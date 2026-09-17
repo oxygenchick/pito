@@ -104,3 +104,7 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Temporary screenshots from prototype QA
+/Assets/Temp/PitoQA/
+/Assets/Temp/PitoQA.meta
