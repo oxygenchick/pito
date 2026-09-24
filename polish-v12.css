@@ -1,0 +1,59 @@
+/* Shared setting. Original scene assets remain available for comparison. */
+.world,.ss-start,.ss-story,.ss-create { background:#eeeaf7 url('./assets/ui-v12/planet.png') center/cover no-repeat; }
+.panel .play-plan-v12 { gap:6px; }
+.panel .play-plan-v12 .play-plan-care { display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:3px 6px; }
+.panel .play-plan-v12 .play-plan-care .plan-care-label { text-align:center;flex:none; }
+.panel .play-plan-v12 .play-plan-care .play-plan-art { width:32px;height:28px; }
+.panel .play-plan-v12 .plan-care-label strong { font-size:18px;margin:0; }
+.panel .play-plan-v12 .plan-care-label>span { font-size:15px; }
+.panel .play-plan-v12 .plan-care-stepper { gap:16px; }
+.panel .play-plan-v12 .plan-care-stepper .play-plan-coins { font-size:24px; }
+.panel .play-plan-v12 .plan-saving { margin-top:auto;width:100%;font-size:16px; }
+.panel .play-plan-v12 .plan-saving-stepper { display:grid;grid-template-columns:36px minmax(0,1fr) 36px;align-items:center;justify-content:center;width:100%; }
+.panel .play-plan-v12 .plan-saving-stepper button { position:relative;z-index:2;pointer-events:auto;display:grid;place-items:center;width:36px;height:44px;padding:8px;border:0;background:none; }
+.panel .play-plan-v12 .plan-saving-stepper button .icon { width:20px;height:20px;object-fit:contain; }
+.panel .play-plan-v12 .plan-saving-stepper .play-plan-coins { font-size:22px;gap:2px; }
+.panel .play-plan-v12 .plan-saving-stepper .play-plan-coins .icon { width:17px;height:21px; }
+.panel .play-plan-v12 .plan-free { display:flex;align-items:center;justify-content:center;gap:7px;min-height:28px;font-size:16px; }
+.panel .play-plan-v12 .plan-free .play-plan-coins { font-size:22px; }
+.panel .play-plan-v12 .plan-free .icon { width:18px;height:22px; }
+.panel .play-plan-v12 .play-plan-choice .plan-card-select[aria-pressed="true"] { outline:none; }
+.panel .play-plan-v12 .play-plan-choice.selected:after { content:'';position:absolute;inset:-5px;z-index:3;border:15px solid transparent;border-image:url('./assets/ui-v12/selected-frame.png') 95 / 15px stretch;pointer-events:none; }
+.panel .play-plan-v12 .play-plan-choice .plan-card-check { display:none; }
+.panel .play-plan-v12 .plan-labeled-coins { flex-direction:row; }
+.panel .play-plan-v12 .plan-care-amount { display:flex!important;align-items:center;gap:6px; }
+.panel .play-plan-v12 .plan-care-stepper { gap:8px; }
+.panel .play-plan-v12 .play-plan-wallet { min-height:36px;padding:0;border-width:4px;border-image-width:8px; }
+.panel .play-plan-v12 .play-plan-care .plan-care-label strong { font-size:18px;margin:0;line-height:1.15; }
+.panel .play-plan-v12 .play-plan-care .plan-care-label>span { font-size:15px;line-height:1.15; }
+.panel .play-plan-v12 .play-plan-choice { padding:4px 5px;gap:1px; }
+.panel .play-plan-v12 .play-plan-choice .plan-picture-picker { min-height:44px; }
+.panel .play-plan-v12 .play-plan-choice .plan-picture-picker .play-plan-art { height:42px; }
+.panel .play-plan-v12 .play-plan-note:empty { display:none; }
+.panel-plan:has(.play-plan-v12) .panel-heading { padding-bottom:8px; }
+.panel-plan:has(.play-plan-v12) .panel-body { padding-bottom:4px; }
+.panel .play-plan-v12>.plan-saving { padding:3px 6px;border:8px solid transparent;border-image:url('./assets/ui-v7/tile-lavender.png') 65 fill / 8px stretch;text-align:center;margin:0; }
+.panel .play-plan-v12>.plan-saving>strong { font-size:18px;font-weight:700; }
+.panel .play-plan-v12>.plan-saving .plan-saving-stepper { display:flex;gap:12px; }
+.panel .play-plan-v12>.plan-saving .plan-saving-stepper .play-plan-coins { min-width:54px;font-size:24px; }
+.panel .play-plan-v12 .plan-care-stepper button,.panel .play-plan-v12 .plan-saving-stepper button,.panel .play-plan-v12 .play-plan-choice .plan-browse { width:44px;height:44px;min-height:44px;padding:10px; }
+.panel .play-plan-v12 .plan-care-stepper button .icon,.panel .play-plan-v12 .plan-saving-stepper button .icon,.panel .play-plan-v12 .play-plan-choice .plan-browse .icon { width:24px!important;height:24px!important;object-fit:contain; }
+.panel .play-plan-v12 .plan-care-stepper { gap:12px; }
+.panel .play-plan-v12 .play-plan-choice .plan-browse { right:-12px; }
+.panel .play-plan-v12 .play-plan-choice .plan-browse.previous { left:-12px;right:auto; }
+.panel .play-plan-v12 { gap:4px; }
+.panel .play-plan-v12 .play-plan-care,.panel .play-plan-v12>.plan-saving { border-width:4px;padding:2px 6px; }
+.panel .play-plan-v12 .play-plan-choice { border-width:6px;padding:3px 5px; }
+.panel-plan:has(.play-plan-v12) .panel-heading { padding-bottom:4px; }
+/* Keep the same floor anchor and body scale when the surrounding UI changes. */
+.ss-create { grid-template-rows:34px auto auto auto 1fr 54px;gap:4px; }
+.ss-create .ss-name { grid-row:2; }
+.ss-create .ss-choices:nth-of-type(1) { grid-row:3; }
+.ss-create .ss-choices:nth-of-type(2) { grid-row:4; }
+.ss-create footer { grid-row:6;align-self:end; }
+.ss-create .ss-pet-preview,.ss-story .ss-story-pet { position:absolute;left:0;right:0;bottom:26.5%;height:60cqw; }
+.ss-create .ss-pet-preview .pet,.ss-story .ss-story-pet .pet { width:34cqw;height:60cqw;bottom:0; }
+.ss-create .ss-pet-preview:after,.ss-story .ss-story-pet:after { display:none; }
+.ss-create .ss-choices>div { padding:5px; }
+@media(max-height:600px){.ss-create .ss-choices .ss-hair{width:48px;height:48px}.ss-create .ss-choices>div{padding:3px}.ss-create .ss-choices legend{font-size:17px;margin:0}}
+@media(max-width:350px){.panel .play-plan-v12 .plan-saving-stepper{grid-template-columns:30px minmax(0,1fr) 30px}.panel .play-plan-v12 .plan-saving-stepper button{width:30px;padding:5px}.panel .play-plan-v12 .plan-saving-stepper .play-plan-coins{font-size:20px}.panel .play-plan-v12 .plan-saving-stepper .play-plan-coins .icon{width:14px}}

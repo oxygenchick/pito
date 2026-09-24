@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import {spawnSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const folder=path.join(root,'.signing'),key=path.join(folder,'pito-release.jks'),props=path.join(folder,'signing.properties');
+if(fs.existsSync(key)||fs.existsSync(props))throw Error('Signing material already exists. Keep it for updates.');
+fs.mkdirSync(folder,{recursive:true});
+const password=crypto.randomBytes(32).toString('hex');
+const tool=process.env.JAVA_HOME?path.join(process.env.JAVA_HOME,'bin',process.platform==='win32'?'keytool.exe':'keytool'):'keytool';
+const result=spawnSync(tool,['-genkeypair','-keystore',key,'-storetype','JKS','-alias','pito','-keyalg','RSA','-keysize','3072','-validity','10000','-dname','CN=Pito, OU=Hackathon, O=Pito, C=RU','-storepass:env','PITO_KEY_PASSWORD','-keypass:env','PITO_KEY_PASSWORD'],{env:{...process.env,PITO_KEY_PASSWORD:password},stdio:'inherit'});
+if(result.status!==0)throw Error('Key generation failed: '+(result.error?.message||result.status));
+fs.writeFileSync(props,`storeFile=pito-release.jks\nstorePassword=${password}\nkeyAlias=pito\nkeyPassword=${password}\n`,{mode:0o600});
+console.log('Signing material created in .signing/. Back it up securely. Do not commit.');

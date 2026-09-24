@@ -1,0 +1,114 @@
+[
+  {
+    "file": "panel-cream.png",
+    "width": 454,
+    "height": 447,
+    "alpha": true,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "file": "button-purple.png",
+    "width": 503,
+    "height": 198,
+    "alpha": true,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "file": "button-round.png",
+    "width": 371,
+    "height": 373,
+    "alpha": true,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "file": "tile-mint.png",
+    "width": 443,
+    "height": 435,
+    "alpha": true,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "file": "tile-peach.png",
+    "width": 443,
+    "height": 437,
+    "alpha": true,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "file": "tile-lavender.png",
+    "width": 438,
+    "height": 439,
+    "alpha": true,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "file": "care-basket.png",
+    "width": 427,
+    "height": 386,
+    "alpha": true,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "file": "toy-box.png",
+    "width": 464,
+    "height": 400,
+    "alpha": true,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "file": "jar.png",
+    "width": 340,
+    "height": 398,
+    "alpha": true,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "file": "cloud.png",
+    "width": 423,
+    "height": 392,
+    "alpha": true,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "file": "drum.png",
+    "width": 391,
+    "height": 384,
+    "alpha": true,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "file": "telescope.png",
+    "width": 437,
+    "height": 436,
+    "alpha": true,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "file": "apple.png",
+    "width": 1118,
+    "height": 1216,
+    "alpha": true,
+    "alphaMin": 0,
+    "alphaMax": 254
+  },
+  {
+    "file": "pito-pito-logo.png",
+    "width": 2045,
+    "height": 355,
+    "alpha": true,
+    "alphaMin": 0,
+    "alphaMax": 255
+  }
+]

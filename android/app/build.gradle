@@ -1,0 +1,38 @@
+plugins { id 'com.android.application' }
+def signingFile = rootProject.file('../.signing/signing.properties')
+def signingValues = new Properties()
+if (signingFile.exists()) signingFile.withInputStream { signingValues.load(it) }
+android {
+    namespace 'ru.pitopito.hackathon2026'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'ru.pitopito.hackathon2026'
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName '0.1.0'
+    }
+    signingConfigs {
+        release {
+            if (signingFile.exists()) {
+                storeFile new File(signingFile.parentFile, signingValues['storeFile'])
+                storePassword signingValues['storePassword']
+                keyAlias signingValues['keyAlias']
+                keyPassword signingValues['keyPassword']
+            }
+        }
+    }
+    buildTypes { release { signingConfig signingConfigs.release; minifyEnabled false; debuggable false } }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    sourceSets.main.assets.srcDirs = ['../../dist']
+}
+tasks.register('checkWebAssets') {
+    doLast { if (!file('../../dist/index.html').exists()) throw new GradleException('Run node scripts/build-web.mjs first.') }
+}
+tasks.named('preBuild').configure { dependsOn 'checkWebAssets' }
+tasks.configureEach { task ->
+    if (task.name == 'validateSigningRelease') task.doFirst {
+        if (!signingFile.exists()) throw new GradleException('Run node scripts/init-signing.mjs first.')
+    }
+}
+dependencies { implementation 'androidx.webkit:webkit:1.12.1' }

@@ -1,0 +1,91 @@
+/* Child-facing optional overlays. Skin variables accept generated PNGs. */
+.ko-content { font-size:clamp(16px,4.45cqw,21px); text-align:center; }
+.ko-content p { font-size:inherit; line-height:1.4; }
+.ko-button { min-height:48px; font-size:clamp(16px,4.5cqw,21px); }
+.panel-footer > .ko-button { width:100%; margin:0; }
+.panel-footer > .ko-button + .ko-button { margin-top:8px; }
+.ko-button.primary { background-image:var(--ko-button-art,none); background-size:100% 100%; }
+.ko-goal-art { position:relative; margin:0 auto 16px; width:44cqw; height:41cqw; max-height:210px; }
+.ko-goal-art > .art { width:100%; height:100%; }
+.ko-price { position:absolute; right:-2cqw; bottom:-1cqw; padding:6px 10px; border-radius:18px; background:#fff4d7; font-size:clamp(18px,5cqw,24px); }
+.ko-main-copy { margin:14px 0; font-size:clamp(18px,5cqw,24px)!important; font-weight:800; }
+.ko-message { margin:12px 0; color:var(--ink-soft,#6c5a73); }
+.ko-progress { height:18px; border-radius:14px; background:#e5dbe9; overflow:hidden; }
+.ko-progress > i { display:block; height:100%; border-radius:inherit; background:#82b78c; transition:width .3s; }
+.ko-presets, .ko-secondary { display:flex; justify-content:center; gap:10px; margin:14px 0; }
+.ko-presets .ko-button { border:2px solid transparent; padding:8px 12px; }
+.ko-presets [aria-pressed="true"] { border-color:#8b4eb0; background:#e7d9ef; }
+.ko-secondary { flex-wrap:wrap; }
+.ko-secondary .ko-button { background:transparent; padding:8px; text-decoration:underline; text-underline-offset:4px; }
+.ko-goal-options { display:grid; gap:12px; }
+.ko-goal-choice { display:grid; grid-template-columns:24cqw 1fr auto; align-items:center; gap:10px; min-height:26cqw; padding:8px 12px; background-color:#f2e8f3; background-image:var(--ko-panel-art,none); background-size:100% 100%; border:3px solid transparent; border-radius:20px 24px 19px 23px; text-align:left; font-size:clamp(16px,4.5cqw,21px); }
+.ko-goal-choice > .art { width:24cqw; height:23cqw; }
+.ko-goal-choice.selected { border-color:#9553b5; }
+.ko-goal-choice .coin { font-size:clamp(18px,5cqw,23px); }
+.ko-owned { font-size:16px; }
+.ko-jar { display:block; width:30cqw; height:32cqw; margin:12px auto; }
+.ko-bank-offer { display:flex; align-items:center; justify-content:center; gap:5cqw; margin:14px 0 24px; }
+.ko-bank-offer > div { display:flex; flex-direction:column; align-items:center; gap:8px; }
+.ko-bank-offer > div > .coin { font-size:clamp(30px,9cqw,44px); font-weight:800; }
+.ko-bank-offer .coin .icon { width:8cqw; height:10cqw; }
+.ko-bank-offer > .icon { width:9cqw; height:9cqw; }
+.ko-days { display:flex; gap:24px; justify-content:center; margin:18px 0; }
+.ko-day { position:relative; padding:10px; border:2px dashed #c9b7cb; border-radius:20px; }
+.ko-day .icon { display:block; width:44px; height:44px; }
+.ko-day.done { background:#e0eedb; border:2px solid #91b588; }
+.ko-day > b { position:absolute; right:-8px; bottom:-7px; width:27px; height:27px; display:grid; place-items:center; border-radius:50%; color:#fff; background:#629362; }
+.ko-tabs { display:flex; gap:8px; margin-bottom:16px; }
+.ko-tabs > button { flex:1; min-height:48px; padding:8px; background:#efe4f1; border-radius:16px; font-size:clamp(16px,4.5cqw,21px); }
+.ko-tabs [aria-selected="true"] { color:#fff; background:#8c49b9; }
+.ko-mission { display:flex; align-items:center; gap:12px; width:100%; min-height:64px; padding:10px; margin:10px 0; border:2px solid transparent; border-radius:18px; background:#f1e7f3; text-align:left; font-size:clamp(16px,4.5cqw,21px); }
+.ko-mission.current { border-color:#ac81bf; }
+.ko-mission > .icon { width:40px; height:40px; }
+.ko-mission > strong { flex:1; }
+.ko-mission > .icon:last-child { width:22px; height:22px; }
+.ko-completed { padding:8px 0; border-bottom:1px solid #e5dbe7; text-align:left; }
+.ko-completed summary { display:flex; align-items:center; gap:12px; min-height:48px; cursor:pointer; list-style:none; }
+.ko-completed summary::-webkit-details-marker { display:none; }
+.ko-completed summary::after { content:'+'; margin-left:auto; font-size:24px; }
+.ko-completed[open] summary::after { content:'−'; }
+.ko-check { display:grid; place-items:center; flex:0 0 28px; height:28px; border-radius:50%; color:#fff; background:#70a279; }
+.ko-completed > p { margin:6px 0 12px 40px; color:var(--ink-soft,#6c5a73); }
+@media (max-height:680px) {
+ .ko-goal-art { height:33cqw; width:36cqw; margin-bottom:12px; }
+ .ko-presets,.ko-secondary { margin:8px 0; }
+ .ko-main-copy { margin:10px 0; }
+}
+
+/* v10: the top changes the dream, the bottom only moves money. */
+.panel .ko-goal-carousel { display:grid; grid-template-columns:44px minmax(0,1fr) 44px; align-items:center; gap:10px; }
+.panel .ko-goal-carousel .ko-goal-art { width:100%; max-width:150px; height:120px; margin:0 auto; }
+.panel .ko-goal-arrow { display:grid; place-items:center; width:44px; height:52px; padding:8px; background:none; border:0; }
+.panel .ko-goal-arrow .icon { width:28px; height:32px; object-fit:contain; }
+.panel .ko-goal-arrow.previous .icon { transform:scaleX(-1); }
+.panel .ko-goal-arrow:disabled { opacity:.25; }
+.panel .ko-goal-price { display:flex; justify-content:center; align-items:center; gap:8px; margin:6px 0; font-size:20px; }
+.panel .ko-saving-progress { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0 16px; }
+.panel .ko-saving-progress>span { display:flex; flex-direction:column; align-items:center; gap:4px; font-size:17px; }
+.panel .ko-saving-progress .coin { font-size:23px; }
+.panel .ko-transfer-modes { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px; }
+.panel .ko-transfer-modes button { min-height:44px; padding:8px 4px; background:#efe5f4; border:0; border-radius:14px; font-size:19px; }
+.panel .ko-transfer-modes [aria-pressed="true"] { background:#d9e8d2; }
+.panel .ko-transfer-stepper { display:flex; align-items:center; justify-content:center; gap:20px; margin:12px 0 2px; }
+.panel .ko-transfer-stepper button { width:48px; min-height:48px; font-size:30px; background:#e8ddee; border:0; border-radius:16px; }
+.panel .ko-transfer-stepper output { min-width:66px; text-align:center; font-size:28px; }
+.panel .ko-transfer-stepper button:disabled { opacity:.35; }
+.panel .ko-planned-amount { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:8px; min-height:48px; margin:8px 0 0; font-size:20px; }
+.panel .ko-transfer-notice { display:flex; align-items:center; justify-content:center; gap:8px; margin:8px 0; color:#3c654a; font-size:19px; }
+.panel .ko-transfer-notice .icon { width:22px; height:26px; }
+.panel .ko-bank-term { display:flex; align-items:center; justify-content:center; gap:12px; margin:20px 0; font-size:21px; }
+.panel .ko-bank-term>.icon { width:34px; height:40px; }
+.panel .ko-bank-term strong { max-width:220px; font-weight:400; }
+.panel .ko-choice-story { margin:14px 0 0; font-size:18px; line-height:1.3; }
+.panel .ko-goal-options .ko-goal-choice { border:0; border-radius:18px; background:none; padding:8px; }
+.panel .ko-goal-options .ko-goal-choice.selected { background:#e4eddc; }
+.panel .ko-item-story { margin:8px 0 14px; font-size:18px; line-height:1.3; }
+@media (max-height:680px) {
+ .panel .ko-goal-carousel .ko-goal-art { height:95px; }
+ .panel .ko-item-story { margin:6px 0 10px; }
+ .panel .ko-transfer-modes { margin-top:10px; }
+ .panel .ko-saving-progress { margin-bottom:10px; }
+}

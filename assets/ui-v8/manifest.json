@@ -1,0 +1,222 @@
+[
+  {
+    "file": "pet-v8/body.png",
+    "width": 412,
+    "height": 323
+  },
+  {
+    "file": "pet-v8/feelers.png",
+    "width": 407,
+    "height": 188
+  },
+  {
+    "file": "pet-v8/legs.png",
+    "width": 262,
+    "height": 332
+  },
+  {
+    "file": "pet-v8/hair-0.png",
+    "width": 294,
+    "height": 248
+  },
+  {
+    "file": "pet-v8/hair-1.png",
+    "width": 422,
+    "height": 257
+  },
+  {
+    "file": "pet-v8/hair-2.png",
+    "width": 355,
+    "height": 184
+  },
+  {
+    "file": "pet-v8/eyes-neutral.png",
+    "width": 256,
+    "height": 163
+  },
+  {
+    "file": "pet-v8/eyes-happy.png",
+    "width": 274,
+    "height": 79
+  },
+  {
+    "file": "pet-v8/eyes-sad.png",
+    "width": 273,
+    "height": 130
+  },
+  {
+    "file": "pet-v8/eyes-closed.png",
+    "width": 310,
+    "height": 69
+  },
+  {
+    "file": "pet-v8/pupil.png",
+    "width": 96,
+    "height": 144
+  },
+  {
+    "file": "pet-v8/mouth-smile.png",
+    "width": 201,
+    "height": 83
+  },
+  {
+    "file": "pet-v8/mouth-open.png",
+    "width": 171,
+    "height": 160
+  },
+  {
+    "file": "pet-v8/mouth-frown.png",
+    "width": 192,
+    "height": 75
+  },
+  {
+    "file": "pet-v8/mouth-grin.png",
+    "width": 233,
+    "height": 110
+  },
+  {
+    "file": "pet-v8/mouth-o.png",
+    "width": 115,
+    "height": 165
+  },
+  {
+    "file": "pet-v8/cheek.png",
+    "width": 100,
+    "height": 99
+  },
+  {
+    "file": "pet-v8/sparkle.png",
+    "width": 143,
+    "height": 152
+  },
+  {
+    "file": "ui-v8/coin.png",
+    "width": 205,
+    "height": 206
+  },
+  {
+    "file": "ui-v8/heart.png",
+    "width": 206,
+    "height": 169
+  },
+  {
+    "file": "ui-v8/drop.png",
+    "width": 149,
+    "height": 204
+  },
+  {
+    "file": "ui-v8/settings.png",
+    "width": 211,
+    "height": 210
+  },
+  {
+    "file": "ui-v8/task.png",
+    "width": 187,
+    "height": 247
+  },
+  {
+    "file": "ui-v8/ball.png",
+    "width": 210,
+    "height": 210
+  },
+  {
+    "file": "ui-v8/comic.png",
+    "width": 209,
+    "height": 232
+  },
+  {
+    "file": "ui-v8/puzzle.png",
+    "width": 181,
+    "height": 214
+  },
+  {
+    "file": "ui-v8/kite.png",
+    "width": 204,
+    "height": 258
+  },
+  {
+    "file": "ui-v8/console.png",
+    "width": 249,
+    "height": 158
+  },
+  {
+    "file": "ui-v8/bike.png",
+    "width": 248,
+    "height": 227
+  },
+  {
+    "file": "ui-v8/house.png",
+    "width": 232,
+    "height": 246
+  },
+  {
+    "file": "ui-v8/hand.png",
+    "width": 224,
+    "height": 188
+  },
+  {
+    "file": "ui-v8/arrow.png",
+    "width": 192,
+    "height": 149
+  },
+  {
+    "file": "ui-v8/lock.png",
+    "width": 176,
+    "height": 216
+  },
+  {
+    "file": "ui-v8/home.png",
+    "width": 207,
+    "height": 188
+  },
+  {
+    "file": "ui-v8/sun.png",
+    "width": 220,
+    "height": 215
+  },
+  {
+    "file": "ui-v8/check.png",
+    "width": 177,
+    "height": 145
+  },
+  {
+    "file": "ui-v8/close.png",
+    "width": 148,
+    "height": 146
+  },
+  {
+    "file": "ui-v8/star.png",
+    "width": 189,
+    "height": 186
+  },
+  {
+    "file": "pet-v8/poop-sleep.png",
+    "width": 405,
+    "height": 368
+  },
+  {
+    "file": "pet-v8/poop-awake.png",
+    "width": 407,
+    "height": 368
+  },
+  {
+    "file": "pet-v8/poop-run.png",
+    "width": 407,
+    "height": 438
+  },
+  {
+    "file": "ui-v8/cloud.png",
+    "width": 1150,
+    "height": 607
+  },
+  {
+    "file": "ui-v8/shelf.png",
+    "width": 1020,
+    "height": 1125
+  },
+  {
+    "file": "ui-v8/logo.png",
+    "width": 1486,
+    "height": 1053
+  }
+]

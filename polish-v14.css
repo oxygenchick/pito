@@ -1,0 +1,37 @@
+/* Same saved puppet on title and meadow, without gameplay objects. */
+.ss-start .start-face.saved-pet { bottom:27.6%; }
+.ss-start .start-face.saved-pet .pet-hair { display:block; }
+.ss-start .start-face.saved-pet .pet.grown .pet-body { bottom:20cqw; }
+.pet-v8 .hair-2 { bottom:82%;left:16%; }
+
+/* A single five-board rack: gold above, wood below. */
+.shelf.collection-shelf { left:1.5%;width:27cqw;height:68cqw;z-index:1; }
+.shelf.collection-shelf>.rack-item {
+ left:calc(2cqw + var(--slot)*11.5cqw);bottom:var(--board);
+ width:11.5cqw;height:11cqw;min-height:0;padding:0;
+ display:flex;align-items:flex-end;justify-content:center;transform-origin:50% 100%;
+}
+.collection-shelf .rack-item .art { width:10.6cqw;height:10cqw;max-height:none;object-fit:contain;object-position:center bottom; }
+.collection-shelf [data-id=ball] .art { width:4.7cqw;height:6.3cqw; }
+.collection-shelf [data-id=comic] .art { width:10cqw;height:9cqw; }
+.collection-shelf [data-id=puzzle] .art { width:11.2cqw;height:10.5cqw; }
+.collection-shelf [data-id=kite] .art { width:11.2cqw;height:8.2cqw; }
+.collection-shelf [data-id=drum] .art { width:8.8cqw;height:6cqw; }
+.collection-shelf [data-id=telescope] .art { width:7.6cqw;height:8.6cqw; }
+.collection-shelf [data-id=console] .art { width:11cqw;height:8cqw; }
+.collection-shelf [data-id=bike] .art { width:7cqw;height:6cqw; }
+.collection-shelf [data-id=house] .art { width:8cqw;height:10.5cqw; }
+.collection-shelf [data-id=phone] .art { width:4.8cqw;height:7.8cqw; }
+/* Equal catalogue cells, deliberately different object silhouettes. */
+.panel .product .art[src$="/bubble-tea.png"] { padding:4cqw 0; }
+.panel .product .art[src$="/instant-camera.png"] { padding:2cqw 0; }
+#game:has(.collection-shelf) .needs { left:60%; }
+#game .ground-guitar { left:74%;width:23cqw;height:29cqw;z-index:1;min-height:0;padding:0;background:none;display:flex;align-items:flex-end;justify-content:center; }
+#game .ground-guitar .art { width:100%;height:100%;max-height:none;object-fit:contain;object-position:center bottom; }
+#game .ground-guitar.item-playing { animation:pet-jump-v11 .6s ease-in-out 3; }
+/* Both pet replies are centred vertically, not aligned to the top padding. */
+.object-bubble { display:flex;align-items:center;justify-content:center;text-align:center; }
+.object-bubble.item-bubble.bubble-right { background:none;isolation:isolate; }
+.object-bubble.item-bubble.bubble-right:before { content:'';position:absolute;inset:0;z-index:-1;background:url('./assets/ui-v11/bubble-left.png') center/100% 100% no-repeat;transform:scaleX(-1); }
+.ko-goal-choice strong,.plan-choice-name { overflow-wrap:anywhere; }
+@media(prefers-reduced-motion:reduce){#game .ground-guitar.item-playing{animation:none}}
