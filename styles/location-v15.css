@@ -1,0 +1,37 @@
+/* Approved composition B. The scenery is fixed; purchases only reveal sprites. */
+.world,.ss-start,.ss-story,.ss-create { background-image:url('../assets/location-v15/planet-platforms.png'); }
+/* Title shows a read-only copy of the saved world, at gameplay coordinates. */
+.ss-start-scene { position:absolute;inset:0;z-index:0;pointer-events:none; }
+.ss-start-scene>.pet-v8 { bottom:26.5%; }
+.ss-start-scene .poop-progress { display:none; }
+#game .ss-start-scene * { pointer-events:none; }
+.world-collection { position:absolute;inset:0;z-index:1;pointer-events:none; }
+#game .world-collection>.location-item {
+ position:absolute;left:var(--item-x);bottom:var(--item-bottom);
+ width:var(--item-width);height:var(--item-height);min-width:40px;min-height:40px;
+ padding:0;border:0;border-radius:0;background:none;pointer-events:auto;
+ transform:translateX(-50%);transform-origin:50% 100%;
+ display:flex;align-items:flex-end;justify-content:center;
+}
+#game .location-item .art { width:var(--item-width);height:var(--item-height);max-width:none;max-height:none;flex:none;object-fit:contain;object-position:center bottom;pointer-events:none;user-select:none; }
+#game .location-item[data-id=guitar] .art { rotate:-20deg;transform-origin:50% 100%; }
+/* The old tall rectangular pet hitbox covered nearby cups and small objects.
+   Keep the keyboard button, but pointer hit-testing follows its visible parts. */
+#game>.pet-v8 { pointer-events:none; }
+#game>.pet-v8 :is(.pet-silhouette,.pet-feelers,.pet-legs,.pet-hair) { pointer-events:auto; }
+#game .location-item.item-playing { animation:location-hop .6s ease-in-out 3; }
+@keyframes location-hop { 0%,100%{translate:0 0}45%{translate:0 -2cqw} }
+/* Keep needs clustered on the pet, without moving them for the old rack. */
+#game:has(.world-collection) .needs { left:51%; }
+.object-bubble.item-bubble.bubble-beside { min-height:20cqw;padding:3cqw;background:url('../assets/ui-v10/bubble-body.png') center/100% 100% no-repeat; }
+.object-bubble.bubble-beside:before { display:none; }
+.object-bubble.item-bubble.bubble-beside:after { display:block;top:var(--bubble-side-y,50%);left:-4cqw;transform:translateY(-50%) rotate(90deg); }
+.object-bubble.item-bubble.bubble-beside.bubble-right:after { left:auto;right:-4cqw;transform:translateY(-50%) rotate(-90deg); }
+.reduced-motion .location-item { animation:none!important; }
+@media(prefers-reduced-motion:reduce){#game .location-item.item-playing{animation:none}}
+/* Narrow phones keep the full instruction and readable 16px type, while
+   dropping only its redundant decorative marker to clear the upper ledge. */
+@container (max-width:340px) {
+ .hud .task-card.task-ticket { padding:4px 6px;gap:6px; }
+ .hud .task-card .task-marker { display:none; }
+}

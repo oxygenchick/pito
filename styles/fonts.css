@@ -1,0 +1,25 @@
+/* Local, complete Google Fonts TTFs: Latin and Cyrillic work without a CDN.
+   Balsamiq Sans, SIL OFL 1.1. See assets/fonts/OFL.txt and SOURCES.md. */
+@font-face {
+  font-family:'Balsamiq Sans';
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+  src:url('../assets/fonts/BalsamiqSans-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family:'Balsamiq Sans';
+  font-style:normal;
+  font-weight:700;
+  font-display:swap;
+  src:url('../assets/fonts/BalsamiqSans-Bold.ttf') format('truetype');
+}
+body, #game, button, input, select, textarea, #game .dev-badge {
+  font-family:'Balsamiq Sans','Trebuchet MS',Arial,sans-serif;
+  font-synthesis:none;
+}
+body, #game, input, select, textarea { font-weight:400; }
+#game :is(h1,h2,h3,h4,h5,h6,strong,b,button,label,legend),
+.desktop-note b { font-weight:700; }
+/* Legacy weights 500/600/800/900 naturally match one of the two real faces.
+   No font-size, line-height, spacing or image/SVG rules are changed here. */

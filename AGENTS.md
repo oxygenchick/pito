@@ -1,7 +1,7 @@
 # Working agreement
 
-- This directory is the active Pito web + Android project. Edit here, not in the sibling `web-prototype`, which is the preserved snapshot from 2026-09-24.
-- Do not restore/remove legacy Unity files through Git unless explicitly requested. Their deletions predate the web migration.
+- Runtime modules live in `src/`, styles in `styles/`, resources in `assets/`, automated tests in `tests/` and visual fixtures in `tools/`.
+- Keep public documentation focused on the product, architecture and reproducible setup. Do not add local workstation paths, conversation history or internal handoff notes.
 - Keep game logic in engine/budget/missions modules, shared by web and Android. Do not fork gameplay in Java.
 - Run `node --test` after logic changes. Run `node scripts/build-web.mjs` before an Android build.
 - Never commit `.signing`, credentials, SDKs, generated `dist`, APKs, or build caches. Preserve the release key for app updates.

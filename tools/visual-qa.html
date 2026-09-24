@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ru"><head><base href="../"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pito · визуальная проверка v11</title></head><body><main id="game" aria-label="Визуальный тест Pito"></main>
+<script type="module">
+// Pure visual fixtures. No storage, live profile or app clock is accessed.
+import {createProfile,ITEMS,GOALS} from './src/engine.mjs';
+import {modalView,home} from './src/views.mjs';
+import {world} from './src/visuals.mjs';
+import {renderStart} from './src/start-screens.mjs';
+const source=await (await fetch('./index.html')).text();
+const template=new DOMParser().parseFromString(source,'text/html');
+await Promise.all([...template.querySelectorAll('link[rel="stylesheet"]')].map(link=>new Promise(resolve=>{const style=link.cloneNode();style.onload=resolve;style.onerror=resolve;document.head.append(style);})));
+const params=new URLSearchParams(location.search);
+const mode=params.get('screen')||'grown';
+const game=document.querySelector('#game');
+if(mode==='create')game.innerHTML=renderStart('create',null,{hair:Number(params.get('hair')||0),petName:'Пито'});
+else if(mode==='start'){
+ const profile=createProfile('Пито',Number(params.get('color')||0),Number(params.get('hair')||0));profile.stage=Number(params.get('stage')||0);
+ if(params.has('collection'))Object.assign(profile,{owned:ITEMS.map(i=>i.id),goalsWon:GOALS.map(i=>i.id),shelfSeen:true,poops:[{id:1,x:80,taps:0,wet:0},{id:2,x:92,taps:0,wet:0}]});
+ game.innerHTML=renderStart('start',profile);
+}
+else if(mode==='collection'||mode==='needs') {
+ const profile=createProfile('Пито');Object.assign(profile,{stage:Number(params.get('stage')??2),hair:Number(params.get('hair')||0),tutorial:'done',owned:ITEMS.map(i=>i.id),goalsWon:GOALS.map(i=>i.id),shelfSeen:true,plan:[4,0,0]});
+ if(params.has('sparse')){profile.owned=['puzzle'];profile.goalsWon=['phone','guitar'];}
+ if(mode==='collection')profile.poops=[{id:1,x:80,taps:0,wet:0},{id:2,x:92,taps:0,wet:0}];
+ game.innerHTML=home(profile,{needsOpen:mode==='needs'});
+}
+else {
+ const profile=createProfile('Пито');profile.stage=Number(params.get('stage')||2);profile.hair=Number(params.get('hair')||0);
+ const view=modalView(profile,{modal:'grown-event'});
+ game.innerHTML=world()+`<div class="modal-backdrop" data-modal="grown-event"><section class="panel panel-grown-event" role="dialog" aria-label="${view.title}"><header class="panel-heading"><h2>${view.title}</h2></header><div class="panel-body">${view.body}</div><footer class="panel-footer">${view.footer}</footer></section></div>`;
+}
+if(params.has('bubble')){
+ await document.fonts.ready;
+ const r=game.getBoundingClientRect(),a=game.querySelector('.pet-silhouette').getBoundingClientRect();
+ const node=document.createElement('div');node.className='object-bubble';node.textContent=params.get('bubble')==='clean'?'Теперь я чистый!':'Я наелся!';
+ node.style.left=((a.left+a.width/2-r.left)/r.width*100)+'%';node.style.bottom=Math.max(22,(r.bottom-a.top)/r.height*100-.3)+'%';
+ game.append(node);
+}
+</script></body></html>

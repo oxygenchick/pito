@@ -1,0 +1,178 @@
+/* Art direction v8: one paper surface, clear hierarchy, generous grouped space.
+   Functional bars/rings stay live; decorative artwork is supplied as PNG sprites. */
+#game { --paper:#fff8e9; --ink:#30334f; --ink-soft:#61627a; --purple:#9463af; --purple-light:#eee3f2; --green:#78b79e; }
+#game :is(p,small,.lead,.ko-main-copy,.task-copy p) { font-weight:400; }
+#game :is(h1,h2,h3,strong,b,button,label,legend) { font-weight:700; }
+.modal-backdrop { padding:5cqw; background:#30334f48; backdrop-filter:blur(2px); }
+.panel { border-width:18px; border-image-width:20px; overflow:hidden; }
+.panel-heading { position:relative; min-height:56px; padding:3px 36px 16px; gap:0; }
+.panel-heading h2 { width:100%; font-size:clamp(25px,7cqw,30px); line-height:1.08; overflow-wrap:normal; text-wrap:balance; }
+.panel-heading:not(:has(.close)) { padding-left:4px; padding-right:4px; }
+.panel .panel-heading .close { top:-8px; right:-10px; width:44px; height:44px; font-size:28px; }
+.panel-body { padding:0 3px 8px; scrollbar-gutter:auto; }
+.panel-footer { padding:16px 1px 0; gap:10px; }
+.panel p,.panel .lead,.ko-content p { font-size:clamp(18px,4.8cqw,21px); line-height:1.32; margin:16px 0; }
+.panel p:first-child { margin-top:0; }
+.panel p:last-child { margin-bottom:0; }
+.kid-main>.lead,.kid-main>p,.ko-content>.ko-main-copy,.ko-content>.ko-message { max-width:28ch; margin-left:auto; margin-right:auto; text-wrap:pretty; }
+.btn.primary,.ss-primary { min-height:54px; font-size:clamp(19px,5.3cqw,24px); line-height:1.15; }
+.btn.secondary { min-height:48px; font-size:clamp(16px,4.4cqw,19px); }
+.panel :is(.muted,.km-category,.km-label,.ko-message,.eyebrow) { font-size:16px!important; line-height:1.35; color:var(--ink-soft); }
+.panel .kid-main .km-art { width:29cqw; height:29cqw; margin:4px auto 20px; }
+.km-coin-hero { height:26cqw; margin-bottom:12px; }
+.km-coin-hero>.icon { width:22cqw; height:22cqw; }
+.km-amount { font-size:clamp(48px,15cqw,68px); line-height:1; color:var(--ink); margin:0 0 20px; }
+.km-allowance { gap:16px; margin:20px 0; }
+.km-allowance p { gap:8px; margin:0; }
+.km-allowance p>span:last-child { max-width:11ch; font-size:16px; line-height:1.2; }
+.km-food-bar { height:16px; margin:6px auto 8px; }
+.km-category { margin-top:20px!important; }
+.km-day-stickers { gap:8px; margin:0 0 20px; }
+.kid-main .km-day-stickers .km-art { width:16cqw; height:16cqw; margin:0; }
+.km-day-stickers>div { padding:14px 3px; gap:10px; background:none; }
+.km-day-stickers>div.done { background:none; }
+.km-day-stickers strong { font-size:16px; }
+.km-day-stickers span { color:var(--green); }
+.km-details { margin:20px auto 0; }
+
+/* The lawn header is a compact identity and one current action, not a dashboard. */
+.hud { gap:2cqw; }
+.hud .topbar { padding:0; min-height:48px; }
+.topbar .identity { padding:2px 4px; }
+.identity .pet-name { font-size:clamp(18px,5cqw,23px); }
+.identity .day-label { font-size:14px; }
+.topbar .wallet { padding:2px; min-width:12cqw; font-size:clamp(21px,5.8cqw,26px); }
+.topbar .round { flex-basis:42px; width:42px; height:44px; padding:8px; }
+.task-card.task-ticket { padding:8px 6px; gap:10px; }
+.task-card .task-marker { background:none; flex-basis:34px; width:34px; height:40px; }
+.task-marker :is(.icon,.art) { width:34px; height:34px; }
+.task-copy strong { font-size:clamp(18px,4.8cqw,21px); line-height:1.15; }
+.task-copy p { margin-top:5px; font-size:16px; line-height:1.25; }
+.actions .action { gap:3px; font-size:clamp(16px,4.5cqw,19px); }
+/* Short feedback belongs in the gap above care controls, never over their labels.
+   Anchoring to their shared height also works with a tall tutorial ticket above. */
+#game:has(.actions.bottom)>.toast {
+ bottom:calc(4.5% + 24cqw + 12px);
+ padding:10px 14px;
+ font-size:16px;
+ line-height:1.25;
+}
+
+/* Stories and creation have their own quiet studio, separate from the lawn. */
+.ss-start { padding-top:6cqw; padding-bottom:8cqw; }
+.ss-start header { position:relative; z-index:1; }
+.ss-start .logo { width:72cqw; margin:0 auto; letter-spacing:0; background:#30334f; -webkit-mask:url('../assets/ui-v8/logo-mono.png') center/contain no-repeat; mask:url('../assets/ui-v8/logo-mono.png') center/contain no-repeat; }
+.ss-start .logo img { width:100%; height:42cqw; object-fit:contain; }
+.ss-start .logo img { opacity:0; }
+.ss-start header .ss-tagline { font-size:clamp(20px,5.8cqw,27px); line-height:1.15; max-width:17ch; margin:4cqw auto 0; color:var(--ink); }
+.ss-start .start-face { top:43%; bottom:22%; background:none; border-radius:0; display:block; }
+.ss-start .start-face .pet { position:relative; left:0; bottom:0; width:100%; height:100%; pointer-events:none; }
+.ss-story { background:#eee4f3; padding-top:9cqw; gap:5cqw; }
+.ss-story-paper { padding:16px 8px; }
+.ss-story-paper p { font-size:clamp(21px,5.8cqw,27px); line-height:1.35; font-weight:400; text-wrap:pretty; }
+.ss-dots { margin-top:20px; gap:12px; }
+.ss-create { padding-top:5cqw; padding-bottom:7cqw; background:var(--paper); gap:12px; grid-template-rows:44px auto minmax(90px,1fr) auto auto 54px; }
+.ss-name label { font-size:clamp(24px,6.7cqw,30px); line-height:1.1; margin-bottom:12px; }
+.ss-name input { height:52px; font-size:clamp(22px,6cqw,28px); border-color:#d6c6dd; border-radius:16px; }
+.ss-choices legend { margin-bottom:10px; font-size:18px; line-height:1.2; }
+.ss-choices>div { gap:22px; }
+.ss-hair { border-radius:16px; background:#eee4f3; }
+.ss-hair img { width:38px; height:36px; object-fit:contain; }
+
+/* In shops and lists, left alignment has meaning. No paper-within-paper. */
+.product-grid { gap:12px; }
+.panel .product { min-height:35cqw; padding:14px 8px; gap:10px; background:none; border:0; border-bottom:1px solid #dfd4df; border-radius:0; }
+.panel .product :is(.art,.icon):not(.coin .icon) { width:21cqw; height:20cqw; }
+.product b,.product strong { font-size:18px; line-height:1.15; }
+.product .coin { font-size:21px; }
+.ko-goal-options { gap:0; }
+.ko-goal-choice { grid-template-columns:23cqw minmax(0,1fr) auto; min-height:29cqw; padding:12px 2px; background:none; border:0; border-bottom:1px solid #dfd4df; border-radius:0; gap:12px; }
+.ko-goal-choice.selected { border-bottom-color:var(--purple); background:#eee4f366; }
+.ko-goal-choice>.art { width:23cqw; height:23cqw; }
+.ko-goal-choice>strong { font-size:19px; line-height:1.2; }
+.ko-goal-choice .coin { font-size:21px; }
+.ko-goal-art { width:36cqw; height:35cqw; margin:4px auto 24px; }
+.ko-price { right:-4cqw; bottom:-1cqw; background:var(--paper); padding:6px 10px; font-size:22px; }
+.ko-progress { margin-top:10px; height:16px; }
+.ko-main-copy { font-size:clamp(20px,5.5cqw,24px)!important; line-height:1.25; }
+.ko-presets { margin:20px 0 10px; }
+.ko-secondary { margin:10px 0 0; gap:8px; }
+.ko-secondary .ko-button { font-size:16px; }
+.ko-bank-offer { margin:4px 0 24px; gap:5cqw; }
+.ko-bank-offer>div>span:last-child { font-size:16px; }
+.ko-day { border:0; background:none; padding:8px; }
+.ko-day.done { border:0; background:none; }
+.ko-tabs { margin-bottom:12px; }
+.ko-tabs>button { font-size:18px; }
+.ko-mission { padding:14px 4px; margin:0; border:0; border-bottom:1px solid #dfd4df; border-radius:0; background:none; gap:12px; }
+.ko-mission.current { border-bottom-color:var(--purple); }
+.ko-mission>strong { font-size:18px; line-height:1.2; }
+.ko-completed { padding:10px 0; }
+.ko-completed summary { font-size:18px; line-height:1.25; }
+.ko-completed>p { font-size:16px; line-height:1.35; margin:8px 0 8px 40px; }
+.panel-parent .panel-body,.panel-parents .panel-body,.parent-topic { text-align:left; }
+.parent-topic h3 { font-size:20px; }
+.parent-topic p { font-size:17px; }
+
+/* Final art pass: pale cut-paper artwork needs a coloured surface, not an outline.
+   The cloud in the sky and the hand over Pito remain free-standing sprites. */
+#game :not(.rain-cloud)>img[src$="/cloud.png"] {
+ background:#6787ab;
+ border-radius:50%;
+ padding:1.4cqw;
+}
+#game :not(.hand)>img[src$="/hand.png"] {
+ background:#766a91;
+ border-radius:50%;
+ padding:1.1cqw;
+}
+#game :is(.task-marker,.round,.ko-mission)>img[src$="/task.png"] {
+ background:#ddd2e7;
+ border-radius:25%;
+ padding:3px;
+}
+.panel img:is(.art,.km-art)[src$="/comic.png"] {
+ background:#ddd2e7;
+ border-radius:18%;
+ padding:1.6cqw;
+}
+#game .hand { width:18cqw; height:18cqw; filter:none; }
+#game .hand>.icon { display:block; width:100%; height:100%; }
+/* Older .muted opacity compounded with the softer ink colour and faded small text. */
+.panel .muted { opacity:1; }
+.panel .status-icon { width:24px; height:24px; padding:4px; background:var(--ink); border-radius:50%; }
+.panel .ko-check { background:transparent; }
+.panel .close-icon { width:22px; height:22px; }
+.ko-mission>strong,.ko-goal-choice>strong { min-width:0; overflow-wrap:break-word; }
+.ko-goal-choice .coin { white-space:nowrap; }
+
+/* Choice cards retain their colour coding, but gain a clear artwork/text rhythm. */
+.panel-plan .panel-heading { padding-bottom:16px; }
+.play-plan-wallet { min-height:38px; margin-bottom:8px; }
+.play-plan-care { padding:12px; gap:12px; }
+.play-plan p.play-plan-prompt { margin:20px 0 12px; font-size:20px; }
+.play-plan-choice { padding:14px 8px 12px; gap:8px; min-height:218px; }
+.play-plan-choice>strong { font-size:20px; line-height:1.1; min-height:42px; }
+.play-plan-choice .play-plan-art { width:68px; height:68px; }
+.play-plan p.play-plan-note { font-size:16px; margin-top:16px; line-height:1.3; }
+.play-plan-saved>div { background:none; padding:12px 4px; }
+.play-plan-saved>div>span:not(.play-plan-coins):not(.play-plan-stack) { min-height:42px; }
+
+@media(max-height:680px) {
+ .modal-backdrop { padding:4cqw; }
+ .panel { border-width:16px; border-image-width:18px; }
+ .panel-heading { padding-bottom:14px; min-height:48px; }
+ .panel-heading h2 { font-size:25px; }
+ .panel-footer { padding-top:12px; }
+ .panel .kid-main .km-art { width:26cqw; height:26cqw; margin-bottom:16px; }
+ .panel .kid-main .km-day-stickers .km-art { width:15cqw; height:15cqw; }
+ .ss-create { padding:12px 7cqw 16px; gap:8px; }
+ .ss-name label { font-size:25px; margin-bottom:8px; }
+ .ss-name input { height:48px; }
+ .ss-choices legend { margin-bottom:7px; }
+ .ss-color,.ss-hair { width:44px; height:44px; }
+ .play-plan-choice { min-height:188px; gap:5px; padding:12px 6px 8px; }
+ .play-plan-choice .play-plan-art { width:56px; height:56px; }
+ .play-plan-choice>strong { min-height:24px; font-size:19px; }
+ .play-plan p.play-plan-prompt { margin:12px 0 8px; }
+}
