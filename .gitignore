@@ -26,3 +26,7 @@ keystore.properties
 tmp/
 test-results/
 playwright-report/
+# Local development checks and assistant instructions
+/tests/
+/tools/
+/AGENTS.md

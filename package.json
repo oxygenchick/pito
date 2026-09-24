@@ -6,7 +6,6 @@
   "engines": { "node": ">=22" },
   "scripts": {
     "start": "node server.mjs",
-    "test": "node --test",
     "build:web": "node scripts/build-web.mjs",
     "signing:init": "node scripts/init-signing.mjs",
     "build:android": "node scripts/build-web.mjs && cd android && gradlew.bat assembleRelease"
