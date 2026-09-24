@@ -11,7 +11,7 @@ export const ITEMS = [
 export const GOALS = [
  {id:'console',art:'console',name:'Приставка',price:24,description:'Домашняя приставка для любимых игр. Устроим игровой вечер с Пито!',reaction:'Берём второй геймпад!',motion:'bounce'},
  {id:'bike',art:'gift-card',name:'Мега шопинг',price:32,description:'Подарочная карта для большой прогулки по магазинам. Пито уже составляет список покупок.',reaction:'Выбираем самое классное!',motion:'bounce'},
- {id:'house',art:'anime-figure',name:'Редкая аниме-фигурка',price:40,description:'Редкая фигурка космического героя. Она займёт почётное место в коллекции Пито.',reaction:'Вот это находка!',motion:'bounce'},
+ {id:'house',art:'anime-figure',name:'Аниме фигурка',price:40,description:'Фигурка космического героя. Она займёт почётное место в коллекции Пито.',reaction:'Вот это находка!',motion:'bounce'},
  {id:'phone',art:'phone',name:'Телефон',price:48,description:'Снимать видео, слушать музыку и звонить друзьям. Всё в одном кармане!',reaction:'Алло, это Пито!',motion:'bounce'},
  {id:'guitar',art:'guitar',name:'Электрогитара',price:56,description:'Для первой группы Пито. Осталось придумать название и разучить любимую мелодию.',reaction:'Устроим концерт!',motion:'bounce'}
 ];

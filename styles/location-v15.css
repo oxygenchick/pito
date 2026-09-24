@@ -1,4 +1,85 @@
 /* Approved composition B. The scenery is fixed; purchases only reveal sprites. */
+.modal-backdrop:has(.play-plan-independent) { padding:8px; }
+.panel:has(.play-plan-independent) { width:100%;max-width:none;max-height:100%;border-width:12px;border-image-width:14px; }
+.panel:has(.play-plan-independent) .panel-heading { padding-top:7px;padding-bottom:16px; }
+.panel .play-plan-independent { gap:14px; }
+.panel .play-plan-independent .play-plan-wallet { border:0;background:none;min-height:44px;gap:10px;font-size:21px; }
+.panel .play-plan-independent .play-plan-wallet .play-plan-coins { font-size:32px; }
+.panel .play-plan-independent .play-plan-care { position:relative;padding:10px 0;gap:10px;border-width:8px; }
+.panel .play-plan-independent .play-plan-care:before,.panel .play-plan-independent .play-plan-care:after { content:'';position:absolute;bottom:10px;width:38px;height:42px;background:center/contain no-repeat;pointer-events:none; }
+.panel .play-plan-independent .play-plan-care:before { left:7px;background-image:url('../assets/ui-v7/apple.png'); }
+.panel .play-plan-independent .play-plan-care:after { right:7px;background-image:url('../assets/ui-v10/cloud.png'); }
+.panel .play-plan-independent .play-plan-choices { gap:12px;padding:0; }
+.panel .play-plan-independent .play-plan-choice { padding:10px 4px 5px;border-width:7px;gap:8px; }
+.panel .play-plan-independent .play-plan-choice h3 { min-height:42px;line-height:1.15;font-size:19px; }
+.panel .play-plan-independent .play-plan-choice .plan-picture-picker { position:relative;width:100%;height:100px;min-height:100px;align-items:center;margin-bottom:3px; }
+.panel .play-plan-independent .play-plan-choice .plan-picture-picker .play-plan-art { width:78px;height:78px;max-width:66%; }
+.panel .play-plan-independent .play-plan-choice .plan-browse { top:17px;right:-8px;width:40px;height:44px;padding:11px; }
+.panel .play-plan-independent .play-plan-choice .plan-browse.previous { left:-8px;right:auto; }
+.panel .play-plan-independent .plan-price-tag { position:absolute;bottom:0;right:2px;z-index:3;display:flex;align-items:center;justify-content:center;min-width:54px;height:32px;padding:3px 8px 3px 14px;background:#fff7e5;clip-path:polygon(15% 0,95% 3%,100% 94%,15% 100%,0 50%);rotate:8deg; }
+.panel .play-plan-independent .plan-price-tag:before { content:'';position:absolute;left:6px;width:4px;height:4px;border-radius:50%;background:#b6a6c5; }
+.panel .play-plan-independent .plan-price-tag .play-plan-coins { font-size:20px;gap:3px; }
+.panel .play-plan-independent .plan-price-tag .icon { width:19px;height:22px; }
+.panel .play-plan-independent .plan-choice-name { min-height:38px;font-size:18px;line-height:1.15;margin:0; }
+.panel .play-plan-independent .plan-envelope { box-sizing:border-box;background:url('../assets/ui-v7/panel-cream.png') center/100% 100% no-repeat;padding:10px 0 7px; }
+.panel .play-plan-independent .plan-envelope>span { display:block;margin-bottom:8px;font-size:17px; }
+.panel .play-plan-independent .plan-saving-stepper button { background:url('../assets/ui-v7/tile-lavender.png') center/100% 100% no-repeat;isolation:isolate;border:0;width:44px;height:44px;padding:12px; }
+.panel .play-plan-independent .plan-saving-stepper button:disabled { opacity:.35; }
+.panel .play-plan-independent .plan-saving-stepper button:focus-visible { outline:3px solid #7956a7;outline-offset:2px; }
+.panel .play-plan-independent .plan-envelope .plan-saving-stepper .play-plan-coins { font-size:29px;justify-content:center; }
+.panel .play-plan-independent .plan-envelope .plan-saving-stepper .play-plan-coins .icon { display:none; }
+.panel .play-plan-independent .plan-free { padding:5px 0;font-size:19px; }
+@media(max-height:700px) {
+ .panel .play-plan-independent { gap:8px; }
+ .panel .play-plan-independent .play-plan-choice .plan-picture-picker { height:78px;min-height:78px; }
+ .panel .play-plan-independent .play-plan-choice .plan-picture-picker .play-plan-art { height:62px; }
+ .panel .play-plan-independent .play-plan-care { padding:5px 0;gap:5px; }
+ .panel .play-plan-independent .play-plan-choice { gap:5px;padding-top:5px; }
+}
+.panel .play-plan-independent .plan-envelope { width:100%;margin-top:auto;text-align:center;font-size:16px; }
+.panel .play-plan-independent .plan-saving-stepper { grid-template-columns:44px minmax(28px,1fr) 44px;gap:0; }
+.panel .play-plan-independent .plan-saving-stepper .play-plan-coins { min-width:0; }
+.panel .play-plan-independent .play-plan-care>.plan-saving-stepper { width:160px; }
+.panel .play-plan-independent .plan-envelope button { pointer-events:auto; }
+.panel .play-plan-independent .play-plan-choice { min-width:0; }
+/* Newly drawn PNG silhouettes, flat tinted to match the game's palette.
+   The primary CTA deliberately retains the shared application artwork. */
+.panel:has(.play-plan-independent) { position:relative;isolation:isolate;border:0;padding:12px;background:none; }
+.panel:has(.play-plan-independent):before { content:'';position:absolute;inset:0;z-index:-1;background:#fff7e5;mask:url('../assets/plan-v16/panel.png') center/100% 100% no-repeat;pointer-events:none; }
+.panel .play-plan-independent :is(.play-plan-choice,.plan-envelope,.play-plan-care,.plan-saving-stepper button,.plan-price-tag) { position:relative;isolation:isolate;background:none;border-image:none; }
+.panel .play-plan-independent :is(.play-plan-choice,.plan-envelope,.plan-saving-stepper button):before { content:'';position:absolute;inset:0;z-index:-1;background:var(--plan-fill,#fff7e5);mask:var(--plan-mask) center/100% 100% no-repeat;pointer-events:none; }
+.panel .play-plan-independent .play-plan-choice { --plan-fill:#ffdec5;--plan-mask:url('../assets/plan-v16/card-peach.png');border:0;padding:14px 10px 10px; }
+.panel .play-plan-independent .play-plan-save { --plan-fill:#e5d8ee;--plan-mask:url('../assets/plan-approved/dream.png'); }
+.panel .play-plan-independent .plan-envelope { --plan-fill:#fff7e5;--plan-mask:url('../assets/plan-approved/inset-reference.png');padding:12px 4px 9px; }
+.panel .play-plan-independent .plan-saving-stepper button { --plan-fill:#d5bfe7;--plan-mask:url('../assets/plan-v16/button-square.png'); }
+.panel .play-plan-independent .play-plan-care { border:0;padding:14px 5px; }
+.panel .play-plan-independent .play-plan-care:before { inset:0;width:auto;height:auto;z-index:-1;background:#dcefdc;mask:url('../assets/plan-v16/care-mint.png') center/100% 100% no-repeat; }
+.panel .play-plan-independent .play-plan-care:after { inset:0;width:auto;height:auto;background-image:url('../assets/ui-v7/apple.png'),url('../assets/ui-v10/cloud.png');background-position:left 10px bottom 13px,right 10px bottom 18px;background-size:40px 44px,40px 32px;background-repeat:no-repeat; }
+.panel .play-plan-independent .play-plan-choice .plan-price-tag { position:absolute;clip-path:none;background:none;width:74px;min-width:74px;height:30px;padding:4px 5px 2px 16px;rotate:8deg; }
+.panel .play-plan-independent .plan-price-tag:before { inset:0;width:auto;height:auto;border-radius:0;z-index:-1;background:#fff7e5;mask:url('../assets/plan-v16/price-tag.png') center/contain no-repeat; }
+.panel .play-plan-independent .plan-price-tag .play-plan-coins { font-size:19px; }
+@media(max-height:700px) {
+ .panel .play-plan-independent { gap:6px; }
+ .panel .play-plan-independent .play-plan-wallet { min-height:32px; }
+ .panel .play-plan-independent .play-plan-care { padding:5px;gap:3px; }
+ .panel .play-plan-independent .play-plan-choice { padding:8px;gap:3px; }
+ .panel .play-plan-independent .play-plan-choice .plan-picture-picker { height:65px;min-height:65px; }
+ .panel .play-plan-independent .plan-choice-name { min-height:28px; }
+ .panel .play-plan-independent .plan-envelope { padding:8px 4px 6px; }
+ .panel .play-plan-independent .plan-envelope>span { margin-bottom:4px; }
+}
+/* Fill portrait devices without cropping side platforms. Only the scenery
+   adapts to the viewport ratio; sprite proportions remain width-based. */
+@media (max-width:600px) and (orientation:portrait) {
+ html,body { width:100%;height:100%;min-height:100%;overflow:hidden; }
+ body { display:block; }
+ #game { width:100%;height:100dvh;aspect-ratio:auto;border-radius:0; }
+ .desktop-note { display:none; }
+ #game :is(.world,.ss-start,.ss-story,.ss-create) { background-size:100% 100%; }
+}
+#game { -webkit-user-select:none;user-select:none;-webkit-touch-callout:none; }
+#game :is(input,textarea,[contenteditable=true]) { -webkit-user-select:text;user-select:text; }
+#game img { -webkit-user-drag:none; }
 .world,.ss-start,.ss-story,.ss-create { background-image:url('../assets/location-v15/planet-platforms.png'); }
 /* Title shows a read-only copy of the saved world, at gameplay coordinates. */
 .ss-start-scene { position:absolute;inset:0;z-index:0;pointer-events:none; }
@@ -44,3 +125,64 @@
  .hud .task-card.task-ticket { padding:4px 6px;gap:6px; }
  .hud .task-card .task-marker { display:none; }
 }
+
+/* Authored 400 x 720 composition. Only the whole popup scales on short
+   devices; taller viewports reveal more scenery, never stretch the UI. */
+#game .modal-backdrop:has(.play-plan-independent) { padding:0; }
+#game .panel:has(.play-plan-independent) {
+ position:absolute;left:50%;top:50%;width:400px;height:720px;
+ max-width:none;max-height:none;padding:20px 16px 40px;border:0;
+ transform:translate(-50%,-50%) scale(var(--plan-scale,1));
+ transform-origin:center;overflow:visible;
+}
+#game .panel:has(.play-plan-independent):before { inset:0;mask-image:url('../assets/plan-approved/panel-clean.png');mask-size:105% 105%;clip-path:inset(0 round 38px); }
+#game .panel:has(.play-plan-independent) .panel-heading { min-height:40px;height:40px;padding:0 32px; }
+#game .panel:has(.play-plan-independent) .panel-heading h2 { font-size:30px;font-weight:700;letter-spacing:-.4px; }
+#game .panel:has(.play-plan-independent) .panel-heading .close { top:-3px;right:-4px;width:44px;height:44px; }
+#game .panel:has(.play-plan-independent) .panel-body { flex:1;padding:0;overflow:visible; }
+#game .panel:has(.play-plan-independent) .panel-footer { padding:4px 22px 0;flex:0 0 64px;translate:0 7px; }
+#game .panel:has(.play-plan-independent) .panel-footer .btn { width:100%;height:60px;min-height:60px;font-size:26px;font-weight:700; }
+#game .play-plan-independent { display:flex;flex-direction:column;gap:8px; }
+#game .play-plan-independent .play-plan-wallet { position:relative;isolation:isolate;min-height:68px;height:68px;gap:0;padding:0;flex-direction:column;line-height:24px; }
+#game .play-plan-independent .play-plan-wallet:before { content:'';position:absolute;left:50%;top:50%;width:146px;height:68px;transform:translate(-50%,-50%);z-index:-1;pointer-events:none;background:url('../assets/plan-approved/wallet-decoration.png') center/248px 120px no-repeat; }
+#game .play-plan-independent .play-plan-wallet:after,#game .play-plan-independent .play-plan-wallet>span:first-child:before { content:'';position:absolute;top:50%;left:calc(50% - 132px);width:42px;height:48px;transform:translateY(-50%);pointer-events:none;background:url('../assets/plan-approved/wallet-decoration.png') left center/248px auto no-repeat; }
+#game .play-plan-independent .play-plan-wallet>span:first-child:before { left:auto;right:calc(50% - 132px);transform:translateY(-50%) scaleX(-1); }
+#game .play-plan-independent .play-plan-wallet>span:first-child { font-weight:400; }
+#game .play-plan-independent .play-plan-care { height:116px;min-height:116px;padding:12px 0 6px;gap:4px;background:url('../assets/plan-approved/care.png') center/100% auto no-repeat; }
+#game .play-plan-independent .play-plan-care:before,#game .play-plan-independent .play-plan-care:after { display:none; }
+#game .play-plan-independent .plan-care-label strong { font-size:19px; }
+#game .play-plan-independent .plan-care-label>span { font-size:15px; }
+#game .play-plan-independent .play-plan-care>.plan-saving-stepper { width:160px; }
+#game .play-plan-independent .play-plan-prompt { margin:0 0 12px;font-size:20px;line-height:26px; }
+#game .play-plan-independent .play-plan-choices { gap:12px; }
+#game .play-plan-independent .play-plan-choice { height:316px;padding:17px 10px 12px;gap:8px;--plan-mask:url('../assets/plan-approved/card.png'); }
+#game .play-plan-independent .play-plan-choice h3 { height:44px;min-height:44px;font-size:19px; }
+#game .play-plan-independent .play-plan-choice .plan-picture-picker { height:100px;min-height:100px;margin:0; }
+#game .play-plan-independent .play-plan-choice .plan-picture-picker .play-plan-art { width:86px;height:86px;max-width:75%; }
+#game .play-plan-independent .play-plan-choice .plan-browse { top:22px; }
+#game .play-plan-independent .plan-choice-name { min-height:38px;height:38px;font-size:18px; }
+#game .play-plan-independent .plan-envelope { height:89px;min-height:89px;padding:10px 0 8px; }
+#game .play-plan-independent .plan-envelope>span { margin-bottom:8px;font-size:17px; }
+#game .play-plan-independent .plan-free { min-height:34px;padding:0;font-size:19px; }
+
+/* Original approved mockup cutouts; no regenerated card geometry. */
+#game .play-plan-independent .play-plan-choice { position:relative;height:282px;padding:12px 8px 8px;gap:0;background:url('../assets/plan-approved/card.png') center/100% 100% no-repeat; }
+#game .play-plan-independent .play-plan-save { background-image:url('../assets/plan-approved/dream.png'); }
+#game .play-plan-independent .play-plan-choice:before,#game .play-plan-independent .plan-envelope:before { display:none; }
+#game .play-plan-independent .play-plan-choice h3 { height:32px;min-height:32px;font-size:19px; }
+#game .play-plan-independent .play-plan-choice .plan-picture-picker { height:104px;min-height:104px;align-items:flex-start; }
+#game .play-plan-independent .play-plan-choice .plan-picture-picker .play-plan-art { height:72px;width:88px; }
+#game .play-plan-independent .play-plan-choice .plan-price-tag { top:76px;bottom:auto;right:12px;height:27px;width:70px;min-width:70px;rotate:4deg; }
+#game .play-plan-independent .play-plan-choice .plan-browse { top:12px;width:48px;height:48px; }
+#game .play-plan-independent .plan-choice-name { height:40px;min-height:40px;font-size:17px;line-height:19px;display:flex;align-items:center;justify-content:center; }
+#game .play-plan-independent .plan-envelope { position:absolute;left:8px;right:8px;bottom:14px;width:auto;height:78px;min-height:78px;padding:4px 8px 0;background:none; }
+#game .play-plan-independent .plan-envelope>span { font-size:16px;margin-bottom:3px; }
+#game .play-plan-independent .plan-saving-stepper button:before { display:none; }
+#game .play-plan-independent .plan-saving-stepper button { background:center/contain no-repeat;padding:0; }
+#game .play-plan-independent .plan-saving-stepper button[data-delta="-1"] { background-image:url('../assets/plan-approved/minus.png'); }
+#game .play-plan-independent .plan-saving-stepper button[data-delta="1"] { background-image:url('../assets/plan-approved/plus.png'); }
+#game .play-plan-independent .plan-saving-stepper button>.icon { visibility:hidden; }
+#game .play-plan-independent .plan-saving-stepper { grid-template-columns:46px minmax(28px,1fr) 46px; }
+#game .play-plan-independent .plan-saving-stepper button { width:46px;height:46px; }
+#game .play-plan-independent .play-plan-care { background-image:url('../assets/plan-approved/care.png');background-size:100% 100%; }
+#game .play-plan-independent .play-plan-care:after { display:block;background-image:url('../assets/ui-v7/apple.png'),url('../assets/ui-v10/cloud.png');background-position:left 9px bottom 8px,right 8px bottom 12px;background-size:57px 62px,57px 44px; }

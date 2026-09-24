@@ -4,13 +4,15 @@ import {resizeAllocation} from './budget.mjs';
 import {planDetail,planFooter} from './budget-view.mjs';
 import {progressEvent} from './progress-events.mjs';
 import {renderStart} from './start-screens.mjs';
-import {choosePlayPlan,planOptions} from './play-plan.mjs';
+import {choosePlayPlan,planOptions,independentPlan} from './play-plan.mjs';
 import {icon,world,pet,poop} from './visuals.mjs';
 import {installGaze} from './character-gaze.mjs';
+import {installPlanLayout} from './plan-layout.mjs';
 import {missionRoute,stepChoice} from './interactions-v10.mjs';
 
 const $=q=>document.querySelector(q), root=$('#game');
 installGaze(root);
+installPlanLayout(root);
 const slot=new URLSearchParams(location.search).get('qa');
 const KEY=slot===null?'pita.web.v1':slot==='1'?'pita.web.qa.v1':'pita.web.qa.'+(slot.replace(/[^a-z0-9-]/gi,'').slice(0,40)||'test')+'.v1';
 let s=null,storageOK=true;
@@ -49,7 +51,7 @@ function bubble(text,target=$('[data-pet]')){
  const center=(a.left+a.width/2-r.left)/r.width*100;
  const right=!isPet&&center>50;if(right)node.classList.add('bubble-right');
  const placed=E.clamp(center+(isPet?0:width*.43*(right?-1:1)),edge,100-edge);node.style.setProperty('--bubble-tail',E.clamp(50+(center-placed)/width*100,12,88)+'%');
- node.style.left=placed+'%';node.style.bottom=Math.max(22,(r.bottom-headTop+r.width*.025)/r.height*100)+'%';
+ node.style.left=placed+'%';node.style.bottom=Math.max(22,(r.bottom-headTop+r.width*.055)/r.height*100)+'%';
  root.append(node);
  // Upper rock ledges sit close to the task card. Speak beside such objects,
  // rather than letting their bubbles cover the HUD.
@@ -118,6 +120,7 @@ function renderModal(){
 function draftPlan(){
  ui.playPlanChoice=null;
  ui.playPlanSavings={want:0};
+ ui.playPlanWants=0;ui.playPlanSaving=0;
  ui.playPlanCare=Math.min(4,Math.floor(s.wallet));
  ui.playPlanItem=E.ITEMS.find(i=>!s.owned.includes(i.id))?.id||null;
  ui.playPlanGoal=hasGoal()&&!s.goalsWon.includes(s.goal)?s.goal:E.GOALS.find(g=>g.id===s.plannedGoal&&!s.goalsWon.includes(g.id))?.id||E.GOALS.find(g=>!s.goalsWon.includes(g.id))?.id;
@@ -230,11 +233,12 @@ function act(a,id,delta){
  case 'plan-food':ui.planFood=id;refreshPlanDetail();break;
  case 'plan-goal':ui.planGoal=id;refreshPlanDetail();break;
  case 'plan-care-step':ui.playPlanCare=E.clamp((ui.playPlanCare??Math.min(4,s.wallet))+Number(id),0,Math.floor(s.wallet));if(!choosePlayPlan(s,ui.playPlanChoice,ui.playPlanItem,ui.playPlanCare,ui.playPlanSavings,ui.playPlanGoal))ui.playPlanChoice=null;renderModal();break;
- case 'plan-item-step':ui.playPlanItem=stepChoice(E.ITEMS.filter(i=>!s.owned.includes(i.id)),ui.playPlanItem,id);if(!choosePlayPlan(s,ui.playPlanChoice,ui.playPlanItem,ui.playPlanCare,ui.playPlanSavings,ui.playPlanGoal))ui.playPlanChoice=null;renderModal();break;
+ case 'plan-item-step':ui.playPlanItem=stepChoice(E.ITEMS.filter(i=>!s.owned.includes(i.id)),ui.playPlanItem,id);ui.playPlanWants=independentPlan(s,ui).parts[1];renderModal();break;
+ case 'plan-allocation-step':{const o=independentPlan(s,ui),index={care:0,wants:1,saving:2}[id];if(index===undefined)break;const fields=['playPlanCare','playPlanWants','playPlanSaving'];const max=index===1?Math.min(o.item?.price||0,o.parts[index]+o.free):index===2?Math.min(o.goal?E.goalRemaining(s,o.goal.id):0,o.parts[index]+o.free):o.parts[index]+o.free;ui[fields[index]]=E.clamp(o.parts[index]+delta,0,max);renderModal();break;}
  case 'plan-saving-step':{if(!['want','save'].includes(id))break;const o=planOptions(s,ui.playPlanItem,ui.playPlanCare,ui.playPlanSavings,ui.playPlanGoal)[id];if(!o.available)break;ui.playPlanSavings={...ui.playPlanSavings,[id]:E.clamp(o.parts[2]+delta,0,o.maxSaving)};ui.playPlanChoice=id;renderModal();break;}
- case 'plan-goal-step':ui.playPlanGoal=stepChoice(E.GOALS.filter(g=>!s.goalsWon.includes(g.id)),ui.playPlanGoal,id);renderModal();break;
+ case 'plan-goal-step':ui.playPlanGoal=stepChoice(E.GOALS.filter(g=>!s.goalsWon.includes(g.id)),ui.playPlanGoal,id);ui.playPlanSaving=independentPlan(s,ui).parts[2];renderModal();break;
  case 'play-plan-choice':{const parts=choosePlayPlan(s,id,ui.playPlanItem,ui.playPlanCare,ui.playPlanSavings,ui.playPlanGoal);if(parts){ui.playPlanChoice=id;ui.draft=parts;renderModal();}break;}
- case 'plan-confirm':{const parts=choosePlayPlan(s,ui.playPlanChoice,ui.playPlanItem,ui.playPlanCare,ui.playPlanSavings,ui.playPlanGoal);if(parts&&E.setPlan(s,parts)){if(E.GOALS.some(g=>g.id===ui.playPlanGoal)){s.plannedGoal=ui.playPlanGoal;if(hasGoal())E.chooseGoal(s,ui.playPlanGoal);}result(before);}break;}
+ case 'plan-confirm':{const parts=independentPlan(s,ui).parts;if(!s.plan&&E.setPlan(s,parts)){if(E.GOALS.some(g=>g.id===ui.playPlanGoal)){s.plannedGoal=ui.playPlanGoal;if(hasGoal())E.chooseGoal(s,ui.playPlanGoal);}result(before);}break;}
  case 'goal':if(s.tutorial!=='done')break;if(!s.plan){showPlan();break;}ui.transferMode='plan';ui.transferNotice='';ui.transferAmount=E.plannedSavingsAmount(s);ui.rainSession=null;ui.goalChoice=E.availableGoalChoice(s,s.plannedGoal||s.goal);open(hasGoal()?'goal':'choose-goal');break;
  case 'choose-goal':if(!s.plan)showPlan();else{ui.goalChoice=E.availableGoalChoice(s,s.plannedGoal||s.goal);open('choose-goal');}break;
  case 'goal-choice':ui.goalChoice=id;renderModal();break;
@@ -274,10 +278,10 @@ function act(a,id,delta){
 }
 function animateItem(id){
  const item=[...E.ITEMS,...E.GOALS].find(i=>i.id===id);if(!item)return;
- const node=$(`[data-act="play-item"][data-id="${id}"]`),character=$('[data-pet]');
+ const node=$(`[data-act="play-item"][data-id="${id}"]`);
  if(node){node.classList.remove('item-playing');void node.offsetWidth;node.dataset.itemMotion=item.motion;node.classList.add('item-playing');}
- character?.classList.add('pet-playing');reactPet('happy',1800);
- setTimeout(()=>{node?.classList.remove('item-playing');character?.classList.remove('pet-playing');},1800);
+ reactPet('happy',1800);
+ setTimeout(()=>node?.classList.remove('item-playing'),1800);
  bubble(item.reaction);
 }
 root.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(el&&!el.disabled)act(el.dataset.act,el.dataset.id,Number(el.dataset.delta));});
