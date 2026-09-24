@@ -5,7 +5,7 @@
 .ss-start-scene>.pet-v8 { bottom:26.5%; }
 .ss-start-scene .poop-progress { display:none; }
 #game .ss-start-scene * { pointer-events:none; }
-.world-collection { position:absolute;inset:0;z-index:1;pointer-events:none; }
+.world-collection { position:absolute;inset:0;z-index:3;pointer-events:none; }
 #game .world-collection>.location-item {
  position:absolute;left:var(--item-x);bottom:var(--item-bottom);
  width:var(--item-width);height:var(--item-height);min-width:40px;min-height:40px;
@@ -23,6 +23,15 @@
 @keyframes location-hop { 0%,100%{translate:0 0}45%{translate:0 -2cqw} }
 /* Keep needs clustered on the pet, without moving them for the old rack. */
 #game:has(.world-collection) .needs { left:51%; }
+/* Separate lanes for the rain hint, cloud and cleanliness gauge. */
+#game .rain-cloud { top:29%; }
+#game .rain-hint.cloud-hint { top:12%; }
+#game:has(.rain-cloud) .needs { left:87%;bottom:37%;z-index:11; }
+#game:has(.rain-cloud) .needs .need-circle { width:15cqw;height:15cqw; }
+#game:has(.rain-cloud) .object-bubble { display:none; }
+/* Overlap the raster tail and body, accounting for transparent margins. */
+.object-bubble:after { top:calc(100% - 3cqw); }
+#game:has(.object-bubble) :is(.task-ticket,.goal-strip) { visibility:hidden;pointer-events:none; }
 .object-bubble.item-bubble.bubble-beside { min-height:20cqw;padding:3cqw;background:url('../assets/ui-v10/bubble-body.png') center/100% 100% no-repeat; }
 .object-bubble.bubble-beside:before { display:none; }
 .object-bubble.item-bubble.bubble-beside:after { display:block;top:var(--bubble-side-y,50%);left:-4cqw;transform:translateY(-50%) rotate(90deg); }

@@ -44,11 +44,12 @@ function bubble(text,target=$('[data-pet]')){
  const anchor=target.matches('[data-pet]')?target.querySelector('.pet-silhouette')||target:target;
  const r=root.getBoundingClientRect(),a=anchor.getBoundingClientRect();
  const isPet=target.matches('[data-pet]'),width=isPet?51:40,edge=width/2+1.5;
+ const headTop=isPet?Math.min(a.top,...[...target.querySelectorAll('.pet-hair,.pet-feelers')].map(el=>el.getBoundingClientRect()).filter(box=>box.width&&box.height).map(box=>box.top)):a.top;
  const node=document.createElement('div');node.className='object-bubble'+(isPet?'':' item-bubble');node.setAttribute('role','status');node.textContent=text;
  const center=(a.left+a.width/2-r.left)/r.width*100;
  const right=!isPet&&center>50;if(right)node.classList.add('bubble-right');
  const placed=E.clamp(center+(isPet?0:width*.43*(right?-1:1)),edge,100-edge);node.style.setProperty('--bubble-tail',E.clamp(50+(center-placed)/width*100,12,88)+'%');
- node.style.left=placed+'%';node.style.bottom=Math.max(22,(r.bottom-a.top)/r.height*100-.3)+'%';
+ node.style.left=placed+'%';node.style.bottom=Math.max(22,(r.bottom-headTop+r.width*.025)/r.height*100)+'%';
  root.append(node);
  // Upper rock ledges sit close to the task card. Speak beside such objects,
  // rather than letting their bubbles cover the HUD.
@@ -172,7 +173,7 @@ function beginRain(){
  if(s.tutorial==='done'&&!s.plan){showPlan();return;}
  if(ui.rainSession){stopRain();ui.rainSession=null;render();return;}
  if(s.needs.clean>=100&&!s.poops.length){bubble('Я уже чистый!');return;}
- ui.modal=null;ui.needsOpen=false;ui.rainSession={spent:0};ui.rainHint=!s.rainHintSeen;ui.cloudX=75;render();
+ $('.object-bubble')?.remove();ui.modal=null;ui.needsOpen=false;ui.rainSession={spent:0};ui.rainHint=!s.rainHintSeen;ui.cloudX=75;render();
  const cloud=$('[data-cloud]');cloud?.classList.add('cloud-arriving');setTimeout(()=>cloud?.classList.remove('cloud-arriving'),650);
 }
 function act(a,id,delta){
@@ -277,7 +278,7 @@ function animateItem(id){
  if(node){node.classList.remove('item-playing');void node.offsetWidth;node.dataset.itemMotion=item.motion;node.classList.add('item-playing');}
  character?.classList.add('pet-playing');reactPet('happy',1800);
  setTimeout(()=>{node?.classList.remove('item-playing');character?.classList.remove('pet-playing');},1800);
- bubble(item.reaction,node);
+ bubble(item.reaction);
 }
 root.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(el&&!el.disabled)act(el.dataset.act,el.dataset.id,Number(el.dataset.delta));});
 root.addEventListener('input',e=>{
