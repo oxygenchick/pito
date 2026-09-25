@@ -8,11 +8,13 @@ import {choosePlayPlan,planOptions,independentPlan} from './play-plan.mjs';
 import {icon,world,pet,poop} from './visuals.mjs';
 import {installGaze} from './character-gaze.mjs';
 import {installPlanLayout} from './plan-layout.mjs';
+import {installAudio} from './audio.mjs';
 import {missionRoute,stepChoice} from './interactions-v10.mjs';
 
 const $=q=>document.querySelector(q), root=$('#game');
 installGaze(root);
 installPlanLayout(root);
+const audio=installAudio(root);
 const slot=new URLSearchParams(location.search).get('qa');
 const KEY=slot===null?'pita.web.v1':slot==='1'?'pita.web.qa.v1':'pita.web.qa.'+(slot.replace(/[^a-z0-9-]/gi,'').slice(0,40)||'test')+'.v1';
 let s=null,storageOK=true;
@@ -108,6 +110,7 @@ function render(){
 function renderModal(){
  const old=$('.modal-backdrop'),same=old?.dataset.modal===ui.modal,scroll=old?.querySelector('.panel-body')?.scrollTop||0;
  const active=document.activeElement,focusAct=active?.dataset?.act,focusId=active?.dataset?.id,focusDelta=active?.dataset?.delta;
+ ui.audioEnabled=audio.getEnabled();
  const view=V.modalView(s,ui);old?.remove();
  const wrap=document.createElement('div');wrap.className='modal-backdrop';wrap.dataset.modal=ui.modal;
  wrap.innerHTML='<section class="panel panel-'+ui.modal+'" role="dialog" aria-modal="true" aria-label="'+esc(view.title)+'"><header class="panel-heading"><h2>'+view.title+'</h2>'+(view.closable===false?'':'<button class="close" data-act="close" aria-label="Закрыть">'+icon('close','icon close-icon')+'</button>')+'</header><div class="panel-body">'+view.body+'</div>'+(view.footer?'<footer class="panel-footer">'+view.footer+'</footer>':'')+'</section>';
@@ -206,6 +209,7 @@ function act(a,id,delta){
  case 'guide-go':{const mission=id||ui.selection||E.currentMission(s)?.id;act(missionRoute(typeof mission==='object'?mission.id:mission));break;}
  case 'journal':ui.journalTab='active';open('journal');break;
  case 'journal-tab':ui.journalTab=id;renderModal();break;
+ case 'audio-toggle':audio.toggle();if(screen==='home')renderModal();else render();break;
  case 'settings':case 'help':case 'growth':case 'last-period':open(a);break;
  case 'day-details':open('last-period');break;
  case 'wallet':showPlan();break;
@@ -324,7 +328,7 @@ root.addEventListener('pointermove',e=>{
   const point=xy(e);$('.hand').style.left=point.x+'%';$('.hand').style.top=point.y+'%';updateHUD();
  }
 });
-function petTapped(){if(ui.rainSession)return;if(E.meet(s)){ui.needsOpen=true;save();render();}else setNeeds(!ui.needsOpen);const p=$('[data-pet]');if(p){p.classList.remove('pet-tapped');void p.offsetWidth;p.classList.add('pet-tapped');setTimeout(()=>p.classList.remove('pet-tapped'),400);}}
+function petTapped(){if(ui.rainSession)return;audio.onAction('pet');if(E.meet(s)){ui.needsOpen=true;save();render();}else setNeeds(!ui.needsOpen);const p=$('[data-pet]');if(p){p.classList.remove('pet-tapped');void p.offsetWidth;p.classList.add('pet-tapped');setTimeout(()=>p.classList.remove('pet-tapped'),400);}}
 function pointerEnd(e){
  cancelDevHold();stopRain();
  if(gesture){if(e?.type==='pointerup'&&gesture.distance<12&&!ui.modal)petTapped();else save();gesture=null;}
