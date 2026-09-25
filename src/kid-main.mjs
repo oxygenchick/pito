@@ -11,13 +11,13 @@ export function kidMain(s,ui){
  let title,body,footer,closable=true;
  switch(ui.modal){
  case 'money-intro':
-  title='Знакомься: штучки';closable=false;
-  body=`<div class="km-coin-hero">${icon('coin')}</div><div class="km-money-section km-money-meaning"><p class="lead">Штучками называют деньги в мире Пито. За них покупают еду и вещи.</p></div><div class="km-allowance"><p class="km-money-section">${coin(20)}<span>На старте</span></p><p class="km-money-section">${coin(8)}<span>Каждый игровой день</span></p></div><div class="km-money-section km-money-rewards"><p>За выполненные задания ты получишь награды.</p></div>`;
+  title='Знакомься, штучки';closable=false;
+  body=`<div class="money-introduction"><div class="km-coin-hero">${icon('coin')}</div><p class="money-meaning">Штучками называют деньги в мире Пито. На них можно купить еду и помыть Пито. А ещё их можно отложить на мечту.</p><div class="money-allowance"><div class="money-start">${coin(20)}<span>Дадим<br>на старте</span></div><div class="money-daily">${coin(8)}<span>Каждый<br>игровой день</span></div></div><div class="money-reward">${icon('task')}<p>Выполняй задания и получай награды.</p></div></div>`;
   footer=btn('Получить штучки','money-explained');break;
  case 'income-event':{
   const e=s.pendingIncome||{amount:0,source:'daily'};
   title=e.source==='deposit'?'Вклад принёс доход':e.source==='initial'?'Первые штучки!':'Карманные штучки';closable=false;
-  body=`<div class="km-coin-hero">${icon('coin')}</div><div class="km-amount">+${e.amount}</div><p class="lead">${e.source==='initial'?'Купим Пито еду и помоем его.':e.source==='deposit'?`Вклад тоже вернулся в кошелёк: ${coin(e.principal)}.`:'На новый игровой день.'}</p>`;
+  body=`<div class="km-coin-hero${e.source==='initial'?' initial-receipt':''}">${icon('coin')}</div><div class="km-amount">+${e.amount}</div><p class="lead">${e.source==='initial'?'Купим Пито еду и помоем его.':e.source==='deposit'?`Вклад тоже вернулся в кошелёк: ${coin(e.principal)}.`:'На новый игровой день.'}</p>`;
   footer=btn(s.plan||!['plan','done'].includes(s.tutorial)?'К Пито':'Выбрать план','income-continue');break;
  }
  case 'reward-event':{

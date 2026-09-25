@@ -214,3 +214,73 @@
 @media(max-height:700px) {
  #game .ss-create .ss-pet-preview { bottom:15%; }
 }
+
+/* Currency introduction: silhouettes cut from the approved portrait mockup.
+   Fixed composition; only shrink the whole dialog when the viewport requires it. */
+#game .modal-backdrop:has(.money-introduction) { padding:0; }
+#game .panel:has(.money-introduction) {
+ position:absolute;left:50%;top:50%;width:400px;height:684px;max-width:none;max-height:none;
+ padding:24px 18px 18px;border:0;border-image:none;background:none;overflow:visible;
+ display:grid;grid-template-rows:84px 1fr 70px;gap:0;
+ transform:translate(-50%,-50%) scale(var(--money-scale,1));transform-origin:center;
+ color:#30334f;
+}
+#game .panel:has(.money-introduction):before {
+ content:'';position:absolute;inset:0;z-index:-1;background:#fff8eb;
+ mask:url('../assets/money-intro/panel-straight.png') center/104% 104% no-repeat;
+ clip-path:inset(0 round 28px);border:0;border-radius:0;pointer-events:none;
+}
+#game .panel:has(.money-introduction) .panel-heading { height:84px;min-height:0;padding:0;display:grid;place-items:center; }
+#game .panel:has(.money-introduction) .panel-heading h2 { max-width:250px;font-size:30px;line-height:1.08;font-weight:700;letter-spacing:-.4px;margin:0; }
+#game .panel:has(.money-introduction) .panel-body { overflow:visible;padding:0;min-height:0; }
+#game .money-introduction { display:grid;grid-template-rows:70px 134px 154px 98px;gap:8px; }
+#game .money-introduction .km-coin-hero { position:relative;height:70px;margin:0;display:grid;place-items:center; }
+#game .money-introduction .km-coin-hero>.icon { width:68px;height:68px;animation:none; }
+#game .money-introduction .km-coin-hero:before,#game .money-introduction .km-coin-hero:after { content:'';position:absolute;top:12px;width:27px;height:47px;background:url('../assets/money-intro/rays.png') center/contain no-repeat;left:calc(50% - 88px); }
+#game .money-introduction .km-coin-hero:after { left:auto;right:calc(50% - 88px);transform:scaleX(-1); }
+#game .money-introduction .money-meaning { font-size:21px;line-height:1.22;font-weight:400;margin:0;padding:0 14px;display:flex;align-items:center;justify-content:center;text-align:center;max-width:none; }
+#game .money-allowance { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
+#game .money-allowance>div { display:grid;grid-template-rows:60px 48px;align-content:center;justify-items:center;gap:10px;padding:14px 8px;background:url('../assets/money-intro/start-card.png') center/100% 100% no-repeat; }
+#game .money-allowance>.money-daily { background-image:url('../assets/money-intro/daily-card.png'); }
+#game .money-allowance .coin { display:flex;align-items:center;justify-content:center;gap:6px;width:100%;height:60px;font-size:54px;line-height:1;font-weight:700; }
+#game .money-allowance .coin>.icon { width:54px;height:54px; }
+#game .money-allowance>div>span:last-child { min-height:48px;display:flex;align-items:flex-start;justify-content:center;text-align:center;font-size:21px;line-height:1.12;font-weight:700;padding-top:2px; }
+#game .money-reward { display:grid;grid-template-columns:80px 1fr;gap:20px;align-items:center;padding:14px 25px;background:url('../assets/money-intro/reward-card.png') center/100% 100% no-repeat; }
+#game .money-reward>.icon { width:64px;height:70px;justify-self:center; }
+#game .money-reward p { margin:0;font-size:21px;line-height:1.17;font-weight:400;text-align:left; }
+#game .panel:has(.money-introduction) .panel-footer { padding:4px 0 0;margin:0;display:flex;align-items:center; }
+#game .panel:has(.money-introduction) .panel-footer .btn {
+ width:100%;height:60px;min-height:60px;padding:3px 8px;border:12px solid transparent;
+ border-image:url('../assets/ui-v7/button-purple.png') 60 fill / 14px stretch;
+ background:transparent!important;
+ font-size:26px;font-weight:700;line-height:1.1;color:#fff;
+}
+#game .panel:has(.money-introduction) .panel-footer .btn:before { display:none; }
+
+#game .panel .panel-heading h2 { font-size:30px;font-weight:700; }
+
+/* Text size only: preserve every existing button sprite and its geometry.
+   Compensate for authored-dialog scaling so labels match the start screen. */
+#game { --button-label-size:clamp(18px,5cqw,24px); }
+#game .panel:has(.play-plan-independent) { --button-label-scale:var(--plan-scale,1); }
+#game .panel:has(.money-introduction) { --button-label-scale:var(--money-scale,1); }
+#game .btn:not(.small),#game .ss-primary {
+ font-size:calc(var(--button-label-size) / var(--button-label-scale,1))!important;
+}
+
+/* First allowance only: continuous corners are drawn into the PNG mask. */
+#game .panel:has(.initial-receipt) {
+ isolation:isolate;background:transparent;border-image:none;border-radius:0;overflow:visible;
+ width:88%;margin-inline:auto;padding-block:16px 18px;
+ --popup-edge-space:18px;
+}
+#game .panel:has(.initial-receipt) .panel-footer { align-items:center; }
+#game .panel:has(.initial-receipt) .panel-footer .btn { width:82%;margin-inline:auto; }
+#game .panel:has(.initial-receipt):before {
+ content:'';position:absolute;inset:calc(-1 * var(--popup-edge-space));z-index:-1;
+ pointer-events:none;background:#fff8eb;border:0;border-radius:0;
+ mask:url('../assets/money-intro/receipt-continuous-mask.png') center/100% 100% no-repeat;
+}
+@media(max-height:680px) {
+ #game .panel:has(.initial-receipt) { --popup-edge-space:16px; }
+}
