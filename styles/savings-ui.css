@@ -1,0 +1,79 @@
+/* Purpose-drawn raster plates. Nine-slicing preserves the painted corners. */
+#game .modal-backdrop:has(.savings-screen){padding:0}
+#game .panel:has(.savings-screen){width:400px;max-width:calc(100% - 24px);max-height:calc(100% - 24px);padding:22px 16px 20px;border:0;border-image:none;background:none;isolation:isolate;overflow:hidden;color:#30334f;--button-label-scale:1}
+#game .panel:has(.savings-screen)::before{content:'';position:absolute;inset:0;z-index:-1;background:#fff8eb;mask:url('../assets/money-intro/panel-straight.png') center/104% 104% no-repeat;border-radius:28px;pointer-events:none}
+#game .panel:has(.savings-screen) .panel-heading{padding:0 30px 16px;min-height:44px;flex-shrink:0}
+#game .panel:has(.savings-screen) .panel-heading h2{font-size:30px;line-height:1.12;font-weight:700;text-align:center;margin:0}
+#game .panel:has(.savings-screen) .close{width:40px;height:40px;right:-8px;top:-10px}
+#game .panel:has(.savings-screen) .panel-body{padding:0;min-height:0;overflow-y:auto;scrollbar-width:thin}
+#game .panel:has(.savings-screen) .panel-footer{padding:14px 0 0;margin:0;flex-shrink:0}
+#game .panel:has(.savings-screen) .panel-footer .btn{width:100%;min-height:56px}
+#game .savings-screen{display:flex;flex-direction:column;gap:12px;text-align:center;font-size:18px;line-height:1.2}
+#game .savings-screen p,#game .savings-screen h3{margin:0;font-size:inherit;line-height:1.2}
+#game .savings-screen .coin{display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap}
+#game .savings-screen .coin>.icon{width:26px;height:28px;object-fit:contain}
+#game .sv-hero{border:0 solid transparent;border-image:url('../assets/finance-polish/hero.png') 55 fill / 28px stretch;padding:20px 18px 16px;display:flex;flex-direction:column;align-items:center;gap:10px}
+#game .sv-bank-picture{position:relative;display:grid;place-items:center;width:100%;height:112px}
+#game .sv-bank-art{width:108px;height:112px;object-fit:contain;display:block;margin:0}
+#game .sv-rays{position:absolute;width:46px;height:24px;object-fit:contain;top:45px;pointer-events:none}
+#game .sv-rays.left{left:calc(50% - 101px);transform:rotate(-90deg)}
+#game .sv-rays.right{right:calc(50% - 101px);transform:rotate(90deg)}
+#game .sv-return.ko-bank-offer{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);width:100%;align-items:center;gap:8px;margin:0}
+#game .sv-return>div{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}
+#game .sv-return>div>span:not(.coin){font-size:20px;font-weight:700}
+#game .sv-return>div>.coin{font-size:39px;font-weight:700;line-height:1.1}
+#game .sv-return>div>.coin>.icon{width:32px;height:35px}
+#game .sv-return>.icon{width:24px;height:28px;object-fit:contain;align-self:end;margin-bottom:7px}
+#game .sv-bonus{background:url('../assets/finance-polish/mint.png') center/100% 100% no-repeat;padding:10px 18px;min-width:144px;font-weight:700;color:#356d61;font-size:21px!important}
+#game .sv-intro{font-size:20px!important;font-weight:700;padding:0 10px}
+#game .sv-lock{border:0 solid transparent;border-image:url('../assets/finance-polish/peach.png') 40 fill / 22px stretch;display:grid;grid-template-columns:34px minmax(0,1fr);align-items:center;gap:12px;padding:15px 20px;text-align:left}
+#game .sv-lock .sv-term.ko-bank-term{margin:0;display:block;font-size:19px;line-height:1.15}
+#game .sv-lock-icon{width:34px;height:40px;object-fit:contain}
+#game .sv-term strong{font-weight:700;max-width:none}
+#game .sv-lock .ko-main-copy{font-size:17px!important;font-weight:400;margin:4px 0 0}
+#game .sv-lock-open{border-image-source:url('../assets/finance-polish/mint.png')}
+#game .sv-locked-copy{border:0 solid transparent;border-image:url('../assets/finance-polish/peach.png') 40 fill / 22px stretch;padding:18px;font-size:18px}
+#game .sv-amount{border:0 solid transparent;border-image:url('../assets/finance-polish/mint.png') 40 fill / 26px stretch;padding:16px 14px 14px;display:flex;flex-direction:column;gap:10px}
+#game .sv-stepper-label{font-size:21px!important;font-weight:700}
+#game .sv-stepper.ko-transfer-stepper{display:grid;grid-template-columns:48px 100px 48px;justify-content:center;align-items:center;gap:14px;margin:0}
+#game .sv-stepper>.btn{min-width:48px;width:48px;height:48px;min-height:48px;padding:0;border:0;border-image:none;border-radius:0;background:none;box-shadow:none}
+#game .sv-stepper>.btn>.icon{width:48px;height:48px;object-fit:contain;filter:none}
+#game .sv-stepper>.btn[data-delta='-1']>.icon{content:url('../assets/plan-approved/minus.png')}
+#game .sv-stepper>.btn[data-delta='1']>.icon{content:url('../assets/plan-approved/plus.png')}
+#game .sv-stepper output{display:flex;align-items:center;justify-content:center;width:100px;min-width:0;height:54px;background:url('../assets/finance-polish/inset.png') center/100% 100% no-repeat;font-size:32px;font-weight:700;text-align:center;line-height:1.1}
+#game .sv-stepper output .coin>.icon{width:32px;height:36px}
+#game .sv-wallet{font-size:17px!important}
+#game .sv-wallet .coin{font-weight:700}
+#game .sv-wallet .coin>.icon{width:21px;height:23px}
+#game .savings-screen .sv-stepper-label,#game .savings-screen .sv-bonus,#game .savings-screen .sv-intro{font-weight:700!important}
+#game .savings-screen .ko-message{font-size:17px;line-height:1.2;margin:0;padding:0 8px}
+#game .ss-dream .sv-hero{gap:8px;padding:14px 12px 12px}
+#game .ss-dream .ko-goal-carousel{display:grid;grid-template-columns:30px minmax(0,1fr) 30px;align-items:center;width:100%;gap:4px}
+#game .ss-dream .ko-goal-art{width:100%;max-width:210px;height:115px;justify-self:center;margin:0 auto}
+#game .ss-dream .ko-goal-art .art{width:100%;height:100%;object-fit:contain}
+#game .ss-dream .ko-goal-arrow{width:36px;height:44px;min-width:0;min-height:44px;border:0;border-image:none;background:none;padding:4px;border-radius:0;box-shadow:none}
+#game .ss-dream .ko-goal-arrow .icon{width:24px;height:28px;object-fit:contain}
+#game .ss-dream .sv-goal-name{font-size:24px;font-weight:700}
+#game .ss-dream .ko-goal-price{border:0;border-image:none;background:url('../assets/finance-polish/inset.png') center/100% 100% no-repeat;display:flex;align-items:center;justify-content:center;min-width:92px;height:42px;padding:0 13px;margin:0;font-size:25px;font-weight:700}
+#game .sv-progress{border:0 solid transparent;border-image:url('../assets/finance-polish/mint.png') 40 fill / 26px stretch;padding:16px 20px;display:flex;flex-direction:column;gap:9px}
+#game .sv-progress p{font-size:19px;font-weight:700}
+#game .sv-progress .ko-progress{height:17px;background:#cfc3e8;order:-1}
+#game .sv-progress .ko-progress>i{background:#956ab9}
+#game .sv-plan{border:0 solid transparent;border-image:url('../assets/finance-polish/peach.png') 40 fill / 26px stretch;display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center;gap:13px;padding:15px 18px;text-align:left}
+#game .sv-plan-icon{width:42px;height:53px;object-fit:contain}
+#game .sv-plan-copy{display:flex;flex-direction:column;gap:6px;min-width:0}
+#game .sv-plan-copy>div{display:flex;align-items:center;justify-content:flex-start;gap:7px;font-size:19px;font-weight:700;flex-wrap:wrap}
+#game .sv-plan-copy>div+div{font-size:17px;font-weight:400}
+#game .sv-plan .coin>.icon{width:20px;height:22px}
+@media(max-width:350px){#game .sv-plan{gap:8px;padding:14px 12px;grid-template-columns:34px minmax(0,1fr)}#game .sv-plan-icon{width:34px;height:44px}#game .sv-plan-copy>div{font-size:17px;gap:4px}#game .sv-plan-copy>div+div{font-size:16px}#game .sv-stepper.ko-transfer-stepper{gap:10px}#game .sv-return>div>span:not(.coin){font-size:18px}#game .sv-return>div>.coin{font-size:34px}}
+#game .ss-dream-win{gap:16px}
+#game .ss-dream-win .sv-hero{padding:22px 12px;gap:10px}
+#game .sv-win-picture{position:relative;width:100%;display:grid;place-items:center;min-height:180px}
+#game .sv-win-decor{position:absolute;width:62px;height:100px;object-fit:contain;top:36px;pointer-events:none}
+#game .sv-win-decor.left{left:-4px;transform:rotate(-28deg)}
+#game .sv-win-decor.right{right:-4px;transform:scaleX(-1) rotate(-28deg)}
+#game .sv-win-art{width:200px;max-width:100%;height:164px;object-fit:contain}
+#game .ss-dream-win .sv-goal-name{font-size:25px;font-weight:700}
+#game .sv-win-message{display:flex;justify-content:center;align-items:center;gap:10px;border:0 solid transparent;border-image:url('../assets/finance-polish/mint.png') 40 fill / 24px stretch;padding:18px 12px;font-size:20px;font-weight:700}
+#game .sv-win-message .icon{width:32px;height:32px;flex-shrink:0}
+#game .ss-dream-win .sv-win-place{border:0 solid transparent;border-image:url('../assets/finance-polish/peach.png') 40 fill / 24px stretch;font-size:18px;padding:18px 14px}

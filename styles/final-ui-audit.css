@@ -1,0 +1,42 @@
+/* Surface-only polish: keep the established spacing and control geometry. */
+#game .panel-journal .ko-tabs>button {
+ background:none;border:0 solid transparent;border-radius:0;
+ border-image:url('../assets/savings-ui/growth.png') 65 fill / 16px stretch;
+}
+#game .panel-journal .ko-tabs>button[aria-selected='true'] {
+ color:#fff;border-image-source:url('../assets/ui-v7/button-purple.png');
+}
+#game .panel-journal .ko-mission.current {
+ background:none;border:0 solid transparent;border-radius:0;
+ border-image:url('../assets/savings-ui/amount.png') 65 fill / 16px stretch;
+}
+
+/* Slice the corners instead of flattening an entire card to a short row. */
+#game .money-review .mr-wallet,#game .money-review .mr-plan-card,#game .money-review .mr-expense-row,#game .money-review .mr-balances {
+ background:none;border:0 solid transparent;
+ border-image:url('../assets/savings-ui/growth.png') 65 fill / 20px stretch;
+}
+#game .mr-plan-card.mr-care {border-image-source:url('../assets/savings-ui/amount.png')}
+#game .mr-plan-card.mr-wants {border-image-source:url('../assets/savings-ui/note.png')}
+#game .mr-plan-card.mr-savings {border-image-source:url('../assets/savings-ui/growth.png')}
+#game .money-review .mr-expense-row {border-image-source:url('../assets/savings-ui/note.png');border-image-width:18px}
+#game .mr-expense-row.mr-food {border-image-source:url('../assets/money-review/rose.png')}
+#game .mr-expense-row.mr-rain {border-image-source:url('../assets/money-review/blue.png')}
+#game .money-review .mr-expense-row.mr-savings {border-image-source:url('../assets/finance-polish/hero.png')}
+
+/* Override the legacy small-copy rule only for these new warning messages. */
+#game .panel .savings-screen .ko-message {font-size:17px!important}
+
+/* One close target and one icon size; individual dialogs keep their positions. */
+#game .panel .panel-heading .close {
+ width:44px;height:44px;min-width:44px;min-height:44px;
+ display:grid;place-items:center;padding:0;
+}
+#game .panel .panel-heading .close>.icon,
+#game .panel .panel-heading .close>.close-icon {
+ width:32px;height:32px;object-fit:contain;
+}
+
+/* Long dialog titles wrap inside a safe text column, never under the close X. */
+#game .panel .panel-heading:has(.close){padding-inline:48px}
+#game .panel .panel-heading:has(.close)>h2{min-width:0;max-width:100%;overflow-wrap:normal;text-wrap:balance}

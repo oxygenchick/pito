@@ -9,6 +9,7 @@ import {icon,world,pet,poop} from './visuals.mjs';
 import {installGaze} from './character-gaze.mjs';
 import {installPlanLayout} from './plan-layout.mjs';
 import {installAudio} from './audio.mjs';
+import {celebrate} from './celebration.mjs';
 import {missionRoute,stepChoice} from './interactions-v10.mjs';
 
 const $=q=>document.querySelector(q), root=$('#game');
@@ -77,7 +78,7 @@ function setNeeds(value){
   else if(value)root.insertAdjacentHTML('beforeend',V.needsView(s));
  }
 }
-function open(type,id=null){stopRain();setNeeds(false);$('.object-bubble')?.remove();if(type==='bank'){ui.depositSource=E.depositFunding(s,1)||'wallet';ui.depositAmount=Math.min(1,Math.floor(s[ui.depositSource]));}ui.error='';ui.modal=type;ui.selection=id;renderModal();}
+function open(type,id=null){stopRain();setNeeds(false);$('.object-bubble')?.remove();if(type==='bank'){ui.depositSource='wallet';ui.depositAmount=Math.max(0,Math.min(1,Math.floor(s.wallet)));}ui.error='';ui.modal=type;ui.selection=id;renderModal();}
 function close(){
  if(progressEvent(s)){ui.modal=progressEvent(s);render();return;}
  ui.modal=null;ui.error='';
@@ -91,6 +92,7 @@ function initialScreens(){
  return renderStart(screen,s,{story,color,hair,petName,face});
 }
 function render(){
+ const hadRain=Boolean($('[data-cloud]'));
  stopRain();gesture=null;cancelDevHold();root.classList.remove('reduced-motion');
  if(screen==='home'&&progressEvent(s))ui.modal=progressEvent(s);
  if(s&&screen==='home')lastMission=E.currentMission(s)?.id||'';
@@ -105,6 +107,9 @@ function render(){
   presentedMission=mission;presentedTicket=ticket?.outerHTML||'';
  }
  if(ui.modal)renderModal();
+ if(hadRain!==Boolean(ui.rainSession)&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+  for(const node of root.querySelectorAll('.hud .task-ticket,.hud .goal-strip'))node.animate(ui.rainSession?[{opacity:1,visibility:'visible',translate:'0 0'},{opacity:0,visibility:'visible',translate:'0 -5px'}]:[{opacity:0,translate:'0 -5px'},{opacity:1,translate:'0 0'}],{duration:200,easing:'ease'});
+ }
  if(!storageOK)toast('Прогресс не сохраняется. Не закрывай вкладку.');
 }
 function renderModal(){
@@ -115,6 +120,7 @@ function renderModal(){
  const wrap=document.createElement('div');wrap.className='modal-backdrop';wrap.dataset.modal=ui.modal;
  wrap.innerHTML='<section class="panel panel-'+ui.modal+'" role="dialog" aria-modal="true" aria-label="'+esc(view.title)+'"><header class="panel-heading"><h2>'+view.title+'</h2>'+(view.closable===false?'':'<button class="close" data-act="close" aria-label="Закрыть">'+icon('close','icon close-icon')+'</button>')+'</header><div class="panel-body">'+view.body+'</div>'+(view.footer?'<footer class="panel-footer">'+view.footer+'</footer>':'')+'</section>';
  root.append(wrap);
+ celebrate(root,s,ui.modal);
  if(same)wrap.querySelector('.panel-body').scrollTop=scroll;
  const focusables=[...wrap.querySelectorAll('button:not(:disabled),input:not(:disabled),summary')].filter(el=>!el.closest('[inert]'));
  const focused=same?focusables.find(el=>el.dataset.act===focusAct&&el.dataset.id===focusId&&el.dataset.delta===focusDelta):null;
@@ -177,10 +183,17 @@ function readyHome(){
 function beginRain(){
  if(!['wash','done'].includes(s.tutorial))return;
  if(s.tutorial==='done'&&!s.plan){showPlan();return;}
- if(ui.rainSession){stopRain();ui.rainSession=null;render();return;}
- if(s.needs.clean>=100&&!s.poops.length){bubble('Я уже чистый!');return;}
+ if(ui.rainSession){dismissRain();return;}
  $('.object-bubble')?.remove();ui.modal=null;ui.needsOpen=false;ui.rainSession={spent:0};ui.rainHint=!s.rainHintSeen;ui.cloudX=75;render();
  const cloud=$('[data-cloud]');cloud?.classList.add('cloud-arriving');setTimeout(()=>cloud?.classList.remove('cloud-arriving'),650);
+}
+function dismissRain(){
+ stopRain();
+ const cloud=$('[data-cloud]'),session=ui.rainSession;
+ if(cloud?.classList.contains('cloud-leaving'))return;
+ cloud?.classList.remove('cloud-arriving');cloud?.classList.add('cloud-leaving');
+ if(cloud)cloud.inert=true;
+ setTimeout(()=>{if(ui.rainSession!==session)return;ui.rainSession=null;save();render();if(session?.cleaned&&!ui.modal)bubble('Теперь я чистый!');},280);
 }
 function act(a,id,delta){
  if(ui.careTransition)return;
@@ -214,6 +227,7 @@ function act(a,id,delta){
  case 'day-details':open('last-period');break;
  case 'wallet':showPlan();break;
  case 'expenses':ui.budgetTab='today';open('budget');break;
+ case 'expenses-back':if(s.review)open('review');else showPlan();break;
  case 'budget-tab':ui.budgetTab=id;renderModal();break;
  case 'food':if(['food','done'].includes(s.tutorial)){if(s.tutorial==='done'&&!s.plan)showPlan();else{ui.rainSession=null;open('feed','apple');}}break;
  case 'select-food':open('feed','apple');break;
@@ -229,7 +243,7 @@ function act(a,id,delta){
   const washed=s.tutorial==='washed';if(E.acknowledgeCare(s)){ui.modal=null;save();render();if(washed&&!s.onboardingPaid)toast(V.coin(20)+' на первые покупки');}break;
  }
  case 'rain':beginRain();break;
- case 'rain-exit':stopRain();ui.rainSession=null;save();render();break;
+ case 'rain-exit':dismissRain();break;
  case 'plan':showPlan();break;
  case 'plan-step':{const i=Number(id),sum=ui.draft.reduce((a,b)=>a+b,0);if(delta<0||sum<s.wallet)ui.draft[i]=Math.max(0,ui.draft[i]+delta);renderModal();break;}
  case 'plan-rest':ui.draft=resizeAllocation(ui.draft,2,s.wallet,s.wallet);ui.planCategory=2;refreshPlan();$('[data-act="plan-confirm"]')?.focus({preventScroll:true});break;
@@ -243,18 +257,17 @@ function act(a,id,delta){
  case 'plan-goal-step':ui.playPlanGoal=stepChoice(E.GOALS.filter(g=>!s.goalsWon.includes(g.id)),ui.playPlanGoal,id);ui.playPlanSaving=independentPlan(s,ui).parts[2];renderModal();break;
  case 'play-plan-choice':{const parts=choosePlayPlan(s,id,ui.playPlanItem,ui.playPlanCare,ui.playPlanSavings,ui.playPlanGoal);if(parts){ui.playPlanChoice=id;ui.draft=parts;renderModal();}break;}
  case 'plan-confirm':{const parts=independentPlan(s,ui).parts;if(!s.plan&&E.setPlan(s,parts)){if(E.GOALS.some(g=>g.id===ui.playPlanGoal)){s.plannedGoal=ui.playPlanGoal;if(hasGoal())E.chooseGoal(s,ui.playPlanGoal);}result(before);}break;}
- case 'goal':if(s.tutorial!=='done')break;if(!s.plan){showPlan();break;}ui.transferMode='plan';ui.transferNotice='';ui.transferAmount=E.plannedSavingsAmount(s);ui.rainSession=null;ui.goalChoice=E.availableGoalChoice(s,s.plannedGoal||s.goal);open(hasGoal()?'goal':'choose-goal');break;
+ case 'goal':if(s.tutorial!=='done')break;if(!s.plan){showPlan();break;}ui.transferMode='manual';ui.transferNotice='';ui.transferAmount=Math.max(0,Math.min(1,Math.floor(s.wallet),E.goalRemaining(s)));ui.rainSession=null;ui.goalChoice=E.availableGoalChoice(s,s.plannedGoal||s.goal);open(hasGoal()?'goal':'choose-goal');break;
  case 'choose-goal':if(!s.plan)showPlan();else{ui.goalChoice=E.availableGoalChoice(s,s.plannedGoal||s.goal);open('choose-goal');}break;
  case 'goal-choice':ui.goalChoice=id;renderModal();break;
  case 'goal-confirm':if(E.chooseGoal(s,E.availableGoalChoice(s,ui.goalChoice)))result(before);break;
- case 'goal-step':{const next=stepChoice(E.GOALS.filter(g=>!s.goalsWon.includes(g.id)),s.goal,id);if(next&&E.chooseGoal(s,next)){ui.transferNotice='';ui.transferAmount=ui.transferMode==='plan'?E.plannedSavingsAmount(s):Math.min(ui.transferAmount,E.goalRemaining(s),s.wallet);save();renderModal();}break;}
- case 'transfer-mode':ui.transferMode=id==='manual'?'manual':'plan';ui.transferNotice='';ui.transferAmount=ui.transferMode==='plan'?E.plannedSavingsAmount(s):Math.min(1,s.wallet);renderModal();break;
- case 'transfer-step':ui.transferAmount=E.clamp(ui.transferAmount+(Number(id)||delta||0),1,Math.max(1,Math.min(Math.floor(s.wallet),E.goalRemaining(s))));renderModal();break;
- case 'transfer-preset':ui.transferAmount=E.clamp(Math.floor(Number(id)||0),0,Math.floor(s.wallet));renderModal();break;
- case 'transfer-plan':ui.transferAmount=E.plannedSavingsAmount(s);renderModal();break;
- case 'transfer':{const amount=ui.transferMode==='plan'?E.plannedSavingsAmount(s):ui.transferAmount;if(E.transferToGoal(s,amount)){ui.transferMode='plan';ui.transferAmount=E.plannedSavingsAmount(s);result(before);if(!ui.modal){ui.transferNotice=`Отложили ${amount} ${E.pieceWord(amount)}`;open('goal');}}else{ui.error='Выбери, сколько отложить.';renderModal();}break;}
+ case 'goal-step':{const next=stepChoice(E.GOALS.filter(g=>!s.goalsWon.includes(g.id)),s.goal,id);if(next&&E.chooseGoal(s,next)){ui.transferMode='manual';ui.transferNotice='';ui.transferAmount=Math.max(0,Math.min(1,Math.floor(s.wallet),E.goalRemaining(s)));save();renderModal();}break;}
+ case 'transfer-mode':case 'transfer-plan':ui.transferMode='manual';ui.transferNotice='';ui.transferAmount=Math.max(0,Math.min(1,Math.floor(s.wallet),E.goalRemaining(s)));renderModal();break;
+ case 'transfer-step':{const max=Math.max(0,Math.floor(Math.min(s.wallet,E.goalRemaining(s)))),current=ui.transferMode==='manual'&&Number.isSafeInteger(ui.transferAmount)?ui.transferAmount:1;ui.transferMode='manual';ui.transferAmount=max?E.clamp(current+(Number(id)||delta||0),1,max):0;renderModal();break;}
+ case 'transfer-preset':{const max=Math.max(0,Math.floor(Math.min(s.wallet,E.goalRemaining(s))));ui.transferMode='manual';ui.transferAmount=max?E.clamp(Math.floor(Number(id)||1),1,max):0;renderModal();break;}
+ case 'transfer':{const max=Math.max(0,Math.floor(Math.min(s.wallet,E.goalRemaining(s)))),requested=ui.transferMode==='manual'&&Number.isSafeInteger(ui.transferAmount)?ui.transferAmount:1,amount=max?E.clamp(requested,1,max):0;if(E.transferToGoal(s,amount)){ui.transferMode='manual';ui.transferAmount=Math.max(0,Math.min(1,Math.floor(s.wallet),E.goalRemaining(s)));result(before);if(!ui.modal){ui.transferNotice=`Отложили ${amount} ${E.pieceWord(amount)}`;open('goal');}}else{ui.error='Выбери, сколько отложить.';renderModal();}break;}
  case 'withdraw':if(s.savings>0)open('withdraw');break;
- case 'withdraw-confirm':if(E.transfer(s,-1)){save();ui.transferAmount=Math.min(1,s.wallet);open('goal');}break;
+ case 'withdraw-confirm':if(E.transfer(s,-1)){save();ui.transferMode='manual';ui.transferAmount=Math.max(0,Math.min(1,Math.floor(s.wallet),E.goalRemaining(s)));open('goal');}break;
  case 'claim-goal':if(E.claimGoal(s)){save();render();}break;
  case 'shop':if(s.tutorial==='done'){if(!s.plan)showPlan();else{ui.rainSession=null;open('shop');}}break;
  case 'select-item':open('buy',id);break;
@@ -263,9 +276,9 @@ function act(a,id,delta){
  case 'play-item':if(!ui.modal&&s.tutorial==='done'&&!s.review&&[...s.owned,...s.goalsWon].includes(id)){E.stroke(s,50);save();animateItem(id);}break;
  case 'shelf-page':ui.shelfPage=E.clamp(ui.shelfPage+delta,0,Math.max(0,Math.ceil((s.owned.length+s.goalsWon.length)/4)-1));render();break;
  case 'bank':if(!s.plan)showPlan();else open('bank');break;
- case 'bank-source':ui.depositSource=id==='savings'?'savings':'wallet';ui.depositAmount=Math.min(Math.max(1,ui.depositAmount||1),Math.floor(s[ui.depositSource]));ui.error='';renderModal();break;
- case 'bank-step':ui.depositAmount=E.clamp((ui.depositAmount||0)+delta,Math.min(1,s[ui.depositSource||'wallet']),Math.floor(s[ui.depositSource||'wallet']));ui.error='';renderModal();break;
- case 'bank-open':if(E.openDeposit(s,ui.depositSource||'wallet',ui.depositAmount||0))result(before);else{ui.error='Выбери сумму, которая у тебя есть.';renderModal();}break;
+ case 'bank-source':ui.depositSource='wallet';ui.depositAmount=Math.max(0,Math.min(Math.max(1,ui.depositAmount||1),Math.floor(s.wallet)));ui.error='';renderModal();break;
+ case 'bank-step':ui.depositSource='wallet';ui.depositAmount=E.clamp((ui.depositAmount||0)+delta,Math.min(1,s.wallet),Math.floor(s.wallet));ui.error='';renderModal();break;
+ case 'bank-open':if(E.openDeposit(s,'wallet',ui.depositAmount||0)){result(before);if(!ui.modal)open('bank');}else{ui.error='Выбери сумму, которая у тебя есть.';renderModal();}break;
  case 'bank-collect':{const principal=s.deposit?.principal||0,returned=s.deposit?Math.ceil(s.deposit.principal+s.deposit.bonus):0;if(E.collectDeposit(s)){s.pendingIncome={amount:returned-principal,principal,source:'deposit',cycle:s.cycle};save();ui.modal='income-event';render();}break;}
  case 'next-cycle':if(E.nextCycle(s)){save();ui.rainSession=null;draftPlan();ui.modal='plan';render();}break;
  case 'adult-gate':ui.gate={a:13+Math.floor(Math.random()*7),b:6+Math.floor(Math.random()*4),c:11+Math.floor(Math.random()*19)};open('gate');break;
@@ -315,7 +328,7 @@ root.addEventListener('pointerdown',e=>{
  const dirt=e.target.closest('[data-poop]');
  if(dirt){const id=Number(dirt.dataset.poop),removed=E.tapPoop(s,id);save();if(s.tutorial==='washed'){ui.rainSession=null;ui.modal='care-result';render();}else{syncPoops();if(removed)showCleanRecovery();const awake=$('[data-poop="'+id+'"]');awake?.classList.add('awake');setTimeout(()=>awake?.classList.remove('awake'),600);}return;}
  const p=e.target.closest('[data-pet]');
- if(p){gesture={lastX:e.clientX,lastY:e.clientY,distance:0};p.setPointerCapture(e.pointerId);e.preventDefault();}else setNeeds(false);
+ if(p){gesture={lastX:e.clientX,lastY:e.clientY,distance:0,needsWereOpen:ui.needsOpen};p.setPointerCapture(e.pointerId);e.preventDefault();}else setNeeds(false);
 });
 root.addEventListener('pointerout',e=>{if(e.target.closest('[data-dev]')&&!e.relatedTarget?.closest?.('[data-dev]'))cancelDevHold();});
 root.addEventListener('pointermove',e=>{
@@ -323,6 +336,7 @@ root.addEventListener('pointermove',e=>{
  if(!gesture||ui.modal)return;
  const distance=Math.hypot(e.clientX-gesture.lastX,e.clientY-gesture.lastY);gesture.distance+=distance;gesture.lastX=e.clientX;gesture.lastY=e.clientY;
  if(gesture.distance>12&&s.tutorial==='done'){
+  if(!gesture.stroking){gesture.stroking=true;$('.needs')?.remove();root.insertAdjacentHTML('beforeend',V.needsView(s,'affection'));}
   E.stroke(s,distance);$('[data-pet]')?.classList.add('petting');reactPet('happy',1300);
   if(!$('.hand'))root.insertAdjacentHTML('beforeend','<span class="hand">'+icon('hand')+'</span>');
   const point=xy(e);$('.hand').style.left=point.x+'%';$('.hand').style.top=point.y+'%';updateHUD();
@@ -331,7 +345,7 @@ root.addEventListener('pointermove',e=>{
 function petTapped(){if(ui.rainSession)return;audio.onAction('pet');if(E.meet(s)){ui.needsOpen=true;save();render();}else setNeeds(!ui.needsOpen);const p=$('[data-pet]');if(p){p.classList.remove('pet-tapped');void p.offsetWidth;p.classList.add('pet-tapped');setTimeout(()=>p.classList.remove('pet-tapped'),400);}}
 function pointerEnd(e){
  cancelDevHold();stopRain();
- if(gesture){if(e?.type==='pointerup'&&gesture.distance<12&&!ui.modal)petTapped();else save();gesture=null;}
+ if(gesture){if(e?.type==='pointerup'&&gesture.distance<12&&!ui.modal)petTapped();else save();if(gesture.stroking)setNeeds(gesture.needsWereOpen);gesture=null;}
  $('[data-pet]')?.classList.remove('petting');$('.hand')?.remove();
  setTimeout(()=>document.querySelectorAll('.poop:not(.running)').forEach(el=>el.classList.remove('awake')),600);
 }
@@ -346,7 +360,7 @@ root.addEventListener('keydown',e=>{
  }
 });
 document.addEventListener('keydown',e=>{
- if(e.key==='Escape'&&!ui.modal&&ui.rainSession){stopRain();ui.rainSession=null;render();}
+ if(e.key==='Escape'&&!ui.modal&&ui.rainSession){dismissRain();}
  if(e.key==='Escape'&&ui.modal&&!['care-result','review'].includes(ui.modal)&&!progressEvent(s))close();
  if(e.key==='Tab'&&ui.modal){const els=[...$('.panel').querySelectorAll('button:not(:disabled),input:not(:disabled),summary')].filter(el=>!el.closest('[inert]')),first=els[0],last=els.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus();}}
 });
@@ -373,7 +387,7 @@ setInterval(()=>{
  const now=performance.now(),dt=Math.min(.5,(now-previous)/1000);previous=now;
  if(!s||screen!=='home'||document.hidden||nativePaused||ui.careTransition)return;
  if(!ui.modal&&rainHeld&&ui.rainSession){
-  const before=[...s.poops],oldTut=s.tutorial,oldWallet=s.wallet;
+  const before=[...s.poops],oldTut=s.tutorial,oldWallet=s.wallet,wasClean=s.needs.clean>=100&&!s.poops.length;
   if(!E.rain(s,dt,ui.cloudX,ui.rainSession)){
    stopRain();
    if(E.deferExhaustedWash(s)){ui.rainSession=null;save();render();toast('Вода закончилась. В новом игровом дне получишь ещё 8 штучек.');return;}
@@ -385,7 +399,7 @@ setInterval(()=>{
    if(!s.poops.some(x=>x.id===p.id)){el.classList.add('running','awake','soaked');el.style.setProperty('--run',p.x>50?'190px':'-190px');setTimeout(()=>el.remove(),650);showCleanRecovery();}
    else if(p.wet>0){el.classList.add('awake');el.classList.toggle('soaked',p.wet>1);el.querySelector('.poop-progress i').style.width=p.wet/1.8*100+'%';}
   }
-  if(oldTut!==s.tutorial){stopRain();reactPet('happy');ui.rainSession=null;ui.careTransition=true;save();setTimeout(()=>{ui.careTransition=false;ui.modal='care-result';render();},700);}else if(s.needs.clean>=100&&!s.poops.length){stopRain();reactPet('happy');ui.rainSession=null;save();render();bubble('Теперь я чистый!');}else updateHUD();
+  if(oldTut!==s.tutorial){stopRain();reactPet('happy');$('[data-cloud]')?.classList.add('cloud-leaving');ui.rainSession=null;ui.careTransition=true;save();setTimeout(()=>{ui.careTransition=false;ui.modal='care-result';render();},700);}else{if(!wasClean&&s.needs.clean>=100&&!s.poops.length){ui.rainSession.cleaned=true;reactPet('happy');save();}updateHUD();}
  }else if(!ui.modal&&!rainHeld){
   const count=s.poops.length;E.tick(s,dt);
   if(E.finishDueCycle(s)){ui.rainSession=null;ui.needsOpen=false;ui.modal='review';save();render();}

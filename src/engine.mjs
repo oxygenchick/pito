@@ -4,6 +4,7 @@ import {applyMissionEvent as emitAction,migrateMissions} from './missions.mjs';
 export {MISSIONS,missionStatus,currentMission,completeMission,deferMission,applyMissionEvent} from './missions.mjs';
 export const VERSION = 1;
 export const CYCLE_SECONDS = 480;
+export const GROWTH_AWARDS = Object.freeze({care:1,plan:3,savings:1});
 export const DEPOSIT_BONUS = 5;
 // Deliberately generous game economy: odd amounts round up once on opening.
 // Only one deposit can run, and its proceeds stay locked for a whole game day.
@@ -125,10 +126,10 @@ export function transfer(s,amount){if(!Number.isInteger(amount)||amount===0||s.t
  record(s,'transfer',amount,'Копилка');emitAction(s,'transferred',{amount,target:'savings'});return true;}
 export function chooseGoal(s,id){const goal=GOALS.find(x=>x.id===id);if(!goal||s.tutorial!=='done'||!s.plan||s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward)return false;s.goal=id;emitAction(s,'goal-selected',{target:id,amount:goal.price});return true;}
 export function claimGoal(s){const g=GOALS.find(x=>x.id===s.goal);if(!g||s.savings<g.price||s.goalsWon.includes(g.id)||!s.plan||s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward||s.tutorial!=='done')return false;const first=s.owned.length+s.goalsWon.length===0,firstDream=s.goalsWon.length===0;s.savings-=g.price;s.goalsWon.push(g.id);record(s,'expense',g.price,g.name,'wants');s.ledger.at(-1).source='savings';s.pendingPurchase={id:g.id,first,firstDream,reward:0,dream:true};return true;}
-// Recommend a source without forbidding a child's deliberate budget choice.
+// New deposits are wallet-only; existing deposit payouts remain unchanged.
 // Actual affordability is checked again in openDeposit; UI shows a care warning.
 export function careReserve(s){return Math.max(0,(s.plan?.[0]??4)-(s.plan?cycleSummary(s).actual.care:0));}
-export function depositFunding(s,amount=10){if(!Number.isSafeInteger(amount)||amount<1)return null;return s.wallet>=amount+careReserve(s)?'wallet':s.savings>=amount?'savings':s.wallet>=amount?'wallet':null;}
+export function depositFunding(s,amount=10){if(!Number.isSafeInteger(amount)||amount<1)return null;return s.wallet>=amount?'wallet':null;}
 // Quote only what is still planned for the goal. Already-paid care or wants no
 // longer reserve wallet coins; moving money between savings and a bank is neutral.
 export function goalRemaining(s,id=s.goal){const g=GOALS.find(g=>g.id===id);return !g||s.goalsWon.includes(id)?0:Math.max(0,g.price-s.savings);}
@@ -147,13 +148,8 @@ export function plannedSavingsAmount(s){
 export function openDeposit(s,source='wallet',amount=10){
  if(s.cycle<3||s.deposit||!s.plan||s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward||s.tutorial!=='done'||!s.missions?.save||!s.missions?.goal)return false;
  if(!Number.isSafeInteger(amount)||amount<1||!Number.isSafeInteger(amount+depositBonus(amount)))return false;
- if(source==='wallet'){if(s.wallet<amount)return false;s.wallet-=amount;}
- else if(source==='savings'){
-  if(s.savings<amount)return false;
-  // Explicitly confirmed rerouting of savings, not new saving or earned income.
-  // Its two ledger legs net to zero saving; the wallet balance does not change.
-  s.savings-=amount;record(s,'transfer',-amount,'Из копилки на вклад');
- }else return false;
+ if(source!=='wallet'||s.wallet<amount)return false;
+ s.wallet-=amount;
  s.deposit={principal:amount,bonus:depositBonus(amount),due:s.completedCycles+1};record(s,'bank-in',amount,'Вклад');emitAction(s,'deposit-opened',{amount,target:'deposit'});return true;
 }
 export function collectDeposit(s){
@@ -209,8 +205,10 @@ export function cycleSummary(s,cycle=s.cycle) {
  if(t.food+t.rain>0)growthReasons.push('Купили еду или воду');
  if(acted&&actual.care<=planned.care&&actual.wants<=planned.wants&&(planned.savings===0||actual.savings>=planned.savings))growthReasons.push('Уложились в свой план');
  if(actual.savings>0)growthReasons.push('Отложили штучки');
+ const growthAwards={care:growthReasons.includes('Купили еду или воду')?GROWTH_AWARDS.care:0,plan:growthReasons.includes('Уложились в свой план')?GROWTH_AWARDS.plan:0,savings:growthReasons.includes('Отложили штучки')?GROWTH_AWARDS.savings:0};
+ const growthGained=growthAwards.care+growthAwards.plan+growthAwards.savings;
  const expense=sum('expense');
- return {cycle,plan,careBeforePlan,walletAtPlan:planRecord?.wallet??null,walletEnd:s.wallet,savingsEnd:s.savings,depositEnd:s.deposit?.principal||0,income:t.income,expense,expenses:{food:t.food,rain:t.rain,wants:t.wants},saved:t.saved,bankSaved,savingsBasis:'new-contributions',totals:t,planned,actual,growthGained:growthReasons.length,growthReasons,growthTotal:(s.growthPoints||0)+growthReasons.length};
+ return {cycle,plan,careBeforePlan,walletAtPlan:planRecord?.wallet??null,walletEnd:s.wallet,savingsEnd:s.savings,depositEnd:s.deposit?.principal||0,income:t.income,expense,expenses:{food:t.food,rain:t.rain,wants:t.wants},saved:t.saved,bankSaved,savingsBasis:'new-contributions',totals:t,planned,actual,growthGained,growthAwards,growthReasons,growthTotal:(s.growthPoints||0)+growthGained};
 }
 export function planOutcome(summary) {
  const planned=summary?.planned||{care:summary?.plan?.[0]||0,wants:summary?.plan?.[1]||0,savings:summary?.plan?.[2]||0};

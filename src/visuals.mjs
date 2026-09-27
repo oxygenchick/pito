@@ -7,6 +7,7 @@ export const svg=(body,cls='icon',view='0 0 64 64')=>`<svg class="${cls}" viewBo
 const newIcons=new Set(['coin','heart','drop','settings','task','ball','comic','puzzle','kite','console','bike','house','hand','arrow','lock','home','sun','check','close','star','cloud']);
 const previousIcons=new Set(['apple','jar','care-basket','toy-box','drum','telescope']);
 export function icon(id,cls='icon'){
+ if(id==='toy-box'||id==='shop')return `<img class="${cls}" src="assets/items-v14/shop.png" alt="" aria-hidden="true">`;
  if(ITEM_ART[id])return `<img class="${cls}" src="assets/items-v14/${ITEM_ART[id]}.png" alt="" aria-hidden="true">`;
  if(['arrow','chevron','plus','minus'].includes(id))return `<img class="${cls}" src="assets/ui-v11/${id==='arrow'?'chevron':id}.png" alt="" aria-hidden="true">`;
  const key=id==='rain'?'cloud':id,version=newIcons.has(key)?'ui-v8':previousIcons.has(key)?'ui-v7':'ui-v8',name=newIcons.has(key)||previousIcons.has(key)?key:'task';

@@ -1,6 +1,9 @@
 import * as E from './engine.mjs';
 import {planView} from './budget-view.mjs';
 import {playPlanView} from './play-plan.mjs';
+import {expensesView} from './money-review.mjs';
+import {dayReviewView,growthReviewView} from './growth-review.mjs';
+import {dreamPurchaseView} from './dream-purchase.mjs';
 import {kidMain} from './kid-main.mjs';
 import {kidOverlay} from './kid-overlays.mjs';
 import {icon, art, svg, world, pet, poop, shelf} from './visuals.mjs';
@@ -53,13 +56,13 @@ function taskCard(s) {
 
 export function home(s, ui) {
  const intro = s.tutorial !== 'done';
- const growth=E.growthProgress(s),growthBase=s.stage===1?4:0,growthFill=growth.complete?100:Math.min(100,Math.max(0,(growth.points-growthBase)/(growth.nextThreshold-growthBase)*100));
+ const growth=E.growthProgress(s),growthFill=growth.complete?100:Math.min(100,Math.max(0,growth.points/growth.nextThreshold*100));
  const goal = currentGoal(s), goalWon=s.goalsWon.includes(goal.id), allGoalsWon=E.GOALS.every(g=>s.goalsWon.includes(g.id));
  const canChooseGoal = !intro && Boolean(s.plan || s.missions?.plan);
  const bankAvailable = Boolean(s.deposit) || s.cycle >= 3 && Boolean(s.missions?.save && s.missions?.goal);
  let html = world() + shelf(s, catalog, ui.shelfPage||0) + pet(s,false,ui.petEmotion);
  html += `<header class="hud"><div class="topbar"><button class="identity" data-act="growth" ${intro ? 'disabled' : ''} aria-label="${esc(s.name)}, день ${s.cycle}. Рост Пито"><span class="pet-name">${esc(s.name)}</span><span class="day-row"><span class="day-label">День ${s.cycle}</span><span class="hud-growth" role="progressbar" aria-label="Рост Пито" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(growthFill)}"><i style="width:${growthFill}%"></i></span></span></button><button class="wallet ${s.tutorial === 'plan' ? 'attention' : ''}" data-act="${s.tutorial === 'plan' ? 'plan' : 'wallet'}" aria-label="${number(s.wallet)} штучек. Мои деньги" ${intro && s.tutorial !== 'plan' ? 'disabled' : ''}>${coin(s.wallet)}</button><button class="round journal-button" data-act="journal" aria-label="Мои задания">${icon('task')}</button><button class="round settings-button" data-act="settings" aria-label="Настройки">${icon('settings')}</button></div>`;
- if (!ui.rainSession) html += taskCard(s);
+ html += taskCard(s);
  if (canChooseGoal) html += `<div class="goal-strip"><button class="goal-shortcut" data-act="${hasGoal(s)&&!goalWon ? 'goal' : 'choose-goal'}">${hasGoal(s)&&!goalWon ? itemArt(goal.id, 'icon') : icon('jar')}<span>${goalWon ? (allGoalsWon ? 'Все мечты сбылись' : 'Новая мечта') : hasGoal(s) ? `${esc(goal.name)} <small>${number(s.savings)} из ${goal.price}</small>` : 'Выбрать мечту'}</span>${hasGoal(s)&&!goalWon ? `<span class="goal-mini-meter"><i style="width:${Math.min(100, s.savings / goal.price * 100)}%"></i></span>` : icon('arrow')}</button>${bankAvailable ? `<button class="bank-shortcut" data-act="bank" aria-label="Вклад">${icon(s.deposit ? 'lock' : 'coin')}<span>Вклад</span>${s.deposit && s.completedCycles >= s.deposit.due ? '<i class="ready-dot"></i>' : ''}</button>` : ''}</div>`;
  html += '</header>';
  if (ui.needsOpen && !ui.rainSession) html += needsView(s);
@@ -102,6 +105,10 @@ function journal(s, tab) {
 }
 
 export function modalView(s, ui) {
+ if(ui.modal==='purchase-event'&&s.pendingPurchase?.dream){const celebration=dreamPurchaseView(s);if(celebration)return celebration;}
+ if (ui.modal==='review') return dayReviewView(s);
+ if (ui.modal==='growth') return growthReviewView(s);
+ if (ui.modal==='budget'||ui.modal==='wallet') return expensesView(s,ui);
  const simplified=kidMain(s,ui)||kidOverlay(s,ui);
  if(simplified)return simplified;
  if(ui.modal==='plan')return playPlanView(s,ui);

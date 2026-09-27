@@ -1,0 +1,69 @@
+/* Fixed visual rhythm, native text and shared button art. Only the backdrop fills tall screens. */
+#game .modal-backdrop:has(.money-review) { padding:0; }
+#game .panel:has(.money-review) { width:400px;max-width:calc(100% - 24px);max-height:calc(100% - 24px);padding:22px 16px 20px;border:0;border-image:none;background:none;isolation:isolate;overflow:hidden;color:#30334f;--button-label-scale:1; }
+#game .panel:has(.money-review)::before { content:'';position:absolute;inset:0;z-index:-1;background:#fff8eb;mask:url('../assets/money-intro/panel-straight.png') center/104% 104% no-repeat;border-radius:28px;pointer-events:none; }
+#game .panel:has(.money-review) .panel-heading { padding:0 30px 16px;min-height:48px;flex-shrink:0; }
+#game .panel:has(.money-review) .panel-heading h2 { font-size:30px;line-height:1.12;font-weight:700;text-align:center;margin:0; }
+#game .panel:has(.money-review) .close { width:40px;height:40px;right:-8px;top:-10px; }
+#game .panel:has(.money-review) .panel-body { padding:0;min-height:0;overflow-y:auto;scrollbar-width:thin; }
+#game .panel:has(.money-review) .panel-footer { padding:12px 0 0;margin:0;flex-shrink:0; }
+#game .panel:has(.money-review) .panel-footer .btn { width:100%;min-height:56px;gap:8px; }
+#game .money-review { display:flex;flex-direction:column;gap:12px;text-align:center; }
+#game .mr-wallet { display:flex;align-items:center;justify-content:center;gap:12px;width:218px;height:82px;margin:0 auto 2px;background:url('../assets/money-review/lavender.png') center/100% 100% no-repeat; }
+#game .mr-wallet>.icon { width:58px;height:58px;object-fit:contain; }
+#game .mr-wallet>span { font-size:18px;text-align:left;line-height:1.1; }
+#game .mr-wallet strong { display:block;font-size:42px;line-height:1.1; }
+#game .mr-plan-cards { display:grid;gap:10px; }
+#game .mr-plan-card { display:grid;grid-template-columns:100px minmax(0,1fr);gap:10px;align-items:center;min-height:114px;padding:16px 16px 16px 10px;background:url('../assets/money-review/mint.png') center/100% 100% no-repeat; }
+#game .mr-plan-card.mr-wants { background-image:url('../assets/money-review/peach.png'); }
+#game .mr-plan-card.mr-savings { background-image:url('../assets/money-review/lavender.png'); }
+#game .mr-picture { display:grid;place-items:center;height:82px; }
+#game .mr-picture>.icon { width:76px;height:82px;object-fit:contain; }
+#game .mr-care-art { position:relative;width:100px;height:82px;display:block; }
+#game .mr-care-art .icon { position:absolute;object-fit:contain;width:66px;height:70px;left:0;top:0; }
+#game .mr-care-art .icon+ .icon { width:58px;height:49px;left:42px;top:38px; }
+#game .mr-card-copy { text-align:left;min-width:0; }
+#game .mr-card-copy h3 { font-size:21px;line-height:1.1;margin:0 0 9px;font-weight:700; }
+#game .mr-card-copy p { font-size:18px;line-height:1.2;margin:0 0 10px; }
+#game .mr-card-copy small { font-size:15px;display:block;margin-top:6px; }
+#game .mr-bar { height:15px;background:#a8d9cc80;border-radius:12px;overflow:hidden; }
+#game .mr-bar i { display:block;height:100%;background:#62b5a1;border-radius:inherit; }
+#game .mr-wants .mr-bar { background:#efb88965; }
+#game .mr-wants .mr-bar i { background:#ed9953; }
+#game .mr-savings .mr-bar { background:#bda5e16b; }
+#game .mr-savings .mr-bar i { background:#9b77c7; }
+#game .mr-note { font-size:16px;line-height:1.25;margin:0;text-align:center; }
+#game .mr-chevron { width:20px;height:20px;object-fit:contain;filter:brightness(0) invert(1); }
+#game [data-act='expenses-back'] .mr-chevron { transform:scaleX(-1); }
+#game .mr-coins { display:inline-flex;align-items:center;gap:5px;white-space:nowrap; }
+#game .mr-coins>.icon { width:26px;height:28px;object-fit:contain; }
+#game .mr-chart { position:relative;width:182px;height:182px;margin:0 auto;flex-shrink:0; }
+#game .mr-chart svg { width:100%;height:100%;display:block; }
+#game .mr-chart-center { position:absolute;inset:30px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:16px; }
+#game .mr-chart-center .mr-coins { font-size:40px;line-height:1; }
+#game .mr-expense-rows { display:grid;gap:8px; }
+#game .mr-expense-row { display:grid;grid-template-columns:58px 1fr auto;align-items:center;gap:10px;min-height:62px;padding:7px 18px 7px 12px;background:url('../assets/money-review/peach.png') center/100% 100% no-repeat;text-align:left; }
+#game .mr-expense-row.mr-rain { background-image:url('../assets/money-review/blue.png'); }
+#game .mr-expense-row.mr-food { background-image:url('../assets/money-review/rose.png'); }
+#game .mr-expense-row.mr-savings { background-image:url('../assets/money-review/lavender.png'); }
+#game .mr-daily-savings { display:grid;gap:6px; }
+#game .mr-expense-row>.icon { width:54px;height:50px;object-fit:contain; }
+#game .mr-expense-row>strong { font-size:21px; }
+#game .mr-expense-row .mr-coins { font-size:28px;flex-direction:row-reverse; }
+#game .mr-balances { display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px 10px;background:url('../assets/money-review/lavender.png') center/100% 100% no-repeat; }
+#game .mr-balances>div { display:flex;align-items:center;justify-content:center;gap:6px; }
+#game .mr-balances .icon { width:43px;height:58px;object-fit:contain; }
+#game .mr-balances span { font-size:16px;line-height:1.15;text-align:left; }
+#game .mr-balances strong { display:block;font-size:32px; }
+#game .mr-tabs { display:flex;gap:8px;justify-content:center; }
+#game .mr-tabs .tab { font-size:16px;padding:8px 12px; }
+@media(max-width:370px){#game .mr-plan-card { grid-template-columns:78px 1fr;gap:8px;padding-inline:9px; }#game .mr-care-art { transform:scale(.8);transform-origin:center; }#game .mr-card-copy h3 { font-size:20px; }#game .mr-card-copy p { font-size:17px; }#game .mr-balances .icon { width:32px; } }
+@media(max-width:370px){#game .mr-balances {gap:8px;padding-inline:8px}#game .mr-balances>div {gap:4px}#game .mr-balances .icon {width:26px}#game .mr-balances span {font-size:15px;white-space:nowrap}}
+
+/* Hide without a layout jump; remove hit targets immediately, then fade. */
+#game .hud .goal-strip { display:flex; }
+#game .hud .task-ticket,#game .hud .goal-strip { transition:opacity .2s ease,translate .2s ease,visibility .2s;opacity:1;visibility:visible;translate:0 0; }
+#game:has(.needs:not(.needs-leaving)) .hud .task-ticket,#game:has(.rain-cloud) .hud .task-ticket,#game:has(.needs:not(.needs-leaving)) .hud .goal-strip,#game:has(.rain-cloud) .hud .goal-strip { display:flex;opacity:0;visibility:hidden;pointer-events:none;translate:0 -5px; }
+#game .rain-cloud.cloud-leaving { animation:cloud-depart .28s ease-in forwards;pointer-events:none; }
+@keyframes cloud-depart { from{opacity:1;translate:0 0}to{opacity:0;translate:50px -6px} }
+@media(prefers-reduced-motion:reduce){#game .hud .task-ticket,#game .hud .goal-strip {transition:none}#game .rain-cloud.cloud-leaving {animation:none;opacity:0} }

@@ -1,8 +1,24 @@
-// Original, sparse pentatonic lullaby. No downloads or third-party recordings.
+// Original pentatonic toy-box score. No downloads or third-party recordings.
 export const AUDIO_SETTING_KEY = 'pito.audio.enabled';
-const MELODY = [72,null,76,null,79,null,76,74,72,null,null,69,67,null,null,null,
-  69,null,72,null,74,null,76,null,79,null,76,74,72,null,null,null];
-const CHORDS = [[48,55,60],[45,52,57],[53,60,65],[48,55,60]];
+// Each row is a four-beat bar, including space for the game and its effects.
+// Four eight-bar sections take about 2.5 minutes to return to the opening.
+const THEMES = [
+  [[72,null,76,null,79,null,76,74],[72,null,null,67,null,69,null,null],
+    [69,null,72,null,76,74,null,72],[74,null,null,null,67,null,null,null]],
+  [[76,null,79,81,null,79,null,76],[74,null,null,72,null,69,72,null],
+    [72,null,74,null,79,null,76,null],[74,null,72,null,null,null,null,null]],
+  [[69,null,null,null,72,null,null,76],[67,null,null,null,69,null,null,null],
+    [72,null,null,74,null,null,76,null],[74,null,null,null,72,null,null,null]],
+  [[79,null,76,null,74,72,null,69],[72,null,null,76,null,79,null,null],
+    [76,null,74,null,72,null,69,null],[67,null,null,69,72,null,null,null]]
+];
+const HARMONIES = [
+  [[48,55,64],[45,52,60],[53,60,69],[55,62,69]],
+  [[45,52,60],[53,60,67],[48,55,64],[55,62,69]],
+  [[53,60,69],[48,55,64],[45,52,60],[55,62,69]],
+  [[48,55,64],[53,60,69],[55,62,69],[48,55,64]]
+];
+const STEP_SECONDS = .58;
 export function soundForAction(action) {
   if (['pet','play-item'].includes(action)) return 'pet';
   if (action === 'feed-confirm') return 'feed';
@@ -24,14 +40,14 @@ export function installAudio(root, options = {}) {
   const voices = new Set();
   const hz = midi => 440 * 2 ** ((midi - 69) / 12);
   const audible = () => enabled && unlocked && !disposed && pageActive && nativeActive && !doc.hidden;
-  function note(midi, at, duration, volume, type = 'sine') {
+  function note(midi, at, duration, volume, type = 'sine', attack = .025) {
     if (!context || !master || voices.size > 32) return;
     const oscillator = context.createOscillator();
     const gain = context.createGain();
     oscillator.type = type;
     oscillator.frequency.setValueAtTime(hz(midi), at);
     gain.gain.setValueAtTime(0, at);
-    gain.gain.linearRampToValueAtTime(volume, at + .025);
+    gain.gain.linearRampToValueAtTime(volume, at + attack);
     gain.gain.exponentialRampToValueAtTime(.0001, at + duration);
     oscillator.connect(gain); gain.connect(master);
     voices.add(oscillator);
@@ -43,10 +59,27 @@ export function installAudio(root, options = {}) {
     // Never replay a backlog after timer throttling or application suspension.
     if (nextNote < context.currentTime) nextNote = context.currentTime + .04;
     while (nextNote < context.currentTime + .35) {
-      const index = step % MELODY.length;
-      if (MELODY[index] !== null) note(MELODY[index], nextNote, 1.1, .10, 'triangle');
-      if (index % 8 === 0) CHORDS[index / 8].forEach((pitch, i) => note(pitch, nextNote + i * .07, 3.8, .037));
-      nextNote += .72; step++;
+      const bar = Math.floor(step / 8);
+      const beat = step % 8;
+      const section = Math.floor(bar / 8) % THEMES.length;
+      const phrase = bar % 4;
+      const secondHalf = bar % 8 >= 4;
+      const chord = HARMONIES[section][phrase];
+      let pitch = THEMES[section][phrase][beat];
+      // The second statement ends differently; the third section is a quiet rest.
+      if (secondHalf && phrase === 3 && beat >= 4) pitch = beat === 4 ? 72 : null;
+      if (pitch !== null) {
+        note(pitch, nextNote, section === 2 ? 1.65 : 1.25,
+          section === 2 ? .065 : .085, 'triangle', .055);
+      }
+      if (beat === 0) {
+        chord.forEach((tone, i) => note(tone, nextNote + i * .09, 4.1, .030, 'sine', .30));
+      }
+      // Quiet upper-register answers enter only after the theme is established.
+      if (secondHalf && section !== 2 && (beat === 3 || (beat === 6 && phrase !== 3))) {
+        note(chord[beat === 3 ? 1 : 2] + 12, nextNote + .035, 1.45, .026, 'sine', .08);
+      }
+      nextNote += STEP_SECONDS; step++;
     }
   }
   function stop() {

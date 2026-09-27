@@ -1,0 +1,3 @@
+#game .achievement-confetti{position:absolute;inset:0;overflow:hidden;z-index:110;pointer-events:none;contain:layout paint}
+#game .achievement-confetti img{position:absolute;height:auto;object-fit:contain;pointer-events:none;will-change:transform,opacity}
+@media(prefers-reduced-motion:reduce){#game .achievement-confetti{display:none}}
