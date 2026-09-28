@@ -24,9 +24,9 @@
 .ss-create { grid-template-rows:44px auto minmax(105px,1fr) auto auto minmax(14px,.25fr) 54px;gap:10px;padding-top:3cqw; }
 .ss-create footer { grid-row:7; }
 .ss-name input { border:0;border-radius:0;background:transparent url('../assets/ui-v10/input-paper.png') center/100% 100% no-repeat;padding:10px 22px; }
-.ss-color { position:relative;border:0;border-radius:0;background:var(--choice-color);mask:url('../assets/ui-v10/swatch.png') center/contain no-repeat; }
-.ss-color.selected { outline:none;mask:none;background:transparent; }
-.ss-color.selected:before { content:'';position:absolute;inset:4px;background:var(--choice-color);mask:url('../assets/ui-v10/swatch.png') center/contain no-repeat;z-index:-1; }
+.ss-color { position:relative;border:0;border-radius:0;background:var(--choice-color);-webkit-mask:url('../assets/ui-v10/swatch.png') center/contain no-repeat;mask:url('../assets/ui-v10/swatch.png') center/contain no-repeat; }
+.ss-color.selected { outline:none;-webkit-mask:none;mask:none;background:transparent; }
+.ss-color.selected:before { content:'';position:absolute;inset:4px;background:var(--choice-color);-webkit-mask:url('../assets/ui-v10/swatch.png') center/contain no-repeat;mask:url('../assets/ui-v10/swatch.png') center/contain no-repeat;z-index:-1; }
 .ss-color.selected:after { content:'';position:absolute;inset:-5px;background:url('../assets/ui-v10/selected-ring.png') center/contain no-repeat;pointer-events:none; }
 .ss-hair.selected { outline:none;background:#ddd0e7; }
 .ss-hair.selected:after { content:'';position:absolute;inset:-5px;background:url('../assets/ui-v10/selected-ring.png') center/contain no-repeat;pointer-events:none; }

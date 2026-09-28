@@ -18,6 +18,13 @@ export function installGaze(root){
  const reset=()=>root.querySelectorAll('[data-pet]').forEach(pet=>{pet.style.removeProperty('--gaze-x');pet.style.removeProperty('--gaze-y');});
  root.addEventListener('pointermove',move,{passive:true});
  root.addEventListener('pointerdown',move,{passive:true});
+ // WebView can cancel pointer events when it takes over a touch gesture.
+ // Passive touch events keep gaze following the finger without blocking scrolling.
+ const touchMove=event=>{if(event.touches.length===1)move(event.touches[0]);};
+ root.addEventListener('touchstart',touchMove,{passive:true});
+ root.addEventListener('touchmove',touchMove,{passive:true});
+ root.addEventListener('touchend',event=>{if(!event.touches.length)reset();},{passive:true});
+ root.addEventListener('touchcancel',reset,{passive:true});
  root.addEventListener('pointerleave',reset,{passive:true});
  root.addEventListener('pointercancel',reset,{passive:true});
  root.addEventListener('pointerup',event=>{if(event.pointerType==='touch')reset();},{passive:true});

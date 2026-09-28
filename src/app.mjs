@@ -311,6 +311,16 @@ root.addEventListener('input',e=>{
  }
 });
 root.addEventListener('focusin',e=>{if(e.target.id==='pet-name')e.target.select();});
+root.addEventListener('keydown',e=>{
+ if(e.key==='Enter'&&!e.isComposing&&['pet-name','gate-answer'].includes(e.target.id)){
+  e.preventDefault();finishTextInput(e.target);
+ }
+});
+function finishTextInput(input){
+ if(input.id==='pet-name'){petName=input.value;input.blur();}
+ else if(input.id==='gate-answer'&&ui.modal==='gate'){input.blur();act('gate-submit');}
+}
+root.addEventListener('pito-input-done',e=>finishTextInput(e.target));
 function xy(e){const r=root.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*100,y:(e.clientY-r.top)/r.height*100};}
 function cancelDevHold(){clearTimeout(devTimer);devTimer=null;$('[data-dev]')?.classList.remove('holding');}
 function rainStarted(){if(ui.rainHint){ui.rainHint=false;$('.cloud-hint')?.remove();s.rainHintSeen=true;save();}}

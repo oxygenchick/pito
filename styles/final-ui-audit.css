@@ -1,10 +1,18 @@
 /* Surface-only polish: keep the established spacing and control geometry. */
+/* Bake the original nine-slice once, avoiding WebView seams at fractional scales.
+   Keep existing borders/padding so labels and hit areas do not move. */
+#game .btn.primary,#game .ss-primary {
+ border-image:none!important;
+ background:transparent url('../assets/money-intro/button-seamless.png') center/100% 100% no-repeat border-box!important;
+ border-radius:0;
+}
+#game .btn { max-width:100%;min-width:0;overflow-wrap:break-word; }
 #game .panel-journal .ko-tabs>button {
  background:none;border:0 solid transparent;border-radius:0;
  border-image:url('../assets/savings-ui/growth.png') 65 fill / 16px stretch;
 }
 #game .panel-journal .ko-tabs>button[aria-selected='true'] {
- color:#fff;border-image-source:url('../assets/ui-v7/button-purple.png');
+ color:#fff;border-image:none;background:transparent url('../assets/money-intro/button-seamless.png') center/100% 100% no-repeat;
 }
 #game .panel-journal .ko-mission.current {
  background:none;border:0 solid transparent;border-radius:0;
@@ -36,6 +44,9 @@
 #game .panel .panel-heading .close>.close-icon {
  width:32px;height:32px;object-fit:contain;
 }
+
+/* Keep finger tracking on the playfield; dialogs retain native scrolling. */
+#game:not(:has(.modal-backdrop)) { touch-action:none; }
 
 /* Long dialog titles wrap inside a safe text column, never under the close X. */
 #game .panel .panel-heading:has(.close){padding-inline:48px}

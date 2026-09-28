@@ -8,6 +8,10 @@ import android.graphics.Color;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputConnectionWrapper;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.*;
 import androidx.webkit.WebViewAssetLoader;
 import java.io.ByteArrayInputStream;
@@ -22,7 +26,25 @@ public final class MainActivity extends Activity {
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
-        web = new WebView(this);
+        web = new WebView(this) {
+            @Override public InputConnection onCreateInputConnection(EditorInfo info) {
+                InputConnection connection = super.onCreateInputConnection(info);
+                if (connection == null) return null;
+                return new InputConnectionWrapper(connection, false) {
+                    @Override public boolean performEditorAction(int actionCode) {
+                        if (actionCode == EditorInfo.IME_ACTION_DONE) {
+                            post(() -> {
+                                evaluateJavascript("(()=>{const input=document.activeElement;if(input instanceof HTMLInputElement){input.dispatchEvent(new Event('pito-input-done',{bubbles:true}));input.blur();}})()", null);
+                                InputMethodManager keyboard = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+                                if (keyboard != null) keyboard.hideSoftInputFromWindow(getWindowToken(), 0);
+                            });
+                            return true;
+                        }
+                        return super.performEditorAction(actionCode);
+                    }
+                };
+            }
+        };
         web.setBackgroundColor(Color.rgb(236,230,255));
         setContentView(web);
         enterFullscreen();

@@ -207,9 +207,9 @@
 #game .ss-create:has(.ss-color[data-id="1"][aria-pressed="true"]) { --hair-preview-color:#e7a04b; }
 #game .ss-create:has(.ss-color[data-id="2"][aria-pressed="true"]) { --hair-preview-color:#62bba0; }
 #game .ss-create .ss-hair>img { opacity:0; }
-#game .ss-create .ss-hair:before { content:'';position:absolute;inset:10px;background:var(--hair-preview-color);mask:url('../assets/pet-v8/hair-0.png') center/contain no-repeat;pointer-events:none; }
-#game .ss-create .ss-hair[data-id="1"]:before { mask-image:url('../assets/ui-v10/hair-1.png'); }
-#game .ss-create .ss-hair[data-id="2"]:before { mask-image:url('../assets/pet-v8/hair-2.png'); }
+#game .ss-create .ss-hair:before { content:'';position:absolute;inset:10px;background:var(--hair-preview-color);-webkit-mask:url('../assets/pet-v8/hair-0.png') center/contain no-repeat;mask:url('../assets/pet-v8/hair-0.png') center/contain no-repeat;pointer-events:none; }
+#game .ss-create .ss-hair[data-id="1"]:before { -webkit-mask-image:url('../assets/ui-v10/hair-1.png');mask-image:url('../assets/ui-v10/hair-1.png'); }
+#game .ss-create .ss-hair[data-id="2"]:before { -webkit-mask-image:url('../assets/pet-v8/hair-2.png');mask-image:url('../assets/pet-v8/hair-2.png'); }
 #game .ss-create .ss-choices .ss-hair.selected:after { border-color:var(--hair-preview-color); }
 @media(max-height:700px) {
  #game .ss-create .ss-pet-preview { bottom:15%; }
@@ -250,9 +250,8 @@
 #game .money-reward p { margin:0;font-size:21px;line-height:1.17;font-weight:400;text-align:left; }
 #game .panel:has(.money-introduction) .panel-footer { padding:4px 0 0;margin:0;display:flex;align-items:center; }
 #game .panel:has(.money-introduction) .panel-footer .btn {
- width:100%;height:60px;min-height:60px;padding:3px 8px;border:12px solid transparent;
- border-image:url('../assets/ui-v7/button-purple.png') 60 fill / 14px stretch;
- background:transparent!important;
+ width:100%;height:60px;min-height:60px;padding:3px 20px;border:0;border-image:none;
+ background:transparent url('../assets/money-intro/button-seamless.png') center/100% 100% no-repeat!important;
  font-size:26px;font-weight:700;line-height:1.1;color:#fff;
 }
 #game .panel:has(.money-introduction) .panel-footer .btn:before { display:none; }
