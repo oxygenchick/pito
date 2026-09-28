@@ -123,8 +123,10 @@ function renderModal(){
  celebrate(root,s,ui.modal);
  if(same)wrap.querySelector('.panel-body').scrollTop=scroll;
  const focusables=[...wrap.querySelectorAll('button:not(:disabled),input:not(:disabled),summary')].filter(el=>!el.closest('[inert]'));
- const focused=same?focusables.find(el=>el.dataset.act===focusAct&&el.dataset.id===focusId&&el.dataset.delta===focusDelta):null;
- (focused||focusables[0])?.focus({preventScroll:true});updateHUD();
+ const focused=same&&focusAct?focusables.find(el=>el.dataset.act===focusAct&&el.dataset.id===focusId&&el.dataset.delta===focusDelta):null;
+ const adultHeading=!focused&&['gate','parent'].includes(ui.modal)?wrap.querySelector('.panel-heading h2'):null;
+ if(adultHeading)adultHeading.tabIndex=-1;
+ (focused||adultHeading||focusables[0])?.focus({preventScroll:true});updateHUD();
 }
 function draftPlan(){
  ui.playPlanChoice=null;
