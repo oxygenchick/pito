@@ -171,7 +171,7 @@ function result(before,message){
  if(newly.length){
   const m=newly[0],deferred=s.missions[m.id].resolution==='deferred';
   ui.feedback={id:m.id,title:deferred?'Покупку отложили':resultTitles[m.id]||m.title,lesson:deferred?'Штучки остались на другие дела. Вещи никуда не денутся.':m.lesson,reward:newly.reduce((n,item)=>n+(s.missions[item.id].rewardPaid||0),0),entries:s.ledger.slice(before.ledger)};
-  if(ui.feedback.reward){s.pendingReward={amount:ui.feedback.reward,title:ui.feedback.title,lesson:ui.feedback.lesson};ui.modal='reward-event';}
+  if(ui.feedback.reward){s.pendingReward={missionId:m.id,amount:ui.feedback.reward,title:ui.feedback.title,lesson:ui.feedback.lesson};ui.modal='reward-event';}
   else ui.modal='result';
  }else{ui.modal=null;ui.feedback=null;}
  save();render();if(!newly.length&&message){if(message==='Пито поел!')bubble('Я наелся!');else toast(message);}

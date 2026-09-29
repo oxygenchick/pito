@@ -1,6 +1,7 @@
 import * as E from './engine.mjs';
 import {icon,art,pet} from './visuals.mjs';
 import {COLLECTION_PLACES} from './collection-layout.mjs';
+import {growthPlanHelp} from './growth-review.mjs';
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const coin=n=>`<span class="coin">${icon('coin')}<span>${n}</span></span>`;
 const btn=(label,action,disabled=false,cls='primary')=>`<button class="btn ${cls} wide" data-act="${action}" ${disabled?'disabled':''}>${label}</button>`;
@@ -23,6 +24,7 @@ export function kidMain(s,ui){
  case 'reward-event':{
   const r=s.pendingReward||{};title=r.title||'Получилось!';closable=false;
   body=`<div class="km-coin-hero">${icon('coin')}</div><div class="km-amount">+${r.amount||0}</div><p>За выполненное задание</p><p class="lead">${esc(r.lesson)}</p>`;
+  if(['plan','replan'].includes(r.missionId)||r.title==='План сохранён')body=`<div class="gr-plan-reward">${icon('coin')}<strong>Ты получил ${r.amount||0} штучки за составление плана!</strong></div>${growthPlanHelp(s,{saved:true})}`;
   footer=btn('К Пито','reward-continue');break;
  }
  case 'food':case 'feed':{
@@ -51,14 +53,14 @@ export function kidMain(s,ui){
  }
  case 'result':{
   const feedback=ui.feedback||{},m=E.MISSIONS.find(x=>x.id===feedback.id);
-  title=feedback.title||'Получилось!';body=`${picture(m?.icon||'task')}<p class="lead">${esc(feedback.lesson)}</p>`;footer=btn('К Пито','close');break;
+  title=feedback.title||'Получилось!';body=['plan','replan'].includes(feedback.id)?growthPlanHelp(s,{saved:true}):`${picture(m?.icon||'task')}<p class="lead">${esc(feedback.lesson)}</p>`;footer=btn('К Пито','close');break;
  }
  case 'guide':{
   const m=E.MISSIONS.find(m=>m.id===(typeof ui.selection==='object'?ui.selection?.id:ui.selection))||E.currentMission(s);
   if(!m)return null;
   const copy={feed:'Нажми на еду и угости Пито яблоком.',wash:'Веди облако над Пито и грязью, пока шкала чистоты не заполнится. Полив стоит 1 штучку за 3 секунды.',plan:'Оставь штучки на еду и воду. Остальные можно потратить на вещь или отложить на мечту.',replan:'Выбери: купить вещь или отложить на большую покупку.',goal:'Выбери вещь, на которую хочешь накопить.',save:'Положи штучки в копилку. Твоя мечта станет ближе.','paid-food':'Пито снова проголодался. Угости его яблоком.',buy:'Можно купить вещь сейчас или оставить деньги на потом.',deposit:'Выбери, сколько штучек положить. Через один игровой день заберёшь их с доходом.'};
   const label={feed:'Выбрать еду',wash:'Включить дождик',plan:'Составить план',replan:'Составить план',goal:'Выбрать мечту',save:'Пополнить копилку','paid-food':'Выбрать еду',buy:'Выбрать вещь',deposit:'Открыть вклад'};
-  title=m.title;body=`${picture(m.icon)}<p class="lead">${copy[m.id]||esc(m.description)}</p>`;footer=btn(label[m.id]||'Открыть','guide-go').replace('data-act="guide-go"',`data-act="guide-go" data-id="${m.id}" data-target="${m.action}"`);break;
+  title=m.title;body=['plan','replan'].includes(m.id)?growthPlanHelp(s):`${picture(m.icon)}<p class="lead">${copy[m.id]||esc(m.description)}</p>`;footer=btn(label[m.id]||'Открыть','guide-go').replace('data-act="guide-go"',`data-act="guide-go" data-id="${m.id}" data-target="${m.action}"`);break;
  }
  case 'review':{
   const raw=s.periods?.at(-1)||E.cycleSummary(s),p={...raw,planned:raw.planned||{care:raw.plan?.[0]||0,wants:raw.plan?.[1]||0,savings:raw.plan?.[2]||0},expenses:raw.expenses||{food:0,rain:0,wants:0},growthReasons:raw.growthReasons||[]};title=`День ${p.cycle} завершён`;closable=false;

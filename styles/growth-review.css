@@ -1,4 +1,11 @@
 /* Fixed-size type and sprite cards, matching the approved money windows. */
+#game .gr-plan-help{gap:12px}
+#game .gr-plan-help .gr-source small{font-size:14px;line-height:1.15}
+#game .gr-plan-help .gr-source{gap:6px}
+#game .gr-plan-help .gr-plan-message{display:flex;flex-direction:column;gap:12px;padding:18px 16px}
+#game .gr-plan-help .gr-source-2{border-image-source:url('../assets/finance-polish/hero.png')}
+#game .gr-plan-reward{display:flex;align-items:center;justify-content:center;gap:14px;margin:0 0 16px;padding:18px 14px;background:transparent url('../assets/finance-polish/mint.png') center/100% 100% no-repeat;font-size:21px;line-height:1.2;text-align:left}
+#game .gr-plan-reward>.icon{width:42px;height:42px;flex-shrink:0;object-fit:contain}
 #game .modal-backdrop:has(.growth-review){padding:0}
 #game .panel:has(.growth-review){width:400px;max-width:calc(100% - 24px);max-height:calc(100% - 24px);padding:22px 16px 20px;border:0;border-image:none;background:none;isolation:isolate;overflow:hidden;color:#30334f;--button-label-scale:1}
 #game .panel:has(.growth-review)::before{content:'';position:absolute;inset:0;z-index:-1;background:#fff8eb;mask:url('../assets/money-intro/panel-straight.png') center/104% 104% no-repeat;border-radius:28px;pointer-events:none}
