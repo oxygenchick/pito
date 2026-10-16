@@ -22,8 +22,8 @@ export function renderStart(screen, profile, {story=0, color=0, hair=0, petName=
     const currentFace=Math.abs(Number(face)||0)%3;
     const snapshot=profile?{owned:[],goalsWon:[],poops:[],...profile}:null;
     const scene=snapshot
-      ? `<div class="ss-start-scene face${currentFace}" aria-hidden="true" inert>${shelf(snapshot,[...ITEMS,...GOALS])}${pet(snapshot)}${snapshot.poops.map(poop).join('')}</div>`
-      : `<div class="start-face face${currentFace}" aria-hidden="true" inert>${pet({stage:0,color:0,hair:0},false,['neutral','happy','neutral'][currentFace])}</div>`;
+      ? `<div class="ss-start-scene face${currentFace}" aria-hidden="true" inert>${shelf(snapshot,[...ITEMS,...GOALS])}${pet(snapshot,false,'neutral')}${snapshot.poops.map(poop).join('')}</div>`
+      : `<div class="start-face face${currentFace}" aria-hidden="true" inert>${pet({stage:0,color:0,hair:0},false,'neutral')}</div>`;
     return world()+`<section class="ss-screen ss-start"><header><h1 class="logo"><img src="assets/ui-v8/logo.png" alt="Пито-Пито" fetchpriority="high"></h1><p class="ss-tagline">Твой финансовый дружище</p></header>${scene}<footer>${primary(profile?'Продолжить':'Новый Пито',profile?'continue':'new')}</footer></section>`;
   }
   if (screen === 'story') {

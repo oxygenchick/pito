@@ -22,10 +22,13 @@ let s=null,storageOK=true;
 try{s=E.restore(localStorage.getItem(KEY));}catch{storageOK=false;}
 const ui={modal:null,selection:null,draft:[0,0,0],playPlanChoice:null,playPlanItem:null,playPlanGoal:null,goalChoice:null,transferMode:'plan',transferNotice:'',transferAmount:1,needsOpen:false,rainSession:null,rainHint:false,cloudX:75,feedback:null,error:'',journalTab:'active',budgetTab:'today',gate:null,key:KEY,shelfPage:0};
 let presentedMission=null,presentedTicket='',bubbleTimer;
-let screen='start',story=0,color=0,hair=0,petName='Пито',gesture=null,devTimer=null,toastTimer=null,rainHeld=false,lastMission='';
+let screen='start',story=0,color=0,hair=0,petName='Пито',gesture=null,touchGesture=null,devTimer=null,toastTimer=null,rainHeld=false,lastMission='';
 let petReaction=null,petReactionUntil=0;
+let lastStrokeSound=-Infinity;
+const playedEvents=new Set();
+const introEvents=new Set(),wetPoopsThisPour=new Set();
 function emotion(){return rainHeld&&Math.abs(ui.cloudX-51)<21?'washing':petReactionUntil>performance.now()?petReaction:Math.min(...Object.values(s?.needs||{food:100}))<25?'sad':'neutral';}
-function syncEmotion(){ui.petEmotion=emotion();const character=$('[data-pet]');if(character)character.dataset.emotion=ui.petEmotion;}
+function syncEmotion(){if(screen!=='home')return;ui.petEmotion=emotion();const character=$('[data-pet]');if(character)character.dataset.emotion=ui.petEmotion;}
 function reactPet(value,duration=1600){petReaction=value;petReactionUntil=performance.now()+duration;syncEmotion();}
 const face=Math.floor(Math.random()*3);
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -42,7 +45,7 @@ function toast(text){
  root.insertAdjacentHTML('beforeend','<div class="toast" role="status">'+text+'</div>');
  toastTimer=setTimeout(()=>$('.toast')?.remove(),3800);
 }
-function stopRain(){rainHeld=false;$('[data-cloud]')?.classList.remove('pouring');syncEmotion();}
+function stopRain(){rainHeld=false;audio.setRain(false);$('[data-cloud]')?.classList.remove('pouring');syncEmotion();}
 function bubble(text,target=$('[data-pet]')){
  if(ui.modal||!target)return;
  clearTimeout(bubbleTimer);$('.object-bubble')?.remove();
@@ -92,6 +95,8 @@ function initialScreens(){
  return renderStart(screen,s,{story,color,hair,petName,face});
 }
 function render(){
+ const opening=screen!=='home'||s?.tutorial==='money'||s?.pendingIncome?.source==='initial';
+ audio.setScene(opening?'intro':'game');
  const hadRain=Boolean($('[data-cloud]'));
  stopRain();gesture=null;cancelDevHold();root.classList.remove('reduced-motion');
  if(screen==='home'&&progressEvent(s))ui.modal=progressEvent(s);
@@ -99,9 +104,10 @@ function render(){
  ui.petEmotion=emotion();
  root.innerHTML=(screen==='home'&&s?V.home(s,ui):initialScreens())+'<button class="dev-hotspot" data-dev aria-label="Режим разработчика: удерживать 1,2 секунды"></button>'+(screen==='home'&&s&&s.speed!==1?'<span class="dev-badge">Время ×'+s.speed+'</span>':'');
  if(screen==='home'&&s&&!ui.modal){
-  const mission=E.currentMission(s)?.id||'',ticket=$('.task-card');
+  const ticket=$('.task-card'),mission=ticket?.dataset.id||ticket?.dataset.act||'';
   if(presentedMission!==null&&mission!==presentedMission){
    ticket?.classList.add('task-arriving');
+   if(mission&&ticket)audio.onAction('mission-arrived');
    if(presentedTicket){const ghost=document.createElement('div');ghost.innerHTML=presentedTicket;const outgoing=ghost.firstElementChild;outgoing.classList.add('task-departing');outgoing.setAttribute('inert','');outgoing.setAttribute('aria-hidden','true');root.append(outgoing);setTimeout(()=>outgoing.remove(),380);}
   }
   presentedMission=mission;presentedTicket=ticket?.outerHTML||'';
@@ -120,7 +126,23 @@ function renderModal(){
  const wrap=document.createElement('div');wrap.className='modal-backdrop';wrap.dataset.modal=ui.modal;
  wrap.innerHTML='<section class="panel panel-'+ui.modal+'" role="dialog" aria-modal="true" aria-label="'+esc(view.title)+'"><header class="panel-heading"><h2>'+view.title+'</h2>'+(view.closable===false?'':'<button class="close" data-act="close" aria-label="Закрыть">'+icon('close','icon close-icon')+'</button>')+'</header><div class="panel-body">'+view.body+'</div>'+(view.footer?'<footer class="panel-footer">'+view.footer+'</footer>':'')+'</section>';
  root.append(wrap);
+ if(ui.modal==='money-intro'||ui.modal==='income-event'&&s.pendingIncome?.source==='initial'){
+  const key=ui.modal;
+  if(!introEvents.has(key)){
+   introEvents.add(key);
+   audio.onAction(key==='money-intro'?'intro-fanfare':'income-fanfare');
+  }
+ }
  celebrate(root,s,ui.modal);
+ if(s&&['review','grown-event','purchase-event'].includes(ui.modal)){
+  const eventKey=ui.modal+':'+s.cycle+':'+s.stage+':'+(s.pendingPurchase?.id||'');
+  if(!playedEvents.has(eventKey)){
+   playedEvents.add(eventKey);
+   if(ui.modal==='review')audio.onAction(root.querySelector('[data-plan-success="true"]')?'review-success':'review-missed');
+   else if(ui.modal==='grown-event')audio.onAction('growth-achieved');
+   else if(s.pendingPurchase?.dream)audio.onAction('claim-goal');
+  }
+ }
  if(same)wrap.querySelector('.panel-body').scrollTop=scroll;
  const focusables=[...wrap.querySelectorAll('button:not(:disabled),input:not(:disabled),summary')].filter(el=>!el.closest('[inert]'));
  const focused=same&&focusAct?focusables.find(el=>el.dataset.act===focusAct&&el.dataset.id===focusId&&el.dataset.delta===focusDelta):null;
@@ -207,7 +229,7 @@ function act(a,id,delta){
  case 'back-start':screen='start';render();break;
  case 'color':color=Number(id);render();break;
  case 'hair':hair=Number(id);render();break;
- case 'birth':s=E.createProfile($('#pet-name').value,color,hair);screen='home';ui.modal=null;save();render();break;
+ case 'birth':s=E.createProfile($('#pet-name').value,color,hair);introEvents.clear();screen='home';ui.modal=null;save();render();break;
  case 'close':close();break;
  case 'money-explained':if(E.grantInitialMoney(s)){save();render();}break;
  case 'income-continue':if(E.acknowledgeIncome(s)){save();if(!s.plan&&['plan','done'].includes(s.tutorial))showPlan();else readyHome();}break;
@@ -236,6 +258,7 @@ function act(a,id,delta){
  case 'feed-confirm':{
   const f=E.FOOD[0];
   if(E.feed(s,f.id)){
+   audio.onAction('feed-confirm');
    save();ui.modal=null;ui.careTransition=true;render();reactPet('eating',1450);setNeeds(true);
    setTimeout(()=>{ui.careTransition=false;if(s.tutorial==='fed'){ui.modal='care-result';render();}else{result(before,'Пито поел!');if(!ui.modal){setNeeds(true);setTimeout(()=>{if(!ui.modal)setNeeds(false);},2200);}}},1450);
   }
@@ -258,7 +281,7 @@ function act(a,id,delta){
  case 'plan-saving-step':{if(!['want','save'].includes(id))break;const o=planOptions(s,ui.playPlanItem,ui.playPlanCare,ui.playPlanSavings,ui.playPlanGoal)[id];if(!o.available)break;ui.playPlanSavings={...ui.playPlanSavings,[id]:E.clamp(o.parts[2]+delta,0,o.maxSaving)};ui.playPlanChoice=id;renderModal();break;}
  case 'plan-goal-step':ui.playPlanGoal=stepChoice(E.GOALS.filter(g=>!s.goalsWon.includes(g.id)),ui.playPlanGoal,id);ui.playPlanSaving=independentPlan(s,ui).parts[2];renderModal();break;
  case 'play-plan-choice':{const parts=choosePlayPlan(s,id,ui.playPlanItem,ui.playPlanCare,ui.playPlanSavings,ui.playPlanGoal);if(parts){ui.playPlanChoice=id;ui.draft=parts;renderModal();}break;}
- case 'plan-confirm':{const parts=independentPlan(s,ui).parts;if(!s.plan&&E.setPlan(s,parts)){if(E.GOALS.some(g=>g.id===ui.playPlanGoal)){s.plannedGoal=ui.playPlanGoal;if(hasGoal())E.chooseGoal(s,ui.playPlanGoal);}result(before);}break;}
+ case 'plan-confirm':{const parts=independentPlan(s,ui).parts;if(!s.plan&&E.setPlan(s,parts)){audio.onAction('plan-confirm');if(E.GOALS.some(g=>g.id===ui.playPlanGoal)){s.plannedGoal=ui.playPlanGoal;if(hasGoal())E.chooseGoal(s,ui.playPlanGoal);}result(before);}break;}
  case 'goal':if(s.tutorial!=='done')break;if(!s.plan){showPlan();break;}ui.transferMode='manual';ui.transferNotice='';ui.transferAmount=Math.max(0,Math.min(1,Math.floor(s.wallet),E.goalRemaining(s)));ui.rainSession=null;ui.goalChoice=E.availableGoalChoice(s,s.plannedGoal||s.goal);open(hasGoal()?'goal':'choose-goal');break;
  case 'choose-goal':if(!s.plan)showPlan();else{ui.goalChoice=E.availableGoalChoice(s,s.plannedGoal||s.goal);open('choose-goal');}break;
  case 'goal-choice':ui.goalChoice=id;renderModal();break;
@@ -267,21 +290,21 @@ function act(a,id,delta){
  case 'transfer-mode':case 'transfer-plan':ui.transferMode='manual';ui.transferNotice='';ui.transferAmount=Math.max(0,Math.min(1,Math.floor(s.wallet),E.goalRemaining(s)));renderModal();break;
  case 'transfer-step':{const max=Math.max(0,Math.floor(Math.min(s.wallet,E.goalRemaining(s)))),current=ui.transferMode==='manual'&&Number.isSafeInteger(ui.transferAmount)?ui.transferAmount:1;ui.transferMode='manual';ui.transferAmount=max?E.clamp(current+(Number(id)||delta||0),1,max):0;renderModal();break;}
  case 'transfer-preset':{const max=Math.max(0,Math.floor(Math.min(s.wallet,E.goalRemaining(s))));ui.transferMode='manual';ui.transferAmount=max?E.clamp(Math.floor(Number(id)||1),1,max):0;renderModal();break;}
- case 'transfer':{const max=Math.max(0,Math.floor(Math.min(s.wallet,E.goalRemaining(s)))),requested=ui.transferMode==='manual'&&Number.isSafeInteger(ui.transferAmount)?ui.transferAmount:1,amount=max?E.clamp(requested,1,max):0;if(E.transferToGoal(s,amount)){ui.transferMode='manual';ui.transferAmount=Math.max(0,Math.min(1,Math.floor(s.wallet),E.goalRemaining(s)));result(before);if(!ui.modal){ui.transferNotice=`Отложили ${amount} ${E.pieceWord(amount)}`;open('goal');}}else{ui.error='Выбери, сколько отложить.';renderModal();}break;}
+ case 'transfer':{const max=Math.max(0,Math.floor(Math.min(s.wallet,E.goalRemaining(s)))),requested=ui.transferMode==='manual'&&Number.isSafeInteger(ui.transferAmount)?ui.transferAmount:1,amount=max?E.clamp(requested,1,max):0;if(E.transferToGoal(s,amount)){audio.onAction('transfer');ui.transferMode='manual';ui.transferAmount=Math.max(0,Math.min(1,Math.floor(s.wallet),E.goalRemaining(s)));result(before);if(!ui.modal){ui.transferNotice=`Отложили ${amount} ${E.pieceWord(amount)}`;open('goal');}}else{ui.error='Выбери, сколько отложить.';renderModal();}break;}
  case 'withdraw':if(s.savings>0)open('withdraw');break;
- case 'withdraw-confirm':if(E.transfer(s,-1)){save();ui.transferMode='manual';ui.transferAmount=Math.max(0,Math.min(1,Math.floor(s.wallet),E.goalRemaining(s)));open('goal');}break;
- case 'claim-goal':if(E.claimGoal(s)){save();render();}break;
+ case 'withdraw-confirm':if(E.transfer(s,-1)){audio.onAction('withdraw-confirm');save();ui.transferMode='manual';ui.transferAmount=Math.max(0,Math.min(1,Math.floor(s.wallet),E.goalRemaining(s)));open('goal');}break;
+ case 'claim-goal':if(E.claimGoal(s)){audio.onAction('claim-goal');save();render();}break;
  case 'shop':if(s.tutorial==='done'){if(!s.plan)showPlan();else{ui.rainSession=null;open('shop');}}break;
  case 'select-item':open('buy',id);break;
- case 'buy-confirm':{const item=E.ITEMS.find(i=>i.id===ui.selection);if(E.buy(s,ui.selection)){save();render();}else{ui.error='Не хватает '+Math.max(0,item.price-s.wallet)+' штучек. Покупку можно отложить.';renderModal();}break;}
+ case 'buy-confirm':{const item=E.ITEMS.find(i=>i.id===ui.selection);if(E.buy(s,ui.selection)){audio.onAction('buy-confirm');save();render();}else{ui.error='Не хватает '+Math.max(0,item.price-s.wallet)+' штучек. Покупку можно отложить.';renderModal();}break;}
  case 'defer-buy':if(E.deferMission(s,'buy'))result(before);break;
  case 'play-item':if(!ui.modal&&s.tutorial==='done'&&!s.review&&[...s.owned,...s.goalsWon].includes(id)){E.stroke(s,50);save();animateItem(id);}break;
  case 'shelf-page':ui.shelfPage=E.clamp(ui.shelfPage+delta,0,Math.max(0,Math.ceil((s.owned.length+s.goalsWon.length)/4)-1));render();break;
  case 'bank':if(!s.plan)showPlan();else open('bank');break;
  case 'bank-source':ui.depositSource='wallet';ui.depositAmount=Math.max(0,Math.min(Math.max(1,ui.depositAmount||1),Math.floor(s.wallet)));ui.error='';renderModal();break;
  case 'bank-step':ui.depositSource='wallet';ui.depositAmount=E.clamp((ui.depositAmount||0)+delta,Math.min(1,s.wallet),Math.floor(s.wallet));ui.error='';renderModal();break;
- case 'bank-open':if(E.openDeposit(s,'wallet',ui.depositAmount||0)){result(before);if(!ui.modal)open('bank');}else{ui.error='Выбери сумму, которая у тебя есть.';renderModal();}break;
- case 'bank-collect':{const principal=s.deposit?.principal||0,returned=s.deposit?Math.ceil(s.deposit.principal+s.deposit.bonus):0;if(E.collectDeposit(s)){s.pendingIncome={amount:returned-principal,principal,source:'deposit',cycle:s.cycle};save();ui.modal='income-event';render();}break;}
+ case 'bank-open':if(E.openDeposit(s,'wallet',ui.depositAmount||0)){audio.onAction('bank-open');result(before);if(!ui.modal)open('bank');}else{ui.error='Выбери сумму, которая у тебя есть.';renderModal();}break;
+ case 'bank-collect':{const principal=s.deposit?.principal||0,returned=s.deposit?Math.ceil(s.deposit.principal+s.deposit.bonus):0;if(E.collectDeposit(s)){audio.onAction('bank-collect');s.pendingIncome={amount:returned-principal,principal,source:'deposit',cycle:s.cycle};save();ui.modal='income-event';render();}break;}
  case 'next-cycle':if(E.nextCycle(s)){save();ui.rainSession=null;draftPlan();ui.modal='plan';render();}break;
  case 'adult-gate':ui.gate={a:13+Math.floor(Math.random()*7),b:6+Math.floor(Math.random()*4),c:11+Math.floor(Math.random()*19)};open('gate');break;
  case 'gate-submit':if($('#gate-answer').value.trim()&&Number($('#gate-answer').value)===ui.gate.a*ui.gate.b-ui.gate.c)open('parent');else{ui.error='Проверь ответ ещё раз.';renderModal();}break;
@@ -292,7 +315,7 @@ function act(a,id,delta){
  case 'dev-needs':s.needs={food:100,affection:100,clean:100};save();renderModal();break;
  case 'dev-poop':E.spawnPoop(s);save();renderModal();break;
  case 'reset-ask':open('reset');break;
- case 'reset-confirm':s=null;save();screen='start';ui.modal=null;ui.rainSession=null;ui.needsOpen=false;color=0;hair=0;petName='Пито';render();break;
+ case 'reset-confirm':s=null;playedEvents.clear();save();screen='start';ui.modal=null;ui.rainSession=null;ui.needsOpen=false;color=0;hair=0;petName='Пито';render();break;
 }
 }
 function animateItem(id){
@@ -325,7 +348,7 @@ function finishTextInput(input){
 root.addEventListener('pito-input-done',e=>finishTextInput(e.target));
 function xy(e){const r=root.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*100,y:(e.clientY-r.top)/r.height*100};}
 function cancelDevHold(){clearTimeout(devTimer);devTimer=null;$('[data-dev]')?.classList.remove('holding');}
-function rainStarted(){if(ui.rainHint){ui.rainHint=false;$('.cloud-hint')?.remove();s.rainHintSeen=true;save();}}
+function rainStarted(){wetPoopsThisPour.clear();audio.setRain(true);if(ui.rainHint){ui.rainHint=false;$('.cloud-hint')?.remove();s.rainHintSeen=true;save();}}
 function showCleanRecovery(){
  if(!$('.needs'))root.insertAdjacentHTML('beforeend',V.needsView(s,'clean'));
  const indicator=$('.need-clean');indicator?.classList.add('clean-recovered');updateHUD();
@@ -338,30 +361,58 @@ root.addEventListener('pointerdown',e=>{
  const cloud=e.target.closest('[data-cloud]');
  if(cloud&&ui.rainSession){e.preventDefault();rainHeld=true;cloud.setPointerCapture(e.pointerId);cloud.classList.add('pouring');ui.cloudX=E.clamp(xy(e).x,20,80);rainStarted();return;}
  const dirt=e.target.closest('[data-poop]');
- if(dirt){const id=Number(dirt.dataset.poop),removed=E.tapPoop(s,id);save();if(s.tutorial==='washed'){ui.rainSession=null;ui.modal='care-result';render();}else{syncPoops();if(removed)showCleanRecovery();const awake=$('[data-poop="'+id+'"]');awake?.classList.add('awake');setTimeout(()=>awake?.classList.remove('awake'),600);}return;}
+ if(dirt){const id=Number(dirt.dataset.poop),removed=E.tapPoop(s,id);audio.onAction('clean-poop');save();if(s.tutorial==='washed'){ui.rainSession=null;ui.modal='care-result';render();}else{syncPoops();if(removed)showCleanRecovery();const awake=$('[data-poop="'+id+'"]');awake?.classList.add('awake');setTimeout(()=>awake?.classList.remove('awake'),600);}return;}
  const p=e.target.closest('[data-pet]');
- if(p){gesture={lastX:e.clientX,lastY:e.clientY,distance:0,needsWereOpen:ui.needsOpen};p.setPointerCapture(e.pointerId);e.preventDefault();}else setNeeds(false);
+ if(p){gesture={lastX:e.clientX,lastY:e.clientY,distance:0,needsWereOpen:ui.needsOpen};try{p.setPointerCapture(e.pointerId);}catch{}e.preventDefault();}else setNeeds(false);
 });
 root.addEventListener('pointerout',e=>{if(e.target.closest('[data-dev]')&&!e.relatedTarget?.closest?.('[data-dev]'))cancelDevHold();});
-root.addEventListener('pointermove',e=>{
- if(rainHeld&&ui.rainSession){ui.cloudX=E.clamp(xy(e).x,20,80);const cloud=$('[data-cloud]');if(cloud)cloud.style.left=ui.cloudX+'%';return;}
- if(!gesture||ui.modal)return;
- const distance=Math.hypot(e.clientX-gesture.lastX,e.clientY-gesture.lastY);gesture.distance+=distance;gesture.lastX=e.clientX;gesture.lastY=e.clientY;
- if(gesture.distance>12&&s.tutorial==='done'){
+function movePetGesture(x,y){
+ if(!gesture||ui.modal||!s)return;
+ const distance=Math.hypot(x-gesture.lastX,y-gesture.lastY);gesture.distance+=distance;gesture.lastX=x;gesture.lastY=y;
+ if(gesture.distance>12&&distance>0&&s.tutorial==='done'){
   if(!gesture.stroking){gesture.stroking=true;$('.needs')?.remove();root.insertAdjacentHTML('beforeend',V.needsView(s,'affection'));}
   E.stroke(s,distance);$('[data-pet]')?.classList.add('petting');reactPet('happy',1300);
+  if(performance.now()-lastStrokeSound>550){audio.onAction('stroke');lastStrokeSound=performance.now();}
   if(!$('.hand'))root.insertAdjacentHTML('beforeend','<span class="hand">'+icon('hand')+'</span>');
-  const point=xy(e);$('.hand').style.left=point.x+'%';$('.hand').style.top=point.y+'%';updateHUD();
+  const point=xy({clientX:x,clientY:y});$('.hand').style.left=point.x+'%';$('.hand').style.top=point.y+'%';updateHUD();
  }
+}
+root.addEventListener('pointermove',e=>{
+ if(rainHeld&&ui.rainSession){ui.cloudX=E.clamp(xy(e).x,20,80);const cloud=$('[data-cloud]');if(cloud)cloud.style.left=ui.cloudX+'%';return;}
+ movePetGesture(e.clientX,e.clientY);
 });
+// Some Android WebViews cancel pointer capture while still delivering touchmove.
+// The touch path fills only those gaps; coincident pointermove has zero distance.
+root.addEventListener('touchstart',e=>{
+ if(ui.modal||ui.careTransition||screen!=='home'||ui.rainSession||e.touches.length!==1||!e.target.closest('[data-pet]'))return;
+ const touch=e.touches[0];
+ touchGesture={lastX:touch.clientX,lastY:touch.clientY,moved:false};
+ if(!gesture)gesture={lastX:touch.clientX,lastY:touch.clientY,distance:0,needsWereOpen:ui.needsOpen};
+},{passive:true});
+root.addEventListener('touchmove',e=>{
+ if(!touchGesture||e.touches.length!==1)return;
+ const touch=e.touches[0];
+ if(Math.hypot(touch.clientX-touchGesture.lastX,touch.clientY-touchGesture.lastY)>2){
+  e.preventDefault();
+  if(!gesture)gesture={lastX:touchGesture.lastX,lastY:touchGesture.lastY,distance:0,needsWereOpen:ui.needsOpen};
+  movePetGesture(touch.clientX,touch.clientY);
+  touchGesture.moved=true;
+ }
+ touchGesture.lastX=touch.clientX;touchGesture.lastY=touch.clientY;
+},{passive:false});
 function petTapped(){if(ui.rainSession)return;audio.onAction('pet');if(E.meet(s)){ui.needsOpen=true;save();render();}else setNeeds(!ui.needsOpen);const p=$('[data-pet]');if(p){p.classList.remove('pet-tapped');void p.offsetWidth;p.classList.add('pet-tapped');setTimeout(()=>p.classList.remove('pet-tapped'),400);}}
 function pointerEnd(e){
  cancelDevHold();stopRain();
- if(gesture){if(e?.type==='pointerup'&&gesture.distance<12&&!ui.modal)petTapped();else save();if(gesture.stroking)setNeeds(gesture.needsWereOpen);gesture=null;}
+ const finished=gesture;
+ if(finished){if(e?.type==='pointerup'&&finished.distance<12&&!ui.modal)petTapped();else save();if(finished.stroking)setNeeds(finished.needsWereOpen);gesture=null;}
  $('[data-pet]')?.classList.remove('petting');$('.hand')?.remove();
  setTimeout(()=>document.querySelectorAll('.poop:not(.running)').forEach(el=>el.classList.remove('awake')),600);
 }
 window.addEventListener('pointerup',pointerEnd);window.addEventListener('pointercancel',pointerEnd);window.addEventListener('blur',pointerEnd);
+root.addEventListener('touchend',()=>{if(!touchGesture)return;if(gesture)pointerEnd({type:touchGesture.moved?'pointercancel':'pointerup'});touchGesture=null;},{passive:true});
+root.addEventListener('touchcancel',()=>{if(gesture)pointerEnd({type:'pointercancel'});touchGesture=null;},{passive:true});
+window.addEventListener('pito-native-pause',stopRain);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopRain();});
 root.addEventListener('keydown',e=>{
  if(e.target.matches('[data-dev]')&&e.key==='Enter'){e.preventDefault();open('dev');return;}
  if(ui.modal||screen!=='home'||!s)return;
@@ -399,7 +450,7 @@ setInterval(()=>{
  const now=performance.now(),dt=Math.min(.5,(now-previous)/1000);previous=now;
  if(!s||screen!=='home'||document.hidden||nativePaused||ui.careTransition)return;
  if(!ui.modal&&rainHeld&&ui.rainSession){
-  const before=[...s.poops],oldTut=s.tutorial,oldWallet=s.wallet,wasClean=s.needs.clean>=100&&!s.poops.length;
+  const before=s.poops.map(p=>({...p})),oldTut=s.tutorial,oldWallet=s.wallet,wasClean=s.needs.clean>=100&&!s.poops.length;
   if(!E.rain(s,dt,ui.cloudX,ui.rainSession)){
    stopRain();
    if(E.deferExhaustedWash(s)){ui.rainSession=null;save();render();toast('Вода закончилась. В новом игровом дне получишь ещё 8 штучек.');return;}
@@ -408,8 +459,12 @@ setInterval(()=>{
   if(oldWallet>s.wallet){const flight=document.createElement('span');flight.className='rain-coin';flight.style.setProperty('--coin-x',ui.cloudX+'%');flight.innerHTML='−'+V.coin(oldWallet-s.wallet);root.append(flight);setTimeout(()=>flight.remove(),1400);}
   for(const p of before){
    const el=$('[data-poop="'+p.id+'"]');if(!el)continue;
-   if(!s.poops.some(x=>x.id===p.id)){el.classList.add('running','awake','soaked');el.style.setProperty('--run',p.x>50?'190px':'-190px');setTimeout(()=>el.remove(),650);showCleanRecovery();}
-   else if(p.wet>0){el.classList.add('awake');el.classList.toggle('soaked',p.wet>1);el.querySelector('.poop-progress i').style.width=p.wet/1.8*100+'%';}
+   const current=s.poops.find(x=>x.id===p.id);
+   if(!current){audio.onAction('poop-run');el.classList.add('running','awake','soaked');el.style.setProperty('--run',p.x>50?'190px':'-190px');setTimeout(()=>el.remove(),650);showCleanRecovery();}
+   else if(current.wet>0){
+    if(current.wet>p.wet&&!wetPoopsThisPour.has(p.id)){wetPoopsThisPour.add(p.id);audio.onAction('poop-wet');}
+    el.classList.add('awake');el.classList.toggle('soaked',current.wet>1);el.querySelector('.poop-progress i').style.width=current.wet/1.8*100+'%';
+   }
   }
   if(oldTut!==s.tutorial){stopRain();reactPet('happy');$('[data-cloud]')?.classList.add('cloud-leaving');ui.rainSession=null;ui.careTransition=true;save();setTimeout(()=>{ui.careTransition=false;ui.modal='care-result';render();},700);}else{if(!wasClean&&s.needs.clean>=100&&!s.poops.length){ui.rainSession.cleaned=true;reactPet('happy');save();}updateHUD();}
  }else if(!ui.modal&&!rainHeld){
@@ -439,3 +494,4 @@ window.addEventListener('pito-native-pause',()=>{nativePaused=true;suspendGame()
 window.addEventListener('pito-native-resume',()=>{nativePaused=false;if(!document.hidden)resumeGame();});
 window.addEventListener('pagehide',save);
 render();
+audio.tryAutoplay();

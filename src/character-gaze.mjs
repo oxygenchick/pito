@@ -8,6 +8,8 @@ export function installGaze(root){
  if(!root||root.dataset.gazeInstalled)return;
  root.dataset.gazeInstalled='true';
  const move=event=>root.querySelectorAll('[data-pet]').forEach(pet=>{
+  // The title pet follows a finger; story and customization previews keep their pose.
+  if(root.querySelector?.('.ss-story,.ss-create'))return;
   if(pet.closest?.('.event-pet')){pet.style.setProperty('--gaze-x','0');pet.style.setProperty('--gaze-y','-.35');return;}
   // The button includes empty space above a young pet: gaze must originate at its eyes.
   const face=pet.querySelector('.pet-eyes')||pet;

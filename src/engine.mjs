@@ -103,7 +103,7 @@ export function deferExhaustedWash(s){if(!s.onboardingPaid||s.tutorial!=='wash'|
 export function finishFirstWash(s){if((s.tutorial==='wash'||s.onboardingPaid&&s.tutorial==='done'&&!s.trialUsed)&&s.poops.length===0&&s.needs.clean>=90){s.trialUsed=true;s.needs.clean=100;if(s.tutorial==='wash')s.tutorial='washed';emitAction(s,'washed',{free:!s.onboardingPaid,first:true,amount:s.onboardingPaid?totals(s).rain:0});return true;}return false;}
 function restoreCleanGround(s,removed){s.needs.clean=clamp(s.needs.clean+removed.reduce((sum,p)=>sum+(Number.isFinite(p.cleanPenalty)?clamp(p.cleanPenalty,0,POOP_DIRT):0),0));}
 export function tapPoop(s,id){const p=s.poops.find(x=>x.id===id);if(!p)return false;p.taps++;if(p.taps>=6){s.poops=s.poops.filter(x=>x.id!==id);restoreCleanGround(s,[p]);s.cycleCare++;finishFirstWash(s);return true;}return false;}
-export function stroke(s,distance){if(s.tutorial!=='done')return false;s.needs.affection=clamp(s.needs.affection+Math.min(6,distance*.09));if(distance>12)s.cycleCare++;return true;}
+export function stroke(s,distance){if(s.tutorial!=='done'||!Number.isFinite(distance)||distance<=0)return false;s.needs.affection=clamp(s.needs.affection+Math.min(6,distance*.09));if(distance>12)s.cycleCare++;return true;}
 // Charge a 3-second portion only when water starts. Paid unused water persists.
 export function rain(s,dt,x,session){if(!(dt>0)||!Number.isFinite(dt)||!session||!['wash','done'].includes(s.tutorial))return false;const free=!s.onboardingPaid&&s.tutorial==='wash'&&!s.trialUsed;
  if(!free&&!canSpend(s,0))return false;

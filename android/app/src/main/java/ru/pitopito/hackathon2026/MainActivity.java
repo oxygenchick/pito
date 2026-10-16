@@ -61,7 +61,8 @@ public final class MainActivity extends Activity {
         config.setAllowFileAccess(false);
         config.setAllowContentAccess(false);
         config.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
-        config.setMediaPlaybackRequiresUserGesture(true);
+        // Intro music may start as soon as the local start screen loads.
+        config.setMediaPlaybackRequiresUserGesture(false);
         config.setTextZoom(100);
         WebView.setWebContentsDebuggingEnabled(false);
         CookieManager.getInstance().setAcceptCookie(false);
