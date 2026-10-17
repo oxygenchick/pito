@@ -2,6 +2,15 @@
 export const AUDIO_SETTING_KEY = 'pito.audio.enabled';
 export const INTRO_MUSIC_SRC = 'assets/audio/shop-theme.ogg';
 export const MUSIC_SRC = 'assets/audio/childrens-march-theme.ogg';
+// Older iOS WebKit cannot decode Ogg, even in Chrome/Firefox on an iPhone.
+export function compatibleAudioSource(source, Audio) {
+  if (!source.endsWith('.ogg')) return source;
+  try {
+    if (Audio?.prototype?.canPlayType && !Audio.prototype.canPlayType.call(new Audio(), 'audio/ogg; codecs="vorbis"'))
+      return source.replace(/\.ogg$/, '.mp3');
+  } catch {}
+  return source;
+}
 const MUSIC_VOLUME = .12;
 const MUSIC_CROSSFADE_MS = 1200;
 const CLIP_COUNTS = {cute:10,eat:4,bubble:4,cheer:1,poopWet:5,poopRun:5};
@@ -38,15 +47,27 @@ export function installAudio(root, options = {}) {
   const host=options.host??globalThis, doc=options.document??root.ownerDocument;
   let storage; try { storage=options.storage??host.localStorage; } catch {}
   let enabled=true;try{enabled=storage?.getItem(AUDIO_SETTING_KEY)!=='false';}catch{}
-  let context,master,effects,timer,resumeTask,noiseBuffer,soundtrack,fadingMusic,musicFadeTimer;
+  let context,master,effects,timer,noiseBuffer,soundtrack,fadingMusic,musicFadeTimer;
   let musicScene='intro';
-  let unlocked=false,disposed=false,pending=false,pageActive=true,nativeActive=true;
+  let unlocked=false,disposed=false,pageActive=true,nativeActive=true;
   let step=0,lastEffect=-Infinity,lastKind='',rainWanted=false,strokeCount=0,lastCreature=-Infinity;
   const clipBags=Object.fromEntries(Object.keys(CLIP_COUNTS).map(key=>[key,[]]));
   const lastClip=Object.fromEntries(Object.keys(CLIP_COUNTS).map(key=>[key,0]));
   const activeClips=new Set();
+  const decodedClips=new Map();
   let activeCheer;
   const Audio=options.Audio??host.Audio;
+  const sourceFor=source=>compatibleAudioSource(source,Audio);
+  function bufferFor(source){
+    if(!decodedClips.has(source)){
+      const request=host.fetch(source).then(response=>{
+        if(!response.ok)throw new Error('Audio HTTP '+response.status);
+        return response.arrayBuffer();
+      }).then(data=>context.decodeAudioData(data)).catch(error=>{decodedClips.delete(source);throw error;});
+      decodedClips.set(source,request);
+    }
+    return decodedClips.get(source);
+  }
   const voices=new Set(),hz=midi=>440*2**((midi-69)/12);
   const audible=()=>enabled&&unlocked&&!disposed&&pageActive&&nativeActive&&!doc.hidden;
   function nextClip(kind){
@@ -62,7 +83,25 @@ export function installAudio(root, options = {}) {
     if(!audible()||!Audio)return;
     try{
       const name=kind==='poopWet'||kind==='poopRun'?'grunt':kind;
-      const source=`assets/audio/${name}_${String(nextClip(kind)).padStart(2,'0')}.${kind==='bubble'?'wav':'ogg'}`;
+      const source=sourceFor(`assets/audio/${name}_${String(nextClip(kind)).padStart(2,'0')}.${kind==='bubble'?'wav':'ogg'}`);
+      // One unlocked AudioContext also works for delayed rewards and rain ticks;
+      // new HTMLAudioElements can require a fresh user gesture on iOS.
+      if(context?.decodeAudioData&&host.fetch){
+        let voice,gain,cancelled=false;
+        const clip={pause(){cancelled=true;try{voice?.stop();}catch{}activeClips.delete(clip);}};
+        if(kind==='cheer'){activeCheer?.pause?.();activeClips.delete(activeCheer);activeCheer=clip;}
+        activeClips.add(clip);
+        void bufferFor(source).then(buffer=>{
+          if(cancelled||!audible()||context.state!=='running'){activeClips.delete(clip);return;}
+          voice=context.createBufferSource();gain=context.createGain();
+          voice.buffer=buffer;gain.gain.value=CLIP_VOLUME[kind];
+          voice.playbackRate.value=kind==='poopWet'?1.12:kind==='poopRun'?.88:1;
+          voice.connect(gain);gain.connect(context.destination);
+          voice.onended=()=>{activeClips.delete(clip);voice.disconnect();gain.disconnect();};
+          voice.start();
+        }).catch(()=>activeClips.delete(clip));
+        return;
+      }
       const clip=new Audio(source);clip.preload='auto';clip.volume=CLIP_VOLUME[kind];
       if(kind==='cheer'){
         // Fast successive achievements should not pile multiple choruses together.
@@ -77,7 +116,7 @@ export function installAudio(root, options = {}) {
   function playMusic(){
     if(!Audio)return;
     try{
-      if(!soundtrack){soundtrack=new Audio(musicScene==='game'?MUSIC_SRC:INTRO_MUSIC_SRC);soundtrack.preload='auto';soundtrack.loop=true;soundtrack.volume=MUSIC_VOLUME;}
+      if(!soundtrack){soundtrack=new Audio(sourceFor(musicScene==='game'?MUSIC_SRC:INTRO_MUSIC_SRC));soundtrack.preload='auto';soundtrack.loop=true;soundtrack.volume=MUSIC_VOLUME;}
       if(soundtrack.paused!==false)return soundtrack.play();
     }catch{/* WebView or browser may lack a media decoder. */}
   }
@@ -93,7 +132,7 @@ export function installAudio(root, options = {}) {
     musicScene=next;
     if(!soundtrack)return;
     clearMusicFade();
-    const source=next==='game'?MUSIC_SRC:INTRO_MUSIC_SRC;
+    const source=sourceFor(next==='game'?MUSIC_SRC:INTRO_MUSIC_SRC);
     if(!audible()||soundtrack.paused!==false){
       soundtrack.pause();soundtrack.src=source;soundtrack.currentTime=0;soundtrack.load?.();
       if(audible())playMusic()?.catch?.(()=>{});
@@ -116,6 +155,9 @@ export function installAudio(root, options = {}) {
         if(musicFadeTimer!==undefined)host.clearInterval(musicFadeTimer);
         musicFadeTimer=undefined;fadingMusic=undefined;
         incoming.pause();soundtrack=outgoing;outgoing.volume=MUSIC_VOLUME;
+        // Reuse the element already unlocked by the first tap on iOS.
+        outgoing.src=source;outgoing.load?.();
+        if(audible())outgoing.play()?.catch?.(()=>{});
       });
     }catch{
       if(musicFadeTimer!==undefined)host.clearInterval(musicFadeTimer);
@@ -220,10 +262,10 @@ export function installAudio(root, options = {}) {
   }
   async function start(){
     if(!audible())return;
-    if(pending){try{await resumeTask;}catch{}return;}
     playMusic()?.catch?.(()=>{});
+    // A denied pointerdown resume can stay pending until a valid touchend/click.
+    // Never await that promise before retrying resume inside the new gesture.
     if(context?.state==='running'){if(rainWanted&&timer===undefined)timer=host.setInterval(schedule,280);return;}
-    pending=true;
     try{
       if(!context){
         const AudioContext=options.AudioContext??host.AudioContext??host.webkitAudioContext;
@@ -232,13 +274,13 @@ export function installAudio(root, options = {}) {
         master.gain.value=0;effects.gain.value=1;
         effects.connect(master);master.connect(context.destination);
       }
-      resumeTask=context.resume();await resumeTask;
+      await context.resume();
       if(!audible()){stop();return;}
       master.gain.cancelScheduledValues(context.currentTime);
       master.gain.setValueAtTime(master.gain.value,context.currentTime);
       master.gain.linearRampToValueAtTime(.62,context.currentTime+.28);
       if(rainWanted)setRain(true);
-    }catch{/* Audio must never prevent gameplay. */}finally{pending=false;}
+    }catch{/* Audio must never prevent gameplay. */}
   }
   function unlock(){unlocked=true;return start();}
   function onAction(action){
@@ -313,6 +355,8 @@ export function installAudio(root, options = {}) {
     options.onChange?.(enabled);return enabled;
   }
   root.addEventListener('pointerdown',unlock,{capture:true,passive:true});
+  root.addEventListener('touchend',unlock,{capture:true,passive:true});
+  root.addEventListener('click',unlock,true);
   root.addEventListener('keydown',unlock,true);root.addEventListener('click',clicked,true);
   doc.addEventListener('visibilitychange',visibility);
   host.addEventListener('pagehide',pageHide);host.addEventListener('pageshow',pageShow);
@@ -321,6 +365,7 @@ export function installAudio(root, options = {}) {
     dispose(){
       if(disposed)return;disposed=true;stop();
       root.removeEventListener('pointerdown',unlock,true);root.removeEventListener('keydown',unlock,true);
+      root.removeEventListener('touchend',unlock,true);root.removeEventListener('click',unlock,true);
       root.removeEventListener('click',clicked,true);doc.removeEventListener('visibilitychange',visibility);
       host.removeEventListener('pagehide',pageHide);host.removeEventListener('pageshow',pageShow);
       host.removeEventListener('pito-native-pause',nativePause);host.removeEventListener('pito-native-resume',nativeResume);

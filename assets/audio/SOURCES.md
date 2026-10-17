@@ -7,3 +7,5 @@
 - `cheer_01.ogg` — “Children saying Yay - Praise and Worship Jesus” by JesusChristIsGod, [Pixabay, sound 299607](https://pixabay.com/sound-effects/people-children-saying-yay-praise-and-worship-jesus-299607/). [Pixabay Content License](https://pixabay.com/service/terms/), not CC0. Downloaded 2026-10-16; the author marks the recording as AI-generated. Converted from the downloaded MP3 to Ogg Vorbis without changing pitch or tempo. Used for introductory rewards, purchases, completed plans, growth and dream purchases; not ordinary UI taps. Free commercial and non-commercial use in the game; attribution is not required. Do not redistribute this recording as a standalone sound asset or imply that it is covered by the project's code license.
 
 The recordings are bundled locally for both the web and Android builds. UI feedback not listed here is synthesized by the application.
+
+MP3 files with the same base names are compatibility copies of the Ogg recordings for browsers without Ogg/Vorbis support, including older iOS Safari. They keep the same authors and licenses; no pitch or tempo changes were applied.
