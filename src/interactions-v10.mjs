@@ -1,4 +1,5 @@
-export const missionRoute=id=>({feed:'food',wash:'rain',plan:'plan',replan:'plan',goal:'choose-goal',save:'goal','paid-food':'food',buy:'shop',deposit:'bank'}[id]||'close');
+import {MISSIONS} from './missions.mjs';
+export const missionRoute=id=>({'intro-play':'intro-play','follow-plan':'plan'}[id]||MISSIONS.find(m=>m.id===id)?.action||'close');
 export function stepChoice(items,current,step){
  if(!items.length)return null;
  const index=Math.max(0,items.findIndex(x=>x.id===current));

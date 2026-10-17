@@ -1,0 +1,9 @@
+Built-in image generation, art-director corrected flat style.
+Original unchanged daytime image: ../location-v15/planet-platforms.png.
+Use case: lighting-weather. EDIT ONLY THE ATTACHED ORIGINAL GAME BACKGROUND. Keep exact composition, silhouettes, positions and sizes of all rocks, grass, platforms, clouds and ringed planet. Strict flat 2D original style: simple solid color shapes, only existing rock facet shapes. Make this time of day: PHASE. Change individual object flat fill colors and add ONLY specified flat celestial shapes. NO volume, NO 3D, NO bevels, NO highlights, NO rim lighting, NO glow, NO halos, NO cast shadows, NO paint grain, NO realistic lighting, NO extra objects. Clouds and planet must stay flat single-color silhouettes. Do not enhance detail. Same drawing of same game, NOT a new illustration. Empty gameplay area, no character, UI or text. ONE portrait image same aspect ratio as input, no montage.
+morning: Pale peach sky, pale lavender clouds, mint meadow. Small solid pale-yellow sun low in LEFT empty sky near horizon.
+afternoon: Light subtly warm blue sky, slightly warmer mint green meadow. Small solid pale cream sun on RIGHT sky. NOT orange sunset.
+evening: Muted peach-pink sky, flat lilac clouds, gray-mint meadow. Half of a small flat peach-yellow sun at the horizon.
+twilight: Medium lavender-blue sky, blue-lilac flat rocks, muted turquoise meadow. Small solid cream crescent moon at upper left and 5 small simple flat stars.
+night: Deep but not black indigo sky, cold blue flat rock facets and muted turquoise meadow. Small solid cream crescent at upper left and 14 small simple dots/four-point stars, absolutely no halos.
+Z raster generations rejected for alpha artifacts. Final sleep-z.svg is a clean repo-native hand-drawn path, solid lavender, no shadow, bevel, highlight, glow or outline.

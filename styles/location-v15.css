@@ -81,8 +81,32 @@
 #game :is(input,textarea,[contenteditable=true]) { -webkit-user-select:text;user-select:text; }
 #game img { -webkit-user-drag:none; }
 .world,.ss-start,.ss-story,.ss-create { background-image:url('../assets/location-v15/planet-platforms.png'); }
+/* Six individually painted scenes. No colored overlay or filter on the world/UI. */
+#game .world>.day-art{display:block;position:absolute;inset:0;background-position:center;background-size:100% 100%;background-repeat:no-repeat;opacity:0;transition:opacity 1.2s ease;pointer-events:none}
+#game[data-daylight=morning] .day-art-morning,#game[data-daylight=day] .day-art-day,#game[data-daylight=afternoon] .day-art-afternoon,#game[data-daylight=evening] .day-art-evening,#game[data-daylight=twilight] .day-art-twilight,#game[data-daylight=night] .day-art-night{opacity:1}
+/* Local sprite lighting only, to settle the pet and collected items into the painted scene. */
+#game[data-daylight=morning]{--sprite-light:brightness(1.03)}
+#game[data-daylight=day]{--sprite-light:none}
+#game[data-daylight=afternoon]{--sprite-light:sepia(.08) brightness(1.02)}
+#game[data-daylight=evening]{--sprite-light:sepia(.08) brightness(.92)}
+#game[data-daylight=twilight]{--sprite-light:brightness(.85) saturate(.9)}
+#game[data-daylight=night]{--sprite-light:brightness(.82) saturate(.85)}
+#game[data-daylight]>.pet,#game[data-daylight]>.world-collection,#game[data-daylight] .poop{filter:var(--sprite-light);transition:filter 1.2s ease}
+/* The emitter belongs to the moving head/body, not the viewport or leg frame. */
+#game .pet-body>.sleep-marks{position:absolute;left:73%;top:15%;width:0;height:0;pointer-events:none;z-index:8}
+#game .sleep-marks img{position:absolute;left:0;top:0;width:26px;height:31px;object-fit:contain;opacity:0;animation:sleep-letter 1.8s ease-out infinite;animation-delay:calc(var(--i)*-.6s)}
+@keyframes sleep-letter{0%{opacity:0;transform:translate(0,0) scale(.55) rotate(-12deg)}18%{opacity:1}80%{opacity:.85}100%{opacity:0;transform:translate(28px,-64px) scale(1.15) rotate(8deg)}}
+#game>.hud,#game>.actions{transition:transform .45s ease,opacity .45s ease}
+#game[data-night-transition=sleep]>.hud{transform:translateY(-125%);opacity:0;pointer-events:none}
+#game[data-night-transition=sleep]>.actions{transform:translateY(160%);opacity:0;pointer-events:none}
+#game[data-night-transition]>.dev-hotspot{visibility:hidden}
+@media(prefers-reduced-motion:reduce){#game .sleep-marks img{animation:none;opacity:1;transform:translate(calc(var(--i)*12px),calc(var(--i)*-19px)) scale(.8)}#game .day-art{transition:none}}
 /* Title shows a read-only copy of the saved world, at gameplay coordinates. */
 .ss-start-scene { position:absolute;inset:0;z-index:0;pointer-events:none; }
+#game .ss-start{background:none}
+#game:is([data-daylight=twilight],[data-daylight=night]) .ss-start .logo img{filter:brightness(0) invert(1)}
+#game:is([data-daylight=twilight],[data-daylight=night]) .ss-start .ss-tagline{color:#fff8eb}
+#game[data-daylight] .ss-start-scene>.pet,#game[data-daylight] .ss-start-scene>.world-collection{filter:var(--sprite-light);transition:filter 1.2s ease}
 .ss-start-scene>.pet-v8 { bottom:26.5%; }
 .ss-start-scene .poop-progress { display:none; }
 #game .ss-start-scene * { pointer-events:none; }
@@ -211,9 +235,10 @@
 #game .ss-create .ss-hair[data-id="1"]:before { -webkit-mask-image:url('../assets/ui-v10/hair-1.png');mask-image:url('../assets/ui-v10/hair-1.png'); }
 #game .ss-create .ss-hair[data-id="2"]:before { -webkit-mask-image:url('../assets/pet-v8/hair-2.png');mask-image:url('../assets/pet-v8/hair-2.png'); }
 #game .ss-create .ss-choices .ss-hair.selected:after { border-color:var(--hair-preview-color); }
-@media(max-height:700px) {
- #game .ss-create .ss-pet-preview { bottom:15%; }
-}
+/* Same world registration before and after birth: center at 51%, feet at 26.5%. */
+#game .ss-create .ss-pet-preview{bottom:26.5%}
+#game .ss-create .ss-pet-preview .pet{left:34%;width:34cqw;height:60cqw;bottom:0;transform:none}
+#game .ss-create .ss-pet-preview .pet:active{transform:none}
 
 /* Currency introduction: silhouettes cut from the approved portrait mockup.
    Fixed composition; only shrink the whole dialog when the viewport requires it. */

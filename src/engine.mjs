@@ -1,14 +1,17 @@
 import {ITEMS,GOALS,LEGACY_ITEM_NAMES} from './item-catalog.mjs';
+import {pacedIntro,calmIntro,freeCare,giftItem,introPhase,introPaidCare,introShop,introGoal,waitForIntro} from './onboarding.mjs';
+export {pacedIntro,calmIntro,freeCare,giftItem,beforeMoney,introPhase,introPaidCare,introShop,introGoal,tickIntro} from './onboarding.mjs';
 export {ITEMS,GOALS} from './item-catalog.mjs';
 import {applyMissionEvent as emitAction,migrateMissions} from './missions.mjs';
 export {MISSIONS,missionStatus,currentMission,completeMission,deferMission,applyMissionEvent} from './missions.mjs';
 export const VERSION = 1;
-export const CYCLE_SECONDS = 480;
+export const CYCLE_SECONDS = 240;
 export const GROWTH_AWARDS = Object.freeze({care:1,plan:3,savings:1});
-export const DEPOSIT_BONUS = 5;
-// Deliberately generous game economy: odd amounts round up once on opening.
-// Only one deposit can run, and its proceeds stay locked for a whole game day.
-export const depositBonus = amount => Number.isSafeInteger(amount)&&amount>0?Math.ceil(amount/2):0;
+export const DEPOSIT_BONUS = 2;
+export const DEPOSIT_MIN = 10;
+export const DEPOSIT_DAYS = 2;
+// Simplified game offer: whole-coin interest, quoted before confirmation.
+export const depositBonus = amount => Number.isSafeInteger(amount)&&amount>=DEPOSIT_MIN?Math.floor(amount/5):0;
 export const POOP_DIRT = 8;
 export const pieceWord = n => n%100>=11&&n%100<=14?'штучек':n%10===1?'штучку':n%10>=2&&n%10<=4?'штучки':'штучек';
 export const FOOD = [
@@ -26,14 +29,15 @@ export const TASKS = [
 export const clamp=(n,min=0,max=100)=>Math.max(min,Math.min(max,n));
 const initialIncome=()=>({cycle:1,kind:'income',amount:20,label:'Первые карманные штучки',category:'',source:'initial'});
 export function createProfile(name='Пито',color=0,hair=0,now=Date.now()) {
- return {version:VERSION,name:name.trim().slice(0,24)||'Пито',color:clamp(color,0,2),hair:clamp(hair,0,2),petType:'slime',variant:'pita',stage:0,antennae:null,pendingGrowth:false,adultNotice:false,growthPoints:0,periods:[],cycle:1,completedCycles:0,elapsed:0,cycleCare:0,needs:{food:25,affection:65,clean:85},wallet:0,savings:0,goal:'console',owned:[],goalsWon:[],shelfSeen:false,pendingPurchase:null,onboardingPaid:true,initialMoneyGranted:false,pendingIncome:null,pendingReward:null,tutorial:'money',giftUsed:false,trialUsed:false,rainHintSeen:false,missions:{},poops:[],nextPoopId:1,poopClock:0,plan:null,plans:[],ledger:[],tasks:[],taskAnswers:{},review:false,deposit:null,water:0,speed:1,lastSeen:now,finaleSeen:false};
+ return {version:VERSION,name:name.trim().slice(0,24)||'Пито',color:clamp(color,0,2),hair:clamp(hair,0,2),petType:'slime',variant:'pita',stage:0,antennae:null,pendingGrowth:false,adultNotice:false,growthPoints:0,periods:[],cycle:1,completedCycles:0,elapsed:0,cycleCare:0,needs:{food:25,affection:65,clean:85},wallet:0,savings:0,goal:'console',owned:[],goalsWon:[],shelfSeen:false,pendingPurchase:null,onboarding:{version:2,revision:3,phase:'care',remaining:0},onboardingPaid:false,initialMoneyGranted:false,pendingIncome:null,pendingReward:null,tutorial:'meet',giftUsed:false,trialUsed:false,rainHintSeen:false,missions:{},poops:[],nextPoopId:1,poopClock:0,plan:null,plans:[],ledger:[],tasks:[],taskAnswers:{},review:false,deposit:null,water:0,speed:1,lastSeen:now,finaleSeen:false};
 }
 export function restore(raw,now=Date.now()) {
  try {const s=JSON.parse(raw);if(s?.version!==VERSION||!s.needs||!Array.isArray(s.ledger)||!Array.isArray(s.tasks)||!Number.isFinite(s.wallet)||s.wallet<0||!['money','meet','food','fed','wash','washed','plan','done'].includes(s.tutorial))return null;
  for(const k of ['food','affection','clean'])if(!Number.isFinite(s.needs[k]))return null;
  const base=createProfile();const p={...base,...s,needs:{...s.needs},onboardingPaid:s.onboardingPaid===true};
+ p.onboarding=s.onboarding?.version===2?{version:2,revision:s.onboarding.revision===3?3:2,phase:['care','pet','item-play','money-wait','money','food-wait','paid-food','shop-wait','shop','goal-wait','goal','plan-wait','plan','complete'].includes(s.onboarding.phase)?s.onboarding.phase:'care',remaining:clamp(Number(s.onboarding.remaining)||0,0,15),petDistance:clamp(Number(s.onboarding.petDistance)||0,0,180)}:null;
  if(p.onboardingPaid&&p.tutorial==='plan'&&!p.giftUsed&&!p.plan)p.tutorial='meet';
- p.initialMoneyGranted=p.onboardingPaid?(s.initialMoneyGranted===true||s.ledger.some(e=>e.source==='initial')):true;
+ p.initialMoneyGranted=p.onboardingPaid||p.onboarding?(s.initialMoneyGranted===true||s.ledger.some(e=>e.source==='initial')):true;
  p.pendingIncome=s.pendingIncome&&Number.isFinite(s.pendingIncome.amount)&&s.pendingIncome.amount>0?{...s.pendingIncome}:null;
  p.pendingReward=s.pendingReward&&Number.isInteger(s.pendingReward.amount)&&s.pendingReward.amount>0?{...s.pendingReward}:null;
  for(const key of ['owned','goalsWon','poops','plans','periods'])if(!Array.isArray(p[key]))p[key]=[];
@@ -49,7 +53,7 @@ export function restore(raw,now=Date.now()) {
  p.elapsed=Number.isFinite(p.elapsed)?clamp(p.elapsed,0,CYCLE_SECONDS):0;
  p.savings=Number.isFinite(p.savings)&&p.savings>=0?p.savings:0;
  p.lastSeen=Number.isFinite(p.lastSeen)?p.lastSeen:now;
- if(!p.onboardingPaid&&!p.ledger.some(e=>e.source==='initial'))p.ledger.unshift(initialIncome());
+ if(!p.onboardingPaid&&!p.onboarding&&!p.ledger.some(e=>e.source==='initial'))p.ledger.unshift(initialIncome());
  // Old builds may have fractional balances. Never silently lose those coins or
  // rewrite historical expenses: credit the difference in a service period.
  const rounding={wallet:0,savings:0};
@@ -64,11 +68,7 @@ export function restore(raw,now=Date.now()) {
   p.migrationNotice='Дробные штучки округлили в твою пользу. Теперь все суммы целые.';
   p.migrationRounding=rounding;
  }
- // Improve still-open deposits from the previous offer; never rewrite paid income.
- if(p.deposit?.principal===10&&p.deposit.bonus===1){
-  p.deposit={...p.deposit,bonus:DEPOSIT_BONUS};
-  p.migrationNotice=[p.migrationNotice,'Доход по твоему вкладу теперь 5 штучек. Срок не изменился.'].filter(Boolean).join(' ');
- }
+ // Existing deposits retain the amount, promised interest and maturity date.
  migrateMissions(p);
  // Offline time is deliberately gentle: at most the remainder of ONE active day,
  // never a day still being planned, tutorial, review, or developer pause.
@@ -78,15 +78,24 @@ export function restore(raw,now=Date.now()) {
  p.lastSeen=now;return p;}catch{return null;}
 }
 export function grantInitialMoney(s){
- if(!s.onboardingPaid||s.tutorial!=='money'||s.initialMoneyGranted||s.ledger.some(e=>e.source==='initial'))return false;
- s.wallet+=20;s.ledger.push(initialIncome());s.initialMoneyGranted=true;s.tutorial='meet';s.pendingIncome={amount:20,source:'initial',cycle:s.cycle};return true;
+ if((!s.onboardingPaid&&!pacedIntro(s))||s.tutorial!=='money'||s.initialMoneyGranted||s.ledger.some(e=>e.source==='initial'))return false;
+ const paced=pacedIntro(s);s.wallet+=20;s.ledger.push(initialIncome());s.initialMoneyGranted=true;s.tutorial=paced?'done':'meet';s.pendingIncome={amount:20,source:'initial',cycle:s.cycle};if(paced){s.rainHintSeen=false;if(calmIntro(s)){s.onboarding.phase='plan';s.pendingIncome=null;}else waitForIntro(s,'food');}return true;
 }
 export function acknowledgeIncome(s){if(!s.pendingIncome)return false;s.pendingIncome=null;return true;}
+export function grantPlanMoney(s){
+ if(calmIntro(s)||!pacedIntro(s)||introPhase(s)!=='plan'||s.pendingIncome||s.pendingReward||s.ledger.some(e=>e.source==='first-plan-funds'))return false;
+ s.wallet+=20;s.ledger.push({cycle:s.cycle,kind:'income',amount:20,label:'Штучки для первого плана',category:'',source:'first-plan-funds'});
+ s.pendingIncome={amount:20,source:'first-plan-funds',cycle:s.cycle};return true;
+}
 export function acknowledgeGrowth(s){if(!s.adultNotice&&!s.pendingGrowth)return false;if(s.pendingGrowth){s.stage=Math.max(1,s.stage);s.antennae=0;s.pendingGrowth=false;}s.adultNotice=false;return true;}
 export function acknowledgePurchase(s){if(!s.pendingPurchase)return null;const purchase=s.pendingPurchase;s.pendingPurchase=null;s.shelfSeen=true;return purchase;}
+export function playIntroItem(s,id){
+ if(!calmIntro(s)||introPhase(s)!=='item-play'||s.pendingPurchase||!s.owned.includes(id))return false;
+ s.onboarding.phase='goal';return true;
+}
 export function record(s,kind,amount,label,category=''){s.ledger.push({cycle:s.cycle,kind,amount,label,category});}
-export function canSpend(s,amount){return (s.tutorial==='done'&&!!s.plan||s.onboardingPaid&&['food','wash'].includes(s.tutorial))&&!s.review&&!s.pendingGrowth&&!s.adultNotice&&!s.pendingIncome&&!s.pendingReward&&Number.isInteger(amount)&&amount>=0&&s.wallet>=amount;}
-function spend(s,amount,label,category){if(!canSpend(s,amount))return false;s.wallet-=amount;record(s,'expense',amount,label,category);return true;}
+export function canSpend(s,amount){return (s.tutorial==='done'&&!!s.plan||introPaidCare(s)||s.onboardingPaid&&['food','wash'].includes(s.tutorial))&&!s.review&&!s.pendingGrowth&&!s.adultNotice&&!s.pendingIncome&&!s.pendingReward&&!s.pendingPurchase&&Number.isInteger(amount)&&amount>=0&&s.wallet>=amount;}
+function spend(s,amount,label,category){if(!canSpend(s,amount))return false;if(pacedIntro(s)&&!s.missions.buy&&['food','rain'].includes(category)&&s.wallet-amount<4)return false;s.wallet-=amount;record(s,'expense',amount,label,category);return true;}
 export function meet(s){if(s.tutorial==='meet'&&!s.pendingIncome&&!s.pendingReward){s.tutorial='food';return true;}return false;}
 export function feed(s,id){const f=FOOD.find(x=>x.id===id);if(!f||s.needs.food>=100)return false;
  if(s.onboardingPaid&&s.tutorial==='food'){
@@ -94,18 +103,19 @@ export function feed(s,id){const f=FOOD.find(x=>x.id===id);if(!f||s.needs.food>=
   s.ledger.at(-1).source='tutorial:feed';s.giftUsed=true;s.needs.food=clamp(s.needs.food+f.gain);s.tutorial='fed';s.cycleCare++;emitAction(s,'fed',{target:id,free:false,first:true,amount:f.price});return true;
  }
  if(!s.onboardingPaid&&s.tutorial==='food'&&!s.giftUsed&&id==='apple'){s.giftUsed=true;s.needs.food=75;s.tutorial='fed';emitAction(s,'fed',{target:id,free:true,first:true,amount:0});return true;}
- if(s.tutorial!=='done'||!spend(s,f.price,f.name,'food'))return false;s.needs.food=clamp(s.needs.food+f.gain);s.cycleCare++;emitAction(s,'fed',{target:id,free:false,first:false,amount:f.price});return true;}
+ if(s.tutorial==='done'&&freeCare(s)&&!s.pendingPurchase&&!s.pendingIncome&&!s.pendingReward){s.needs.food=clamp(s.needs.food+f.gain);return true;}
+ if(s.tutorial!=='done'||!spend(s,f.price,f.name,'food'))return false;s.needs.food=clamp(s.needs.food+f.gain);s.cycleCare++;emitAction(s,'fed',{target:id,free:false,first:false,amount:f.price});if(introPhase(s)==='paid-food')waitForIntro(s,'shop');return true;}
 export function spawnPoop(s){if(s.poops.length<3){const positions=[80,92,70],x=positions.find(x=>!s.poops.some(p=>Math.abs(p.x-x)<5));const cleanPenalty=Math.min(POOP_DIRT,s.needs.clean);s.needs.clean=clamp(s.needs.clean-cleanPenalty);s.poops.push({id:s.nextPoopId++,x:x??80,taps:0,wet:0,cleanPenalty});}}
-export function acknowledgeCare(s){if(s.tutorial==='fed'){s.tutorial='wash';s.needs.clean=35;spawnPoop(s);return true;}if(s.tutorial==='washed'){s.tutorial=s.plan?'done':'plan';return true;}return false;}
+export function acknowledgeCare(s){if(s.tutorial==='fed'){s.tutorial='wash';s.needs.clean=35;spawnPoop(s);return true;}if(s.tutorial==='washed'){s.tutorial=pacedIntro(s)?'done':s.plan?'done':'plan';if(pacedIntro(s)){s.onboarding.phase='pet';s.onboarding.petDistance=0;}return true;}return false;}
 // Running out of water is not a tutorial dead end: keep the wash mission open,
 // let this ordinary day elapse, and use tomorrow's announced income to continue.
 export function deferExhaustedWash(s){if(!s.onboardingPaid||s.tutorial!=='wash'||s.wallet>0||s.water>.001)return false;s.tutorial=s.plan?'done':'plan';return true;}
 export function finishFirstWash(s){if((s.tutorial==='wash'||s.onboardingPaid&&s.tutorial==='done'&&!s.trialUsed)&&s.poops.length===0&&s.needs.clean>=90){s.trialUsed=true;s.needs.clean=100;if(s.tutorial==='wash')s.tutorial='washed';emitAction(s,'washed',{free:!s.onboardingPaid,first:true,amount:s.onboardingPaid?totals(s).rain:0});return true;}return false;}
 function restoreCleanGround(s,removed){s.needs.clean=clamp(s.needs.clean+removed.reduce((sum,p)=>sum+(Number.isFinite(p.cleanPenalty)?clamp(p.cleanPenalty,0,POOP_DIRT):0),0));}
 export function tapPoop(s,id){const p=s.poops.find(x=>x.id===id);if(!p)return false;p.taps++;if(p.taps>=6){s.poops=s.poops.filter(x=>x.id!==id);restoreCleanGround(s,[p]);s.cycleCare++;finishFirstWash(s);return true;}return false;}
-export function stroke(s,distance){if(s.tutorial!=='done'||!Number.isFinite(distance)||distance<=0)return false;s.needs.affection=clamp(s.needs.affection+Math.min(6,distance*.09));if(distance>12)s.cycleCare++;return true;}
+export function stroke(s,distance){if(s.tutorial!=='done'||!Number.isFinite(distance)||distance<=0)return false;s.needs.affection=clamp(s.needs.affection+Math.min(6,distance*.09));if(distance>12)s.cycleCare++;if(introPhase(s)==='pet'){s.onboarding.petDistance=Math.min(180,(s.onboarding.petDistance||0)+Math.min(distance,40));if(s.onboarding.petDistance>=180){s.missions['intro-pet']={cycle:s.cycle,rewardPaid:0};if(calmIntro(s)){s.onboarding.phase='shop';}else{waitForIntro(s,'money');s.onboarding.remaining=3;}}}return true;}
 // Charge a 3-second portion only when water starts. Paid unused water persists.
-export function rain(s,dt,x,session){if(!(dt>0)||!Number.isFinite(dt)||!session||!['wash','done'].includes(s.tutorial))return false;const free=!s.onboardingPaid&&s.tutorial==='wash'&&!s.trialUsed;
+export function rain(s,dt,x,session){if(!(dt>0)||!Number.isFinite(dt)||!session||!['wash','done'].includes(s.tutorial))return false;const free=freeCare(s)||!s.onboardingPaid&&s.tutorial==='wash'&&!s.trialUsed;
  if(!free&&!canSpend(s,0))return false;
  if(!free&&s.water<=.001){if(!spend(s,1,'Дождик','rain'))return false;s.water=3;session.spent++;}
  const used=free?dt:Math.min(dt,s.water);if(!free)s.water=Math.max(0,s.water-used);
@@ -115,21 +125,24 @@ export function rain(s,dt,x,session){if(!(dt>0)||!Number.isFinite(dt)||!session|
  if(used>0)s.cycleCare++;finishFirstWash(s);return true;
 }
 export function setPlan(s,parts){if(s.pendingIncome||s.pendingReward||s.review||s.pendingGrowth||s.adultNotice||s.plan||!['plan','done'].includes(s.tutorial))return false;
+ if(pacedIntro(s)&&introPhase(s)!=='plan')return false;
  if(!Array.isArray(parts)||parts.length!==3||parts.some(v=>!Number.isInteger(v)||v<0)||parts.reduce((a,b)=>a+b,0)>s.wallet)return false;
  const first=s.plans.length===0;
- s.plan=[...parts];s.plans.push({cycle:s.cycle,parts:[...parts],wallet:s.wallet,careBeforePlan:totals(s).food+totals(s).rain});s.tutorial=s.onboardingPaid&&first&&!s.giftUsed?'meet':'done';
+ const paced=pacedIntro(s);
+ s.plan=[...parts];s.plans.push({cycle:s.cycle,parts:[...parts],wallet:s.wallet,careBeforePlan:totals(s).food+totals(s).rain,wantsBeforePlan:totals(s).wants});s.tutorial=s.onboardingPaid&&first&&!s.giftUsed?'meet':'done';
+ if(paced){s.onboarding.phase='complete';s.onboarding.remaining=0;}
  emitAction(s,'plan-confirmed',{first,amount:parts.reduce((sum,n)=>sum+n,0),care:parts[0],wants:parts[1],savings:parts[2]});
  return true;}
-export function buy(s,id){const item=ITEMS.find(x=>x.id===id);if(!item||s.tutorial!=='done'||s.owned.includes(id))return false;if(!spend(s,item.price,item.name,'wants'))return false;const first=s.owned.length+s.goalsWon.length===0,hadMission=!!s.missions?.buy;s.owned.push(id);emitAction(s,'want-decided',{target:id,amount:item.price,resolution:'purchased'});s.pendingPurchase={id,first,reward:hadMission?0:s.missions?.buy?.rewardPaid||0};return true;}
+export function buy(s,id){const item=ITEMS.find(x=>x.id===id);if(!item||s.tutorial!=='done'||s.owned.includes(id)||pacedIntro(s)&&!introShop(s))return false;const gift=giftItem(s);if(gift){if(s.pendingPurchase||s.pendingIncome||s.pendingReward)return false;}else if(!spend(s,item.price,item.name,'wants'))return false;const first=s.owned.length+s.goalsWon.length===0,hadMission=!!s.missions?.buy;s.owned.push(id);emitAction(s,'want-decided',{target:id,amount:item.price,resolution:'purchased'});s.pendingPurchase={id,first,...(gift?{gift:true}:{}),reward:hadMission?0:s.missions?.buy?.rewardPaid||0};if(introPhase(s)==='shop'){if(calmIntro(s))s.onboarding.phase='item-play';else waitForIntro(s,'goal');}return true;}
 export function transfer(s,amount){if(!Number.isInteger(amount)||amount===0||s.tutorial!=='done'||!s.plan||s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward)return false;
  if(amount>0){if(s.wallet<amount)return false;s.wallet-=amount;s.savings+=amount;}else{if(s.savings< -amount)return false;s.savings+=amount;s.wallet-=amount;}
- record(s,'transfer',amount,'Копилка');emitAction(s,'transferred',{amount,target:'savings'});return true;}
-export function chooseGoal(s,id){const goal=GOALS.find(x=>x.id===id);if(!goal||s.tutorial!=='done'||!s.plan||s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward)return false;s.goal=id;emitAction(s,'goal-selected',{target:id,amount:goal.price});return true;}
+ record(s,'transfer',amount,'Копилка');emitAction(s,'transferred',{amount,target:'savings',abovePlan:s.plan?totals(s).saved-s.plan[2]:0});return true;}
+export function chooseGoal(s,id){const goal=GOALS.find(x=>x.id===id);if(!goal||s.tutorial!=='done'||(!s.plan&&!introGoal(s))||s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward||s.pendingPurchase)return false;s.goal=id;emitAction(s,'goal-selected',{target:id,amount:goal.price});if(introPhase(s)==='goal'){if(calmIntro(s))s.onboarding.phase='plan';else waitForIntro(s,'plan');}return true;}
 export function claimGoal(s){const g=GOALS.find(x=>x.id===s.goal);if(!g||s.savings<g.price||s.goalsWon.includes(g.id)||!s.plan||s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward||s.tutorial!=='done')return false;const first=s.owned.length+s.goalsWon.length===0,firstDream=s.goalsWon.length===0;s.savings-=g.price;s.goalsWon.push(g.id);record(s,'expense',g.price,g.name,'wants');s.ledger.at(-1).source='savings';s.pendingPurchase={id:g.id,first,firstDream,reward:0,dream:true};return true;}
 // New deposits are wallet-only; existing deposit payouts remain unchanged.
 // Actual affordability is checked again in openDeposit; UI shows a care warning.
 export function careReserve(s){return Math.max(0,(s.plan?.[0]??4)-(s.plan?cycleSummary(s).actual.care:0));}
-export function depositFunding(s,amount=10){if(!Number.isSafeInteger(amount)||amount<1)return null;return s.wallet>=amount?'wallet':null;}
+export function depositFunding(s,amount=10){if(!Number.isSafeInteger(amount)||amount<DEPOSIT_MIN)return null;return s.wallet>=amount?'wallet':null;}
 // Quote only what is still planned for the goal. Already-paid care or wants no
 // longer reserve wallet coins; moving money between savings and a bank is neutral.
 export function goalRemaining(s,id=s.goal){const g=GOALS.find(g=>g.id===id);return !g||s.goalsWon.includes(id)?0:Math.max(0,g.price-s.savings);}
@@ -147,13 +160,18 @@ export function plannedSavingsAmount(s){
 }
 export function openDeposit(s,source='wallet',amount=10){
  if(s.cycle<3||s.deposit||!s.plan||s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward||s.tutorial!=='done'||!s.missions?.save||!s.missions?.goal)return false;
- if(!Number.isSafeInteger(amount)||amount<1||!Number.isSafeInteger(amount+depositBonus(amount)))return false;
+ if(!Number.isSafeInteger(amount)||amount<DEPOSIT_MIN||!Number.isSafeInteger(amount+depositBonus(amount)))return false;
  if(source!=='wallet'||s.wallet<amount)return false;
  s.wallet-=amount;
- s.deposit={principal:amount,bonus:depositBonus(amount),due:s.completedCycles+1};record(s,'bank-in',amount,'Вклад');emitAction(s,'deposit-opened',{amount,target:'deposit'});return true;
+ s.deposit={principal:amount,bonus:depositBonus(amount),due:s.completedCycles+DEPOSIT_DAYS};record(s,'bank-in',amount,'Вклад');emitAction(s,'deposit-opened',{amount,target:'deposit'});return true;
+}
+export function withdrawDeposit(s){
+ const d=s.deposit;
+ if(!d||!Number.isFinite(d.due)||s.completedCycles>=d.due||!Number.isSafeInteger(d.principal)||d.principal<=0||s.tutorial!=='done'||s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward||s.pendingPurchase)return false;
+ s.wallet+=d.principal;record(s,'bank-out',d.principal,'Досрочный возврат вклада');s.ledger.at(-1).source='early-withdrawal';s.deposit=null;return true;
 }
 export function collectDeposit(s){
- if(!s.deposit||s.completedCycles<s.deposit.due||s.tutorial!=='done'||!s.plan||s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward)return false;
+ if(!s.deposit||s.completedCycles<s.deposit.due||s.tutorial!=='done'||s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward||s.pendingPurchase)return false;
  const d=s.deposit;
  if(!Number.isFinite(d.principal)||d.principal<0||!Number.isFinite(d.bonus)||d.bonus<0)return false;
  // Preserve the real old principal in accounting; only the actual final payout
@@ -199,7 +217,8 @@ export function cycleSummary(s,cycle=s.cycle) {
  const bankSaved=sum('bank-in')-sum('bank-out');
  const walletWants=entries.filter(e=>e.kind==='expense'&&e.category==='wants'&&e.source!=='savings').reduce((v,e)=>v+e.amount,0);
  const careBeforePlan=planRecord?.careBeforePlan||0;
- const actual={care:Math.max(0,t.food+t.rain-careBeforePlan),wants:walletWants,savings:t.saved+sum('bank-in')};
+ const earlyReturn=entries.filter(e=>e.kind==='bank-out'&&e.source==='early-withdrawal').reduce((n,e)=>n+e.amount,0);
+ const actual={care:Math.max(0,t.food+t.rain-careBeforePlan),wants:Math.max(0,walletWants-(planRecord?.wantsBeforePlan||0)),savings:t.saved+sum('bank-in')-earlyReturn};
  const planned={care:plan[0],wants:plan[1],savings:plan[2]},growthReasons=[];
  const acted=actual.care+actual.wants+Math.max(0,actual.savings)>0;
  if(t.food+t.rain>0)growthReasons.push('Купили еду или воду');
@@ -208,7 +227,7 @@ export function cycleSummary(s,cycle=s.cycle) {
  const growthAwards={care:growthReasons.includes('Купили еду или воду')?GROWTH_AWARDS.care:0,plan:growthReasons.includes('Уложились в свой план')?GROWTH_AWARDS.plan:0,savings:growthReasons.includes('Отложили штучки')?GROWTH_AWARDS.savings:0};
  const growthGained=growthAwards.care+growthAwards.plan+growthAwards.savings;
  const expense=sum('expense');
- return {cycle,plan,careBeforePlan,walletAtPlan:planRecord?.wallet??null,walletEnd:s.wallet,savingsEnd:s.savings,depositEnd:s.deposit?.principal||0,income:t.income,expense,expenses:{food:t.food,rain:t.rain,wants:t.wants},saved:t.saved,bankSaved,savingsBasis:'new-contributions',totals:t,planned,actual,growthGained,growthAwards,growthReasons,growthTotal:(s.growthPoints||0)+growthGained};
+ return {cycle,plan,careBeforePlan,wantsBeforePlan:planRecord?.wantsBeforePlan||0,walletAtPlan:planRecord?.wallet??null,walletEnd:s.wallet,savingsEnd:s.savings,depositEnd:s.deposit?.principal||0,income:t.income,expense,expenses:{food:t.food,rain:t.rain,wants:t.wants},saved:t.saved,bankSaved,savingsBasis:'new-contributions',totals:t,planned,actual,growthGained,growthAwards,growthReasons,growthTotal:(s.growthPoints||0)+growthGained};
 }
 export function planOutcome(summary) {
  const planned=summary?.planned||{care:summary?.plan?.[0]||0,wants:summary?.plan?.[1]||0,savings:summary?.plan?.[2]||0};

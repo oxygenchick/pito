@@ -1,4 +1,12 @@
 /* Fixed visual rhythm, native text and shared button art. Only the backdrop fills tall screens. */
+/* Small paper labels sit in reserved space, never on top of numbers. */
+#game .completion-sticker{position:absolute;z-index:1;right:9px;top:7px;display:inline-flex;align-items:center;gap:4px;padding:5px 9px;color:#315b4b;background:#bfe2aa;border:0;border-radius:9px 12px 10px 11px;box-shadow:none;text-shadow:none;transform:rotate(5deg);font-size:14px;font-weight:700;line-height:1;white-space:nowrap;pointer-events:none}
+#game .completion-sticker>span{font-size:15px}
+#game .mr-plan-card{position:relative}
+#game .mr-plan-card.has-completion{padding-top:32px}
+#game .gr-source{position:relative}
+#game .gr-source.has-completion{padding-top:28px}
+#game .gr-source .completion-sticker{right:50%;transform:translateX(50%) rotate(-5deg);top:4px;font-size:12px;padding:3px 5px;gap:2px}
 #game .modal-backdrop:has(.money-review) { padding:0; }
 #game .panel:has(.money-review) { width:400px;max-width:calc(100% - 24px);max-height:calc(100% - 24px);padding:22px 16px 20px;border:0;border-image:none;background:none;isolation:isolate;overflow:hidden;color:#30334f;--button-label-scale:1; }
 #game .panel:has(.money-review)::before { content:'';position:absolute;inset:0;z-index:-1;background:#fff8eb;mask:url('../assets/money-intro/panel-straight.png') center/104% 104% no-repeat;border-radius:28px;pointer-events:none; }
@@ -39,8 +47,10 @@
 #game .mr-coins>.icon { width:26px;height:28px;object-fit:contain; }
 #game .mr-chart { position:relative;width:182px;height:182px;margin:0 auto;flex-shrink:0; }
 #game .mr-chart svg { width:100%;height:100%;display:block; }
-#game .mr-chart-center { position:absolute;inset:30px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:16px; }
-#game .mr-chart-center .mr-coins { font-size:40px;line-height:1; }
+#game .mr-chart-center { position:absolute;inset:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:14px;text-align:center;line-height:1.1; }
+#game .mr-chart-center>span { max-width:100%;white-space:normal; }
+#game .mr-chart-center .mr-coins { font-size:26px;line-height:1;gap:3px; }
+#game .mr-chart-center .mr-coins>.icon { width:18px;height:20px; }
 #game .mr-expense-rows { display:grid;gap:8px; }
 #game .mr-expense-row { display:grid;grid-template-columns:58px 1fr auto;align-items:center;gap:10px;min-height:62px;padding:7px 18px 7px 12px;background:url('../assets/money-review/peach.png') center/100% 100% no-repeat;text-align:left; }
 #game .mr-expense-row.mr-rain { background-image:url('../assets/money-review/blue.png'); }

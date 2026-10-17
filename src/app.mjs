@@ -1,5 +1,6 @@
 import * as E from './engine.mjs';
 import * as V from './views.mjs';
+import {dayPhase,nightBeat,sleepMarks} from './daylight.mjs';
 import {resizeAllocation} from './budget.mjs';
 import {planDetail,planFooter} from './budget-view.mjs';
 import {progressEvent} from './progress-events.mjs';
@@ -27,7 +28,7 @@ let petReaction=null,petReactionUntil=0;
 let lastStrokeSound=-Infinity;
 const playedEvents=new Set();
 const introEvents=new Set(),wetPoopsThisPour=new Set();
-function emotion(){return rainHeld&&Math.abs(ui.cloudX-51)<21?'washing':petReactionUntil>performance.now()?petReaction:Math.min(...Object.values(s?.needs||{food:100}))<25?'sad':'neutral';}
+function emotion(){if(ui.dayTransition)return ui.dayTransition.beat==='sleep'?'sleeping':'happy';return rainHeld&&Math.abs(ui.cloudX-51)<21?'washing':petReactionUntil>performance.now()?petReaction:Math.min(...Object.values(s?.needs||{food:100}))<25?'sad':'neutral';}
 function syncEmotion(){if(screen!=='home')return;ui.petEmotion=emotion();const character=$('[data-pet]');if(character)character.dataset.emotion=ui.petEmotion;}
 function reactPet(value,duration=1600){petReaction=value;petReactionUntil=performance.now()+duration;syncEmotion();}
 const face=Math.floor(Math.random()*3);
@@ -81,7 +82,7 @@ function setNeeds(value){
   else if(value)root.insertAdjacentHTML('beforeend',V.needsView(s));
  }
 }
-function open(type,id=null){stopRain();setNeeds(false);$('.object-bubble')?.remove();if(type==='bank'){ui.depositSource='wallet';ui.depositAmount=Math.max(0,Math.min(1,Math.floor(s.wallet)));}ui.error='';ui.modal=type;ui.selection=id;renderModal();}
+function open(type,id=null){stopRain();setNeeds(false);$('.object-bubble')?.remove();if(type==='bank'){ui.depositSource='wallet';ui.depositAmount=E.DEPOSIT_MIN;}ui.error='';ui.modal=type;ui.selection=id;renderModal();}
 function close(){
  if(progressEvent(s)){ui.modal=progressEvent(s);render();return;}
  ui.modal=null;ui.error='';
@@ -94,13 +95,24 @@ function close(){
 function initialScreens(){
  return renderStart(screen,s,{story,color,hair,petName,face});
 }
+function syncDaylight(){if((screen==='home'||screen==='start')&&s)root.dataset.daylight=ui.dayTransition?(ui.dayTransition.beat==='sleep'?'night':'morning'):dayPhase(s);else if(screen==='start')root.dataset.daylight='day';else delete root.dataset.daylight;}
+function startNight(){
+ stopRain();ui.rainSession=null;ui.needsOpen=false;ui.modal=null;ui.dayTransition={seconds:0,beat:'sleep'};save();render();
+ root.inert=true;root.getBoundingClientRect();root.dataset.nightTransition='sleep';root.querySelector('[data-pet] .pet-body')?.insertAdjacentHTML('beforeend',sleepMarks());
+}
+function tickNight(dt){
+ const t=ui.dayTransition;t.seconds+=dt;const beat=nightBeat(t.seconds);
+ if(beat==='done'){ui.dayTransition=null;root.inert=false;delete root.dataset.nightTransition;E.finishDueCycle(s);ui.modal='review';save();render();return;}
+ if(beat!==t.beat){t.beat=beat;root.dataset.nightTransition=beat;root.querySelector('.sleep-marks')?.remove();syncDaylight();syncEmotion();}
+}
 function render(){
- const opening=screen!=='home'||s?.tutorial==='money'||s?.pendingIncome?.source==='initial';
+ syncDaylight();
+ const opening=screen!=='home'||!s?.onboarding&&(s?.tutorial==='money'||s?.pendingIncome?.source==='initial');
  audio.setScene(opening?'intro':'game');
  const hadRain=Boolean($('[data-cloud]'));
  stopRain();gesture=null;cancelDevHold();root.classList.remove('reduced-motion');
  if(screen==='home'&&progressEvent(s))ui.modal=progressEvent(s);
- if(s&&screen==='home')lastMission=E.currentMission(s)?.id||'';
+ if(s&&screen==='home'){lastMission=E.currentMission(s)?.id||'';}
  ui.petEmotion=emotion();
  root.innerHTML=(screen==='home'&&s?V.home(s,ui):initialScreens())+'<button class="dev-hotspot" data-dev aria-label="Режим разработчика: удерживать 1,2 секунды"></button>'+(screen==='home'&&s&&s.speed!==1?'<span class="dev-badge">Время ×'+s.speed+'</span>':'');
  if(screen==='home'&&s&&!ui.modal){
@@ -184,7 +196,10 @@ function refreshPlan(){
 }
 function showPlan(){
  if(!['plan','done'].includes(s.tutorial))return;
+ if(E.pacedIntro(s)&&E.introPhase(s)!=='plan')return;
  if(s.plan){open('plan');return;}
+ if(E.calmIntro(s)&&!s.initialMoneyGranted){s.tutorial='money';save();open('money-intro');return;}
+ if(E.grantPlanMoney(s)){save();ui.modal='income-event';render();return;}
  draftPlan();open('plan');
 }
 function beforeAction(){return {ids:Object.keys(s.missions||{}),ledger:s.ledger.length};}
@@ -193,6 +208,9 @@ function result(before,message){
  if(newly.length){
   const m=newly[0],deferred=s.missions[m.id].resolution==='deferred';
   ui.feedback={id:m.id,title:deferred?'Покупку отложили':resultTitles[m.id]||m.title,lesson:deferred?'Штучки остались на другие дела. Вещи никуда не денутся.':m.lesson,reward:newly.reduce((n,item)=>n+(s.missions[item.id].rewardPaid||0),0),entries:s.ledger.slice(before.ledger)};
+  if(E.calmIntro(s)&&m.id==='goal'){save();ui.modal=null;render();bubble('Отличная мечта!');return;}
+  if(s.onboarding?.version===2&&m.id==='goal')ui.feedback.lesson='Мечта выбрана! Покупать её сразу не нужно. Скоро решим, сколько откладывать.';
+  if(s.onboarding?.version===2&&m.id==='paid-food')ui.feedback.lesson='Пито сыт! Яблоко стоило 2 штучки. Ты увидел, как деньги превращаются в заботу.';
   if(ui.feedback.reward){s.pendingReward={missionId:m.id,amount:ui.feedback.reward,title:ui.feedback.title,lesson:ui.feedback.lesson};ui.modal='reward-event';}
   else ui.modal='result';
  }else{ui.modal=null;ui.feedback=null;}
@@ -206,7 +224,7 @@ function readyHome(){
 }
 function beginRain(){
  if(!['wash','done'].includes(s.tutorial))return;
- if(s.tutorial==='done'&&!s.plan){showPlan();return;}
+ if(s.tutorial==='done'&&!s.plan&&!E.introPaidCare(s)){showPlan();return;}
  if(ui.rainSession){dismissRain();return;}
  $('.object-bubble')?.remove();ui.modal=null;ui.needsOpen=false;ui.rainSession={spent:0};ui.rainHint=!s.rainHintSeen;ui.cloudX=75;render();
  const cloud=$('[data-cloud]');cloud?.classList.add('cloud-arriving');setTimeout(()=>cloud?.classList.remove('cloud-arriving'),650);
@@ -220,6 +238,7 @@ function dismissRain(){
  setTimeout(()=>{if(ui.rainSession!==session)return;ui.rainSession=null;save();render();if(session?.cleaned&&!ui.modal)bubble('Теперь я чистый!');},280);
 }
 function act(a,id,delta){
+ if(ui.dayTransition)return;
  if(ui.careTransition)return;
  const before=s?beforeAction():null;
  switch(a){
@@ -231,8 +250,8 @@ function act(a,id,delta){
  case 'hair':hair=Number(id);render();break;
  case 'birth':s=E.createProfile($('#pet-name').value,color,hair);introEvents.clear();screen='home';ui.modal=null;save();render();break;
  case 'close':close();break;
- case 'money-explained':if(E.grantInitialMoney(s)){save();render();}break;
- case 'income-continue':if(E.acknowledgeIncome(s)){save();if(!s.plan&&['plan','done'].includes(s.tutorial))showPlan();else readyHome();}break;
+ case 'money-explained':if(E.grantInitialMoney(s)){save();if(E.calmIntro(s))showPlan();else render();}break;
+ case 'income-continue':{const forPlan=s.pendingIncome?.source==='first-plan-funds';if(E.acknowledgeIncome(s)){save();if(forPlan||!E.pacedIntro(s)&&!s.plan&&['plan','done'].includes(s.tutorial))showPlan();else readyHome();}break;}
  case 'reward-continue':if(s.pendingReward){s.pendingReward=null;save();readyHome();}break;
  case 'grown-continue':if(E.acknowledgeGrowth(s)){save();readyHome();}break;
  case 'purchase-continue':{
@@ -243,6 +262,7 @@ function act(a,id,delta){
  }
  case 'meet-guide':open('meet-guide');break;
  case 'guide':open('guide',id);break;
+ case 'intro-play':close();bubble('Нажми на свою новую вещь!');break;
  case 'guide-go':{const mission=id||ui.selection||E.currentMission(s)?.id;act(missionRoute(typeof mission==='object'?mission.id:mission));break;}
  case 'journal':ui.journalTab='active';open('journal');break;
  case 'journal-tab':ui.journalTab=id;renderModal();break;
@@ -253,7 +273,7 @@ function act(a,id,delta){
  case 'expenses':ui.budgetTab='today';open('budget');break;
  case 'expenses-back':if(s.review)open('review');else showPlan();break;
  case 'budget-tab':ui.budgetTab=id;renderModal();break;
- case 'food':if(['food','done'].includes(s.tutorial)){if(s.tutorial==='done'&&!s.plan)showPlan();else{ui.rainSession=null;open('feed','apple');}}break;
+ case 'food':if(['food','done'].includes(s.tutorial)){if(s.tutorial==='done'&&!s.plan&&!E.introPaidCare(s))showPlan();else{ui.rainSession=null;open('feed','apple');}}break;
  case 'select-food':open('feed','apple');break;
  case 'feed-confirm':{
   const f=E.FOOD[0];
@@ -265,7 +285,7 @@ function act(a,id,delta){
   else{ui.error=s.wallet<f.price?'Штучек пока не хватает. Новый день принесёт ещё 8.':'Пито уже сыт.';renderModal();}break;
  }
  case 'care-next':{
-  const washed=s.tutorial==='washed';if(E.acknowledgeCare(s)){ui.modal=null;save();render();if(washed&&!s.onboardingPaid)toast(V.coin(20)+' на первые покупки');}break;
+  const washed=s.tutorial==='washed';if(E.acknowledgeCare(s)){ui.modal=null;save();render();if(washed&&!s.onboardingPaid&&!s.onboarding)toast(V.coin(20)+' на первые покупки');}break;
  }
  case 'rain':beginRain();break;
  case 'rain-exit':dismissRain();break;
@@ -282,8 +302,8 @@ function act(a,id,delta){
  case 'plan-goal-step':ui.playPlanGoal=stepChoice(E.GOALS.filter(g=>!s.goalsWon.includes(g.id)),ui.playPlanGoal,id);ui.playPlanSaving=independentPlan(s,ui).parts[2];renderModal();break;
  case 'play-plan-choice':{const parts=choosePlayPlan(s,id,ui.playPlanItem,ui.playPlanCare,ui.playPlanSavings,ui.playPlanGoal);if(parts){ui.playPlanChoice=id;ui.draft=parts;renderModal();}break;}
  case 'plan-confirm':{const parts=independentPlan(s,ui).parts;if(!s.plan&&E.setPlan(s,parts)){audio.onAction('plan-confirm');if(E.GOALS.some(g=>g.id===ui.playPlanGoal)){s.plannedGoal=ui.playPlanGoal;if(hasGoal())E.chooseGoal(s,ui.playPlanGoal);}result(before);}break;}
- case 'goal':if(s.tutorial!=='done')break;if(!s.plan){showPlan();break;}ui.transferMode='manual';ui.transferNotice='';ui.transferAmount=Math.max(0,Math.min(1,Math.floor(s.wallet),E.goalRemaining(s)));ui.rainSession=null;ui.goalChoice=E.availableGoalChoice(s,s.plannedGoal||s.goal);open(hasGoal()?'goal':'choose-goal');break;
- case 'choose-goal':if(!s.plan)showPlan();else{ui.goalChoice=E.availableGoalChoice(s,s.plannedGoal||s.goal);open('choose-goal');}break;
+ case 'goal':if(E.pacedIntro(s)&&s.missions?.goal){open('goal');break;}if(s.tutorial!=='done')break;if(!s.plan){showPlan();break;}ui.transferMode='manual';ui.transferNotice='';ui.transferAmount=Math.max(0,Math.min(1,Math.floor(s.wallet),E.goalRemaining(s)));ui.rainSession=null;ui.goalChoice=E.availableGoalChoice(s,s.plannedGoal||s.goal);open(hasGoal()?'goal':'choose-goal');break;
+ case 'choose-goal':if(!s.plan&&!E.introGoal(s))showPlan();else{ui.goalChoice=E.availableGoalChoice(s,s.plannedGoal||s.goal);open('choose-goal');}break;
  case 'goal-choice':ui.goalChoice=id;renderModal();break;
  case 'goal-confirm':if(E.chooseGoal(s,E.availableGoalChoice(s,ui.goalChoice)))result(before);break;
  case 'goal-step':{const next=stepChoice(E.GOALS.filter(g=>!s.goalsWon.includes(g.id)),s.goal,id);if(next&&E.chooseGoal(s,next)){ui.transferMode='manual';ui.transferNotice='';ui.transferAmount=Math.max(0,Math.min(1,Math.floor(s.wallet),E.goalRemaining(s)));save();renderModal();}break;}
@@ -294,16 +314,17 @@ function act(a,id,delta){
  case 'withdraw':if(s.savings>0)open('withdraw');break;
  case 'withdraw-confirm':if(E.transfer(s,-1)){audio.onAction('withdraw-confirm');save();ui.transferMode='manual';ui.transferAmount=Math.max(0,Math.min(1,Math.floor(s.wallet),E.goalRemaining(s)));open('goal');}break;
  case 'claim-goal':if(E.claimGoal(s)){audio.onAction('claim-goal');save();render();}break;
- case 'shop':if(s.tutorial==='done'){if(!s.plan)showPlan();else{ui.rainSession=null;open('shop');}}break;
+ case 'shop':if(s.tutorial==='done'){if(!s.plan&&!E.introShop(s))showPlan();else{ui.rainSession=null;open('shop');}}break;
  case 'select-item':open('buy',id);break;
  case 'buy-confirm':{const item=E.ITEMS.find(i=>i.id===ui.selection);if(E.buy(s,ui.selection)){audio.onAction('buy-confirm');save();render();}else{ui.error='Не хватает '+Math.max(0,item.price-s.wallet)+' штучек. Покупку можно отложить.';renderModal();}break;}
  case 'defer-buy':if(E.deferMission(s,'buy'))result(before);break;
- case 'play-item':if(!ui.modal&&s.tutorial==='done'&&!s.review&&[...s.owned,...s.goalsWon].includes(id)){E.stroke(s,50);save();animateItem(id);}break;
+ case 'play-item':if(!ui.modal&&s.tutorial==='done'&&!s.review&&[...s.owned,...s.goalsWon].includes(id)){E.stroke(s,50);if(E.playIntroItem(s,id)){save();render();}else save();animateItem(id);}break;
  case 'shelf-page':ui.shelfPage=E.clamp(ui.shelfPage+delta,0,Math.max(0,Math.ceil((s.owned.length+s.goalsWon.length)/4)-1));render();break;
- case 'bank':if(!s.plan)showPlan();else open('bank');break;
- case 'bank-source':ui.depositSource='wallet';ui.depositAmount=Math.max(0,Math.min(Math.max(1,ui.depositAmount||1),Math.floor(s.wallet)));ui.error='';renderModal();break;
- case 'bank-step':ui.depositSource='wallet';ui.depositAmount=E.clamp((ui.depositAmount||0)+delta,Math.min(1,s.wallet),Math.floor(s.wallet));ui.error='';renderModal();break;
+ case 'bank':if(!s.plan&&!s.deposit)showPlan();else open('bank');break;
+ case 'bank-source':ui.depositSource='wallet';ui.depositAmount=Math.max(E.DEPOSIT_MIN,Math.min(ui.depositAmount||E.DEPOSIT_MIN,Math.floor(s.wallet)));ui.error='';renderModal();break;
+ case 'bank-step':ui.depositSource='wallet';ui.depositAmount=E.clamp((ui.depositAmount||E.DEPOSIT_MIN)+delta,E.DEPOSIT_MIN,Math.max(E.DEPOSIT_MIN,Math.floor(s.wallet)));ui.error='';renderModal();break;
  case 'bank-open':if(E.openDeposit(s,'wallet',ui.depositAmount||0)){audio.onAction('bank-open');result(before);if(!ui.modal)open('bank');}else{ui.error='Выбери сумму, которая у тебя есть.';renderModal();}break;
+ case 'bank-withdraw':if(E.withdrawDeposit(s)){audio.onAction('bank-collect');save();ui.modal=null;render();toast('Штучки вернулись в кошелёк. Доход не начислен.');}break;
  case 'bank-collect':{const principal=s.deposit?.principal||0,returned=s.deposit?Math.ceil(s.deposit.principal+s.deposit.bonus):0;if(E.collectDeposit(s)){audio.onAction('bank-collect');s.pendingIncome={amount:returned-principal,principal,source:'deposit',cycle:s.cycle};save();ui.modal='income-event';render();}break;}
  case 'next-cycle':if(E.nextCycle(s)){save();ui.rainSession=null;draftPlan();ui.modal='plan';render();}break;
  case 'adult-gate':ui.gate={a:13+Math.floor(Math.random()*7),b:6+Math.floor(Math.random()*4),c:11+Math.floor(Math.random()*19)};open('gate');break;
@@ -371,7 +392,9 @@ function movePetGesture(x,y){
  const distance=Math.hypot(x-gesture.lastX,y-gesture.lastY);gesture.distance+=distance;gesture.lastX=x;gesture.lastY=y;
  if(gesture.distance>12&&distance>0&&s.tutorial==='done'){
   if(!gesture.stroking){gesture.stroking=true;$('.needs')?.remove();root.insertAdjacentHTML('beforeend',V.needsView(s,'affection'));}
-  E.stroke(s,distance);$('[data-pet]')?.classList.add('petting');reactPet('happy',1300);
+  const wasIntroPet=E.introPhase(s)==='pet';
+  E.stroke(s,distance);if(wasIntroPet&&E.introPhase(s)!=='pet')gesture.introPetCompleted=true;
+  $('[data-pet]')?.classList.add('petting');reactPet('happy',1300);
   if(performance.now()-lastStrokeSound>550){audio.onAction('stroke');lastStrokeSound=performance.now();}
   if(!$('.hand'))root.insertAdjacentHTML('beforeend','<span class="hand">'+icon('hand')+'</span>');
   const point=xy({clientX:x,clientY:y});$('.hand').style.left=point.x+'%';$('.hand').style.top=point.y+'%';updateHUD();
@@ -404,7 +427,7 @@ function petTapped(){if(ui.rainSession)return;audio.onAction('pet');if(E.meet(s)
 function pointerEnd(e){
  cancelDevHold();stopRain();
  const finished=gesture;
- if(finished){if(e?.type==='pointerup'&&finished.distance<12&&!ui.modal)petTapped();else save();if(finished.stroking)setNeeds(finished.needsWereOpen);gesture=null;}
+ if(finished){if(e?.type==='pointerup'&&finished.distance<12&&!ui.modal)petTapped();else save();if(finished.stroking)setNeeds(finished.needsWereOpen);gesture=null;if(finished.introPetCompleted){render();bubble('Вау! Спасибо!');}}
  $('[data-pet]')?.classList.remove('petting');$('.hand')?.remove();
  setTimeout(()=>document.querySelectorAll('.poop:not(.running)').forEach(el=>el.classList.remove('awake')),600);
 }
@@ -429,6 +452,9 @@ document.addEventListener('keydown',e=>{
 });
 function updateHUD(){
  if(!s||screen!=='home')return;
+ syncDaylight();
+ const dayProgress=$('.hud-growth'),dayFill=E.clamp(s.elapsed/E.CYCLE_SECONDS*100);
+ if(dayProgress){dayProgress.setAttribute('aria-valuenow',String(Math.round(dayFill)));dayProgress.querySelector('i').style.width=dayFill+'%';}
  syncEmotion();
  const wallet=$('.wallet');if(wallet&&wallet.dataset.balance!==String(s.wallet)){
   wallet.dataset.balance=String(s.wallet);wallet.innerHTML=V.coin(s.wallet);
@@ -449,12 +475,13 @@ let previous=performance.now(),saveClock=0;
 setInterval(()=>{
  const now=performance.now(),dt=Math.min(.5,(now-previous)/1000);previous=now;
  if(!s||screen!=='home'||document.hidden||nativePaused||ui.careTransition)return;
+ if(ui.dayTransition){tickNight(dt);return;}
  if(!ui.modal&&rainHeld&&ui.rainSession){
   const before=s.poops.map(p=>({...p})),oldTut=s.tutorial,oldWallet=s.wallet,wasClean=s.needs.clean>=100&&!s.poops.length;
   if(!E.rain(s,dt,ui.cloudX,ui.rainSession)){
    stopRain();
    if(E.deferExhaustedWash(s)){ui.rainSession=null;save();render();toast('Вода закончилась. В новом игровом дне получишь ещё 8 штучек.');return;}
-   toast('Штучки закончились. Грязь можно убрать тапами.');
+   toast(E.pacedIntro(s)&&!s.missions.buy?'Оставим 4 штучки на первую вещь. Грязь можно убрать тапами.':'Штучки закончились. Грязь можно убрать тапами.');
   }
   if(oldWallet>s.wallet){const flight=document.createElement('span');flight.className='rain-coin';flight.style.setProperty('--coin-x',ui.cloudX+'%');flight.innerHTML='−'+V.coin(oldWallet-s.wallet);root.append(flight);setTimeout(()=>flight.remove(),1400);}
   for(const p of before){
@@ -468,9 +495,10 @@ setInterval(()=>{
   }
   if(oldTut!==s.tutorial){stopRain();reactPet('happy');$('[data-cloud]')?.classList.add('cloud-leaving');ui.rainSession=null;ui.careTransition=true;save();setTimeout(()=>{ui.careTransition=false;ui.modal='care-result';render();},700);}else{if(!wasClean&&s.needs.clean>=100&&!s.poops.length){ui.rainSession.cleaned=true;reactPet('happy');save();}updateHUD();}
  }else if(!ui.modal&&!rainHeld){
+  if(!ui.rainSession&&!gesture&&E.tickIntro(s,dt)){save();render();return;}
   const count=s.poops.length;E.tick(s,dt);
-  if(E.finishDueCycle(s)){ui.rainSession=null;ui.needsOpen=false;ui.modal='review';save();render();}
-  else{if(count!==s.poops.length)syncPoops();updateHUD();const m=E.currentMission(s)?.id||'';if(m!==lastMission&&!gesture&&!devTimer){lastMission=m;if(!ui.rainSession)render();}}
+  if(!s.review&&s.plan&&s.elapsed>=E.CYCLE_SECONDS){startNight();}
+  else{if(count!==s.poops.length)syncPoops();updateHUD();const m=E.currentMission(s)?.id||'';if((m!==lastMission)&&!gesture&&!devTimer){lastMission=m;if(!ui.rainSession)render();}}
  }
  saveClock+=dt;if(saveClock>2){saveClock=0;save();}
 },100);
@@ -481,7 +509,7 @@ function suspendGame(){
  save();
 }
 function resumeGame(){
- if(hiddenSince!==null&&s&&screen==='home'&&!ui.modal){
+ if(hiddenSince!==null&&s&&screen==='home'&&!ui.modal&&!ui.dayTransition){
   // Use the same bounded offline simulation on tab resume as on a full reload.
   s=E.restore(JSON.stringify({...s,lastSeen:hiddenSince}))||s;
   if(E.finishDueCycle(s)){ui.rainSession=null;ui.needsOpen=false;ui.modal='review';}

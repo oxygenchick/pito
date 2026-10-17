@@ -23,6 +23,7 @@ function goalView(s,ui) {
   const cannotBrowse=!ready(s)||choices.length===0||(choices.length===1&&choices[0].id===g.id);
   const hero = `<section class="sv-hero"><div class="ko-goal-carousel">${goalArrow(-1,cannotBrowse)}<div class="ko-goal-art">${art(g.id,'art')}</div>${goalArrow(1,cannotBrowse)}</div><h3 class="sv-goal-name">${esc(g.name)}</h3><p class="ko-goal-price" aria-label="Цена ${number(g.price)} штучек">${coin(g.price)}</p></section>`;
   const progress = `<div class="ko-progress" role="progressbar" aria-label="Накоплено на мечту" aria-valuemin="0" aria-valuemax="${g.price}" aria-valuenow="${Math.min(s.savings,g.price)}" aria-valuetext="${number(s.savings)} из ${g.price}"><i style="width:${Math.min(100,s.savings/g.price*100)}%"></i></div>`;
+  if(E.pacedIntro(s)&&s.missions?.goal)return {title:'Моя мечта',body:`<div class="savings-screen ss-dream">${hero}<div class="sv-progress"><p>Накоплено ${number(s.savings)} из ${number(g.price)}</p>${progress}</div><p class="lead">Это твоя мечта! Скоро составим план и начнём на неё откладывать.</p></div>`,footer:back(),closable:true};
   let body = hero+`<div class="sv-progress"><p>Накоплено ${number(s.savings)} из ${number(g.price)}</p>${progress}${won?'<p>Уже на лужайке</p>':enough?'<p>Накопили!</p>':''}</div><section class="sv-plan">${icon('task','sv-plan-icon')}<div class="sv-plan-copy"><div><span>Сегодня по плану</span>${coin(planned)}</div><div><span>Уже отложено</span>${coin(savedToday)}</div></div></section>`;
   if(ui.transferNotice) body+=`<p class="ko-transfer-notice" role="status">${icon('check')}${esc(ui.transferNotice)}</p>`;
   if (!won&&!enough) {
@@ -40,28 +41,29 @@ function bankView(s,ui) {
   const validDeposit = !deposit || Number.isFinite(deposit.principal)&&deposit.principal>=0&&Number.isFinite(deposit.bonus)&&deposit.bonus>=0&&Number.isFinite(deposit.due);
   const funding = 'wallet';
   const available = Math.max(0,Math.floor(s.wallet||0));
-  const amount = Number.isSafeInteger(ui.depositAmount)?ui.depositAmount:Math.min(1,available);
+  const amount = Number.isSafeInteger(ui.depositAmount)?Math.max(E.DEPOSIT_MIN,ui.depositAmount):E.DEPOSIT_MIN;
   const principal = deposit?.principal??Math.max(0,amount);
   const returned = deposit?Math.ceil(deposit.principal+deposit.bonus):principal+E.depositBonus(principal);
-  const left = deposit?Math.max(0,deposit.due-s.completedCycles):1;
+  const left = deposit?Math.max(0,deposit.due-s.completedCycles):E.DEPOSIT_DAYS;
   const eligible = ready(s)&&s.cycle>=3&&Boolean(s.missions?.save&&s.missions?.goal);
-  const canOpen = eligible && !deposit && Number.isSafeInteger(amount)&&amount>0&&amount<=available;
-  const canCollect = ready(s)&&Boolean(deposit)&&left===0&&validDeposit;
-  let message = deposit ? left>0?'До конца срока эти штучки нельзя потратить.':'Можно забрать штучки и доход!' : 'До конца срока эти штучки нельзя потратить.';
+  const canOpen = eligible && !deposit && Number.isSafeInteger(amount)&&amount>=E.DEPOSIT_MIN&&amount<=available;
+  const canCollect = s.tutorial==='done'&&!s.review&&!s.pendingGrowth&&!s.adultNotice&&!s.pendingIncome&&!s.pendingReward&&!s.pendingPurchase&&Boolean(deposit)&&left===0&&validDeposit;
+  let message = left>0?'Штучки остаются твоими. Забрать можно в любой момент, но раньше срока — без дохода.':'Можно забрать штучки и доход!';
   if (!deposit&&!eligible) message = 'Сначала попробуй копилку. Вклад появится на третий день.';
-  else if (!deposit&&available<1) message = 'Здесь пока нет штучек.';
+  else if (!deposit&&available<E.DEPOSIT_MIN) message = 'Для вклада нужно хотя бы 10 штучек в кошельке.';
   if (!validDeposit) message='Этот вклад не удалось прочитать.';
   const term = left===0?'Срок закончился':left===1?'Через 1 игровой день':`Через ${number(left)} игровых дня`;
-  const controls = deposit?'':`<section class="sv-amount"><p class="sv-stepper-label">Сколько положим?</p><div class="sv-stepper ko-transfer-stepper ko-bank-stepper"><button class="btn" data-act="bank-step" data-delta="-1" aria-label="Вложить на одну штучку меньше" ${!eligible||amount<=1?'disabled':''}><img src="./assets/ui-v11/minus.png" class="icon" alt=""></button><output aria-live="polite">${coin(principal)}</output><button class="btn" data-act="bank-step" data-delta="1" aria-label="Вложить на одну штучку больше" ${!eligible||amount>=available?'disabled':''}><img src="./assets/ui-v11/plus.png" class="icon" alt=""></button></div><p class="sv-wallet">В кошельке ${coin(s.wallet)}</p></section>`;
+  const controls = deposit?'':`<section class="sv-amount"><p class="sv-stepper-label">Сколько положим? От 10 штучек</p><div class="sv-stepper ko-transfer-stepper ko-bank-stepper"><button class="btn" data-act="bank-step" data-delta="-1" aria-label="Вложить на одну штучку меньше" ${!eligible||amount<=E.DEPOSIT_MIN?'disabled':''}><img src="./assets/ui-v11/minus.png" class="icon" alt=""></button><output aria-live="polite">${coin(principal)}</output><button class="btn" data-act="bank-step" data-delta="1" aria-label="Вложить на одну штучку больше" ${!eligible||amount>=available?'disabled':''}><img src="./assets/ui-v11/plus.png" class="icon" alt=""></button></div><p class="sv-wallet">В кошельке ${coin(s.wallet)}</p></section>`;
   const warning=!deposit&&funding==='wallet'&&available-amount<E.careReserve(s)?'<p class="ko-message ko-bank-warning">На еду и воду останется меньше, чем ты запланировал.</p>':'';
-  const body = `${!deposit?'<p class="sv-intro">Положи штучки на день.<br>Заберёшь больше!</p>':''}<section class="sv-hero"><div class="sv-bank-picture">${icon('jar','sv-bank-art')}<img class="sv-rays left" src="assets/finance-polish/rays.png" alt=""><img class="sv-rays right" src="assets/finance-polish/rays.png" alt=""></div><div class="sv-return ko-bank-offer"><div><span>${deposit?'Положили':'Положишь'}</span>${coin(principal)}</div>${icon('arrow')}<div><span>Заберёшь</span>${coin(returned)}</div></div><p class="sv-bonus">Доход +${number(returned-principal)}</p></section><section class="sv-lock ${deposit?'sv-lock-open':''}">${icon(left===0?'check':deposit?'sun':'lock','sv-lock-icon')}<div><div class="sv-term ko-bank-term" aria-label="${deposit?`Осталось игровых дней: ${number(left)}`:'Ждать 1 игровой день'}"><strong>${term}</strong></div>${!deposit?`<p class="ko-main-copy">${eligible&&available>0?'Раньше забрать нельзя.':message}</p>`:''}</div></section>${deposit?`<p class="sv-locked-copy">${message}</p>`:''}${controls}${warning}${error(ui)}`;
-  const footer = deposit ? canCollect?button(`Забрать ${coin(returned)}`,'bank-collect',{extra:'data-category="savings" data-effect="income"'}):button('К Пито','close') : button(`Положить ${coin(principal)}`,'bank-open',{disabled:!canOpen,extra:`data-category="savings" data-effect="deposit-lock" data-funding-source="${funding}" data-deposit-amount="${principal}"`})+(!canOpen?back():'');
+  const body = `${!deposit?'<p class="sv-intro">Банк использует деньги в своей работе и платит тебе за это заранее обещанный доход.</p>':''}<section class="sv-hero"><div class="sv-bank-picture">${icon('jar','sv-bank-art')}<img class="sv-rays left" src="assets/finance-polish/rays.png" alt=""><img class="sv-rays right" src="assets/finance-polish/rays.png" alt=""></div><div class="sv-return ko-bank-offer"><div><span>${deposit?'Положили':'Положишь'}</span>${coin(principal)}</div>${icon('arrow')}<div><span>В конце срока</span>${coin(returned)}</div></div><p class="sv-bonus">Доход +${number(returned-principal)}</p></section><section class="sv-lock ${deposit?'sv-lock-open':''}">${icon(left===0?'check':'sun','sv-lock-icon')}<div class="sv-term ko-bank-term"><strong>${term}</strong><p class="ko-main-copy">${message}</p></div></section>${controls}${warning}<p class="sv-wallet">Условные игровые условия, не реальные ставки банка. Доход округляется вниз до целой штучки.</p>${error(ui)}`;
+  const canWithdraw=validDeposit&&left>0&&s.tutorial==='done'&&!s.review&&!s.pendingGrowth&&!s.adultNotice&&!s.pendingIncome&&!s.pendingReward&&!s.pendingPurchase;
+  const footer = deposit ? canCollect?button(`Забрать ${coin(returned)}`,'bank-collect',{extra:'data-category="savings" data-effect="income"'}):button(`Забрать ${coin(principal)} без дохода`,'bank-withdraw',{disabled:!canWithdraw,secondary:true}) : button(`Положить ${coin(principal)}`,'bank-open',{disabled:!canOpen,extra:`data-category="savings" data-effect="deposit-lock" data-funding-source="${funding}" data-deposit-amount="${principal}"`})+(!canOpen?back():'');
   return {title:deposit?(left===0&&validDeposit?'Можно забрать!':'Вклад открыт'):'Вклад',body:`<div class="savings-screen ss-bank ${deposit?'ss-bank-opened':''}">${body}</div>`,footer,closable:true};
 }
 
 function journalView(s,ui) {
   const done = ui.journalTab==='done';
-  const missions = E.MISSIONS.filter(m=>E.missionStatus(s,m)===(done?'done':'active'));
+  const missions = done?E.MISSIONS.filter(m=>E.missionStatus(s,m)==='done'):[E.currentMission(s)].filter(Boolean);
   const current = E.currentMission(s);
   const tabs = `<div class="ko-tabs" role="tablist" aria-label="Список заданий">${[['active','Сейчас'],['done','Выполнено']].map(([id,label])=>`<button role="tab" aria-selected="${done===(id==='done')}" data-act="journal-tab" data-id="${id}">${label}</button>`).join('')}</div>`;
   const items = missions.map(m=>{
@@ -83,10 +85,11 @@ export function kidOverlay(s,ui) {
   switch(ui.modal) {
     case 'goal': return goalView(s,ui);
     case 'choose-goal': {
+      const choosing=ready(s)||(E.introGoal(s)&&s.tutorial==='done'&&!s.pendingIncome&&!s.pendingReward&&!s.pendingPurchase);
       const selected=E.availableGoalChoice(s,ui.goalChoice);
       const choice=E.GOALS.find(g=>g.id===selected&&!s.goalsWon.includes(g.id));
-      const body=wrap(`<div class="ko-goal-options">${E.GOALS.map(g=>`<button class="ko-goal-choice ${selected===g.id?'selected':''}" data-act="goal-choice" data-id="${esc(g.id)}" aria-pressed="${selected===g.id}" ${!ready(s)||s.goalsWon.includes(g.id)?'disabled':''}>${art(g.id,'art')}<strong>${esc(g.name)}</strong>${s.goalsWon.includes(g.id)?`<span class="ko-owned">${icon('check','icon status-icon')} Уже есть</span>`:coin(g.price)}</button>`).join('')}</div>`);
-      return {title:'Выбери мечту',body,footer:button('Выбрать мечту','goal-confirm',{disabled:!ready(s)||!choice}),closable:true};
+      const body=wrap(`<div class="ko-goal-options">${E.GOALS.map(g=>`<button class="ko-goal-choice ${selected===g.id?'selected':''}" data-act="goal-choice" data-id="${esc(g.id)}" aria-pressed="${selected===g.id}" ${!choosing||s.goalsWon.includes(g.id)?'disabled':''}>${art(g.id,'art')}<strong>${esc(g.name)}</strong>${s.goalsWon.includes(g.id)?`<span class="ko-owned">${icon('check','icon status-icon')} Уже есть</span>`:coin(g.price)}</button>`).join('')}</div>`);
+      return {title:'Выбери мечту',body,footer:button('Выбрать мечту','goal-confirm',{disabled:!choosing||!choice}),closable:true};
     }
     case 'withdraw': return {title:'Взять из копилки?',body:wrap(`${art('jar','ko-jar art')}<div class="ko-main-copy">Останется ${coin(Math.max(0,s.savings-1))}</div><p class="ko-message">До мечты дальше на 1 штучку.</p>${error(ui)}`),footer:button(`Взять ${coin(1)}`,'withdraw-confirm',{disabled:!ready(s)||s.savings<1,extra:'data-category="savings" data-effect="withdraw-one"'}),closable:true};
     case 'bank': return bankView(s,ui);

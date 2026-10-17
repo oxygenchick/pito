@@ -1,5 +1,6 @@
-import {cycleSummary, planOutcome, growthProgress, GROWTH_AWARDS} from './engine.mjs';
+import {cycleSummary, planOutcome, growthProgress, GROWTH_AWARDS, freeCare} from './engine.mjs';
 import {icon, pet} from './visuals.mjs';
+import {completionSticker} from './completion-sticker.mjs';
 
 const n=value=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(Number(value)||0);
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -8,9 +9,10 @@ const countPlans=s=>(s.periods||[]).filter(p=>(p.growthReasons||[]).includes(rea
 const planWord=k=>k%10===1&&k%100!==11?'раз':k%10>=2&&k%10<=4&&(k%100<12||k%100>14)?'раза':'раз';
 const puppet=(s,stage=s.stage,emotion='neutral')=>`<div class="gr-pet-frame" aria-hidden="true">${pet({...s,stage},true,emotion).replace('data-pet','disabled')}</div>`;
 const careArt=()=>`<span class="gr-care-art">${icon('apple')}${icon('cloud')}</span>`;
-function sources(gained=null,awards=null,explain=false){return `<div class="gr-sources">${[['Уход',careArt(),'care'],['План',icon('task'),'plan'],['Копилка',icon('jar'),'savings']].map(([label,picture,key],i)=>{
+function sources(gained=null,awards=null,explain=false,statuses=null){return `<div class="gr-sources">${[['Уход',careArt(),'care'],['План',icon('task'),'plan'],['Копилка',icon('jar'),'savings']].map(([label,picture,key],i)=>{
  const value=gained?(awards?.[key]??Number(gained.includes(reasons[i]))):GROWTH_AWARDS[key];
- return `<div class="gr-source gr-source-${i}">${picture}<strong>${label} +${value}</strong>${explain?`<small>${['Купи еду<br>или воду','Соблюдай<br>план дня','Отложи<br>штучки'][i]}</small>`:''}</div>`;
+ const status=statuses?.[key]||(gained&&value>0?'Сделано!':'');
+ return `<div class="gr-source gr-source-${i}${status?' has-completion':''}">${status?completionSticker(status):''}${picture}<strong>${label} +${value}</strong>${explain?`<small>${['Купи еду<br>или воду','Соблюдай<br>план дня','Отложи<br>штучки'][i]}</small>`:''}</div>`;
  }).join('')}</div>`;}
 function progress(s,heading,withSources=null,awards=null){
  const p=growthProgress(s),target=p.nextThreshold,filled=Math.min(target,Math.max(0,Math.floor(p.points)));
@@ -19,6 +21,10 @@ function progress(s,heading,withSources=null,awards=null){
 }
 const counter=s=>`<div class="gr-plan-count">${icon('check')}<strong>План выполнен ${countPlans(s)} ${planWord(countPlans(s))}</strong></div>`;
 export function growthPlanHelp(s,{saved=false}={}){
+ if(s.onboarding?.version===2){
+  const message=saved?'<h3>Теперь действуй по плану</h3><p>Штучки пока в кошельке. Покупай еду и вещи в пределах плана, а на мечту откладывай сам.</p>':'<h3>Чтобы хватило на важное и на мечту</h3><p>Ты уже позаботился о Пито, выбрал первую вещь и свою мечту. Теперь реши заранее: сколько оставить на заботу о Пито, сколько — на приятные покупки, а сколько — в копилку.</p><p>Это и есть финансовый план. Выполняй его — Пито будет расти быстрее!</p>';
+  return `<section class="growth-review gr-plan-help"><div class="gr-lesson gr-plan-message">${message}</div>${sources(null,null,true)}</section>`;
+ }
  const message=saved?'<h3>Теперь следуй плану</h3><p>Ты составил план, но твои деньги ещё не потрачены. Теперь тебе нужно самому ухаживать за Пито, покупать вещи и откладывать в копилку.</p><p>Не переживай, мы всё расскажем на следующих этапах.</p>':'<h3>Выполняй план — Пито будет расти быстрее!</h3><p>Оставляй штучки, чтобы покормить и помыть Пито. Выделяй, сколько хочешь потратить на покупку вещей и сколько отложить в копилку на свою мечту.</p>';
  return `<section class="growth-review gr-plan-help"><div class="gr-lesson gr-plan-message">${message}</div><div class="gr-stages">${['Малыш','С усиками','С ножками'].map((label,stage)=>`<div class="gr-stage">${puppet(s,stage)}<strong>${label}</strong></div>`).join('')}</div>${sources(null,null,true)}</section>`;
 }
@@ -35,6 +41,8 @@ export function dayReviewView(s){
  return {title:`День ${raw.cycle} завершён`,body,footer:'<button class="btn primary wide" data-act="next-cycle">Новый день</button>',closable:false};
 }
 export function growthReviewView(s){
- const body=`<div class="growth-review gr-details"><div class="gr-stages">${['Малыш','С усиками','С ножками'].map((label,stage)=>`<div class="gr-stage ${s.stage===stage?'current':''}" ${s.stage===stage?'aria-current="step"':''}>${puppet(s,stage)}<strong>${label}</strong></div>`).join('')}</div>${progress(s,'До нового роста')}${counter(s)}${sources()}<p class="gr-lesson">${s.stage===2?'Ты помог Пито вырасти. Впереди новые мечты!':'Каждый день эти решения помогают Пито расти.'}</p></div>`;
+ if(freeCare(s))return {title:'Пито растёт',body:`<div class="growth-review gr-details"><div class="gr-stages">${['Малыш','С усиками','С ножками'].map((label,stage)=>`<div class="gr-stage ${stage===0?'current':''}">${puppet(s,stage)}<strong>${label}</strong></div>`).join('')}</div><p class="gr-lesson">Сейчас Пито ещё малыш. Заботься о нём! Скоро узнаешь, как помогать ему расти быстрее.</p></div>`,footer:'<button class="btn primary wide" data-act="close">К Пито</button>',closable:true};
+ const today=cycleSummary(s),a=today.growthAwards||{},statuses={care:a.care?'Сделано!':'',savings:a.savings?'Сделано!':'',plan:s.plan&&a.plan?(s.review?'Сделано!':'По плану'):''};
+ const body=`<div class="growth-review gr-details"><div class="gr-stages">${['Малыш','С усиками','С ножками'].map((label,stage)=>`<div class="gr-stage ${s.stage===stage?'current':''}" ${s.stage===stage?'aria-current="step"':''}>${puppet(s,stage)}<strong>${label}</strong></div>`).join('')}</div>${progress(s,'До нового роста')}${counter(s)}${sources(null,null,false,statuses)}<p class="gr-lesson">${s.stage===2?'Ты помог Пито вырасти. Впереди новые мечты!':'Каждый день эти решения помогают Пито расти.'}</p></div>`;
  return {title:s.stage===2?'Пито вырос!':'Пито растёт',body,footer:'<button class="btn primary wide" data-act="close">К Пито</button>',closable:true};
 }

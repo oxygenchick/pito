@@ -11,10 +11,10 @@ export function compatibleAudioSource(source, Audio) {
   } catch {}
   return source;
 }
-const MUSIC_VOLUME = .12;
+const MUSIC_VOLUME = .09;
 const MUSIC_CROSSFADE_MS = 1200;
 const CLIP_COUNTS = {cute:10,eat:4,bubble:4,cheer:1,poopWet:5,poopRun:5};
-const CLIP_VOLUME = {cute:.38,eat:.50,bubble:.56,cheer:.52,poopWet:.42,poopRun:.5};
+const CLIP_VOLUME = {cute:.38,eat:.50,bubble:1,cheer:.52,poopWet:.42,poopRun:.5};
 const SELECT = new Set(['color','hair','goal-choice','goal-step','plan-item-step','plan-goal-step','plan-category','plan-food','journal-tab','budget-tab','shelf-page']);
 const STEP = new Set(['plan-step','plan-care-step','plan-allocation-step','plan-saving-step','transfer-step','transfer-preset','bank-step']);
 const BUBBLE = new Set(['settings','help','growth','last-period','journal','expenses','goal','choose-goal','shop','bank']);
@@ -54,9 +54,23 @@ export function installAudio(root, options = {}) {
   const clipBags=Object.fromEntries(Object.keys(CLIP_COUNTS).map(key=>[key,[]]));
   const lastClip=Object.fromEntries(Object.keys(CLIP_COUNTS).map(key=>[key,0]));
   const activeClips=new Set();
+  const musicRoutes=new WeakMap();
   const decodedClips=new Map();
   let activeCheer;
   const Audio=options.Audio??host.Audio;
+  function musicVolume(clip,volume){
+    if(!clip)return;
+    // iOS does not reliably implement HTMLMediaElement.volume. Use a gain node
+    // after the shared AudioContext is unlocked, with the same mix on Android.
+    if(context?.createMediaElementSource){
+      try{
+        let route=musicRoutes.get(clip);
+        if(!route){const source=context.createMediaElementSource(clip),gain=context.createGain();source.connect(gain);gain.connect(context.destination);route={source,gain};musicRoutes.set(clip,route);}
+        route.gain.gain.value=volume;clip.volume=1;return;
+      }catch{/* Keep ordinary media playback if routing is unsupported. */}
+    }
+    clip.volume=volume;
+  }
   const sourceFor=source=>compatibleAudioSource(source,Audio);
   function bufferFor(source){
     if(!decodedClips.has(source)){
@@ -116,7 +130,7 @@ export function installAudio(root, options = {}) {
   function playMusic(){
     if(!Audio)return;
     try{
-      if(!soundtrack){soundtrack=new Audio(sourceFor(musicScene==='game'?MUSIC_SRC:INTRO_MUSIC_SRC));soundtrack.preload='auto';soundtrack.loop=true;soundtrack.volume=MUSIC_VOLUME;}
+      if(!soundtrack){soundtrack=new Audio(sourceFor(musicScene==='game'?MUSIC_SRC:INTRO_MUSIC_SRC));soundtrack.preload='auto';soundtrack.loop=true;musicVolume(soundtrack,MUSIC_VOLUME);}
       if(soundtrack.paused!==false)return soundtrack.play();
     }catch{/* WebView or browser may lack a media decoder. */}
   }
@@ -124,7 +138,7 @@ export function installAudio(root, options = {}) {
     if(musicFadeTimer!==undefined)host.clearInterval(musicFadeTimer);
     musicFadeTimer=undefined;
     fadingMusic?.pause?.();fadingMusic=undefined;
-    if(soundtrack)soundtrack.volume=MUSIC_VOLUME;
+    musicVolume(soundtrack,MUSIC_VOLUME);
   }
   function setScene(scene){
     const next=scene==='game'?'game':'intro';
@@ -140,21 +154,21 @@ export function installAudio(root, options = {}) {
     }
     const outgoing=soundtrack;
     try{
-      const incoming=new Audio(source);incoming.preload='auto';incoming.loop=true;incoming.volume=0;
+      const incoming=new Audio(source);incoming.preload='auto';incoming.loop=true;musicVolume(incoming,0);
       soundtrack=incoming;fadingMusic=outgoing;
       const started=(host.performance?.now?.()??Date.now());
       musicFadeTimer=host.setInterval(()=>{
         const elapsed=(host.performance?.now?.()??Date.now())-started;
         const progress=Math.min(1,Math.max(0,elapsed/MUSIC_CROSSFADE_MS));
-        outgoing.volume=MUSIC_VOLUME*(1-progress);
-        incoming.volume=MUSIC_VOLUME*progress;
+        musicVolume(outgoing,MUSIC_VOLUME*(1-progress));
+        musicVolume(incoming,MUSIC_VOLUME*progress);
         if(progress>=1)clearMusicFade();
       },40);
       incoming.play()?.catch?.(()=>{
         if(soundtrack!==incoming)return;
         if(musicFadeTimer!==undefined)host.clearInterval(musicFadeTimer);
         musicFadeTimer=undefined;fadingMusic=undefined;
-        incoming.pause();soundtrack=outgoing;outgoing.volume=MUSIC_VOLUME;
+        incoming.pause();soundtrack=outgoing;musicVolume(outgoing,MUSIC_VOLUME);
         // Reuse the element already unlocked by the first tap on iOS.
         outgoing.src=source;outgoing.load?.();
         if(audible())outgoing.play()?.catch?.(()=>{});
@@ -162,7 +176,7 @@ export function installAudio(root, options = {}) {
     }catch{
       if(musicFadeTimer!==undefined)host.clearInterval(musicFadeTimer);
       musicFadeTimer=undefined;fadingMusic=undefined;
-      soundtrack=outgoing;outgoing.volume=MUSIC_VOLUME;
+      soundtrack=outgoing;musicVolume(outgoing,MUSIC_VOLUME);
     }
   }
   function tryAutoplay(){
@@ -251,7 +265,7 @@ export function installAudio(root, options = {}) {
   function stop(){
     if(timer!==undefined)host.clearInterval(timer);timer=undefined;
     clearMusicFade();
-    soundtrack?.pause?.();if(soundtrack)soundtrack.volume=MUSIC_VOLUME;
+    soundtrack?.pause?.();musicVolume(soundtrack,MUSIC_VOLUME);
     for(const clip of activeClips)clip.pause?.();activeClips.clear();
     if(context&&master){
       setRain(false);master.gain.cancelScheduledValues(context.currentTime);
@@ -273,6 +287,7 @@ export function installAudio(root, options = {}) {
         context=new AudioContext();master=context.createGain();effects=context.createGain();
         master.gain.value=0;effects.gain.value=1;
         effects.connect(master);master.connect(context.destination);
+        musicVolume(soundtrack,MUSIC_VOLUME);
       }
       await context.resume();
       if(!audible()){stop();return;}
@@ -291,8 +306,8 @@ export function installAudio(root, options = {}) {
     lastEffect=at;lastKind=kind;
     const hit=(midi,offset=0,duration=.17,volume=.10,timbre='wood')=>tone(midi,at+offset,duration,volume,timbre,effects);
     const click=(offset=0,bright=false)=>{
-      noise(at+offset,.045,bright?.045:.038,bright?2600:1400,effects);
-      hit(bright?72:67,offset,.06,bright?.058:.054,'bass');
+      noise(at+offset,.045,bright?.090:.076,bright?2600:1400,effects);
+      hit(bright?72:67,offset,.06,bright?.116:.108,'bass');
     };
     switch(kind){
       case 'select':click(0,true);break;

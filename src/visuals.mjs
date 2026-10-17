@@ -1,6 +1,7 @@
 import {groundBottom} from './meadow-ground.mjs';
 import {ITEM_ART} from './item-catalog.mjs';
 import {ownedPlaces} from './collection-layout.mjs';
+import {DAY_PHASES,dayArtPath} from './daylight.mjs';
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 // SVG remains available for functional charts, not decorative illustrations.
 export const svg=(body,cls='icon',view='0 0 64 64')=>`<svg class="${cls}" viewBox="${view}" aria-hidden="true">${body}</svg>`;
@@ -14,7 +15,7 @@ export function icon(id,cls='icon'){
  return `<img class="${cls}" src="assets/${['hand','cloud','comic','arrow','bike'].includes(key)?'ui-v10':version}/${name}.png" alt="" aria-hidden="true">`;
 }
 export const art=(id,cls='art')=>icon(id,cls);
-export const world=()=>'<div class="world" aria-hidden="true"></div>';
+export const world=()=>`<div class="world" aria-hidden="true">${DAY_PHASES.map(phase=>`<div class="day-art day-art-${phase}" style="background-image:url('${dayArtPath(phase)}')"></div>`).join('')}</div>`;
 const part=(name,cls)=>`<img class="${cls}" src="assets/${name==='body'?'ui-v13':name==='eyes-happy'?'ui-v11':['body','hair-1','mouth-smile','mouth-grin'].includes(name)?'ui-v10':'pet-v8'}/${name}.png" alt="" aria-hidden="true" draggable="false">`;
 const shape=(name,cls)=>{const url=`assets/${name==='body'?'ui-v13':'pet-v8'}/${name}.png`;return `<span class="${cls} sprite-shape" style="mask-image:url('${url}');-webkit-mask-image:url('${url}')" aria-hidden="true">${part(name,'shape-source')}</span>`;};
 export function pet(profile,preview=false,emotion){
