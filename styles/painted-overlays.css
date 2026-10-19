@@ -146,6 +146,7 @@
 #game .rv-bank-opening .rv-amount-bush.right{right:7px;transform:scaleX(-1)}
 #game .rv-bank-opening .rv-bonus::before{left:-22px}
 #game .rv-bank-opening .rv-bonus::after{right:-22px}
+#game .rv-bank.rv-bank-opening .rv-bonus::after,#game .rv-bank.rv-bank-opening .rv-amount h3::after{transform:translateY(-50%) scaleX(-1)}
 #game .rv-bank-opening .rv-stepper{width:100%;margin-top:12px;padding:7px 10px}
 #game .rv-bank-opening .rv-amount>.rv-caption{font-size:17px;white-space:nowrap;margin-top:12px}
 #game .modal-backdrop .panel:has(.rv-bank-opening){height:auto;min-height:0}
