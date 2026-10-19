@@ -1,0 +1,133 @@
+/* Shared flat visual language. Artwork stays canonical; text and values stay live. */
+#game{--rev-cream:#fff8e9;--rev-mint:#d0eee2;--rev-peach:#ffe0cd;--rev-lilac:#e7dafa;--rev-purple:#8952b0;--rev-ink:#30334f}
+#game .panel .btn{min-height:56px;box-shadow:none;text-shadow:none;font-size:23px;line-height:1.12;border:0;padding:12px 18px}
+#game .panel .btn.secondary{background:#e7dafa;border-radius:23px;color:#644080}
+#game .panel .close{background:none!important;border:0!important;box-shadow:none!important;outline:none;width:44px;height:44px;padding:10px}
+#game .panel .close:focus-visible{outline:2px solid #8952b0;outline-offset:2px}
+#game .panel .panel-body{overflow-x:hidden}
+#game .hud{display:flex;flex-direction:column}
+#game .hud .topbar{order:0}#game .hud .goal-strip{order:1}#game .hud .task-card{order:2}
+#game .task-card:not([data-act]){cursor:default;grid-template-columns:34px minmax(0,1fr)}
+#game div.task-card{font:inherit;text-align:left;color:var(--rev-ink)}
+#game .goal-shortcut{min-height:66px;text-align:left;gap:9px}
+#game .goal-shortcut>span{min-width:0}#game .goal-shortcut small{display:block;font-size:13px;line-height:1.15}
+#game .goal-shortcut .coin{display:inline-flex;font-size:15px;gap:3px}
+#game .goal-shortcut .coin>.icon{width:17px;height:17px}
+#game .panel:has(.revision-plan){position:absolute;left:50%;top:50%;width:400px;max-width:none;height:744px;max-height:none;padding:22px 16px;transform:translate(-50%,-50%) scale(var(--plan-scale,1));border:0;gap:0}
+#game .panel:has(.revision-plan) .panel-heading{height:40px;min-height:40px;padding:0 36px 0 0}
+#game .panel:has(.revision-plan) .panel-heading h2{font-size:29px;text-align:center}
+#game .panel:has(.revision-plan) .panel-body{padding:0;overflow:visible}
+#game .panel:has(.revision-plan) .panel-footer{padding:12px 0 0;translate:none;flex:0 0 68px}
+#game .panel:has(.revision-plan) .panel-footer .btn{height:56px;min-height:56px;font-size:25px}
+#game .revision-plan{gap:10px}
+#game .revision-plan .play-plan-wallet{height:65px;min-height:65px}
+#game .revision-plan .play-plan-care{height:138px;min-height:138px;padding:13px 12px 9px;display:flex;flex-direction:column;gap:9px;background-color:transparent;background-image:url('../assets/plan-approved/care.png')}
+#game .revision-plan .play-plan-care:after{display:none}
+#game .revision-plan .plan-care-label{text-align:center}
+#game .revision-plan .plan-care-label strong{font-size:23px;display:block}
+#game .revision-plan .plan-care-label>span{font-size:16px;display:block;margin-top:3px}
+#game .revision-plan .plan-care-apple,#game .revision-plan .plan-care-cloud{position:absolute;bottom:16px;width:58px;height:58px;pointer-events:none}
+#game .revision-plan .plan-care-apple{left:9px}#game .revision-plan .plan-care-cloud{right:9px}
+#game .revision-plan .plan-care-apple>.icon,#game .revision-plan .plan-care-cloud>.icon{width:100%;height:100%;object-fit:contain}
+#game .revision-plan .play-plan-care>.plan-saving-stepper{width:188px;background:var(--rev-cream);border-radius:24px;padding:6px;grid-template-columns:46px 1fr 46px}
+#game .revision-plan .play-plan-choice{height:295px;padding:14px 10px 10px;gap:5px}
+#game .revision-plan .play-plan-choice h3{font-size:24px;height:30px;min-height:30px}
+#game .revision-plan .play-plan-choice .plan-picture-picker{height:112px;min-height:112px;align-items:center}
+#game .revision-plan .play-plan-choice .plan-picture-picker .play-plan-art{width:118px;height:104px;max-width:85%;object-fit:contain}
+#game .revision-plan .play-plan-choice .plan-browse{top:34px;width:44px;height:44px;right:-10px;padding:12px;z-index:3}
+#game .revision-plan .play-plan-choice .plan-browse.previous{left:-10px}
+#game .revision-plan .plan-choice-name{font-size:20px;min-height:27px;height:27px;line-height:1.1}
+#game .revision-plan .plan-item-cost{height:33px;display:flex;align-items:center;justify-content:center;gap:4px;font-size:15px}
+#game .revision-plan .plan-item-cost .play-plan-coins{font-size:22px;gap:3px}
+#game .revision-plan .plan-item-cost .icon{width:23px;height:23px}
+#game .revision-plan .plan-envelope{height:65px;min-height:65px;bottom:8px;left:8px;right:8px;padding:8px 4px;background:none}
+#game .revision-plan .plan-free{height:45px;min-height:45px;background:#fbefda;border-radius:28px;font-size:19px;display:flex;justify-content:center;align-items:center;gap:7px}
+#game .revision-plan .plan-free .play-plan-coins{font-size:27px}
+#game .revision-plan .plan-care-apple::before,#game .revision-plan .plan-care-cloud::before{content:'';position:absolute;inset:-18px -12px;background:url('../assets/revision/leaves.svg') center/contain no-repeat;z-index:-1}
+#game .revision-plan .plan-care-cloud::before{transform:scaleX(-1)}
+#game .revision-plan .play-plan-choice h3::before,#game .revision-plan .play-plan-choice h3::after{content:'';position:absolute;width:18px;height:30px;top:40px;left:7px;background:url('../assets/revision/rays.svg') center/contain no-repeat;pointer-events:none}
+#game .revision-plan .play-plan-choice h3::after{left:auto;right:7px;transform:scaleX(-1)}
+#game .gr-details .gr-progress h3{position:relative}
+#game .gr-details .gr-progress h3::before,#game .gr-details .gr-progress h3::after{content:'';display:inline-block;width:18px;height:27px;background:url('../assets/revision/rays.svg') center/contain no-repeat;vertical-align:middle;margin:0 5px}
+#game .gr-details .gr-progress h3::after{transform:scaleX(-1)}
+#game .panel .plan-saving-stepper button{border:0;box-shadow:none;width:46px;height:46px}
+#game .panel:has(.growth-review){padding:22px 15px 18px}
+#game .gr-stages{gap:4px}
+#game .gr-stage{padding:10px 0;border-radius:30px}
+#game .gr-stage{position:relative}
+#game .gr-stage:not(:last-child)::after{content:none}
+#game .gr-stage.current{background:var(--rev-mint)}
+#game .gr-stage strong{font-size:16px;white-space:nowrap}
+#game .gr-stages .gr-pet-frame{width:96px;height:104px}
+#game .gr-stages .gr-pet-frame .pet{width:84px;height:75px}
+#game .gr-stages .gr-pet-frame .pet.grown{width:64px;height:96px}
+#game .gr-stages .gr-pet-frame .pet.grown .pet-body{bottom:37px}
+#game .gr-progress{background:var(--rev-lilac);border:0;border-image:none;border-radius:30px 35px 28px 32px;padding:18px 12px;gap:12px}
+#game .gr-dots{display:grid;grid-template-columns:repeat(5,24px);gap:9px;max-width:none;width:auto}
+#game .gr-dots i{width:24px;height:24px;border:3px solid #b49ad2}
+#game .gr-dots i.filled{background:#9b69c2;border-color:#9b69c2}
+#game .gr-source{background:var(--rev-mint);border:0;border-image:none;border-radius:26px 22px 25px 21px;padding:14px 4px;min-height:112px;gap:10px}
+#game .gr-source-1{background:var(--rev-peach)}#game .gr-source-2{background:var(--rev-lilac)}
+#game .gr-source>.icon{width:53px;height:53px}#game .gr-source strong{font-size:17px}
+#game .gr-lesson{background:var(--rev-peach);border:0;border-image:none;border-radius:28px;padding:16px}
+#game .gr-plan-help .gr-plan-message{padding:17px;gap:10px}
+#game .gr-plan-help .gr-plan-message p{font-size:17px}
+#game .gr-growth-caption{font-size:15px}
+#game .gr-day{gap:9px}
+#game .gr-day .gr-pet-frame{height:125px}
+#game .gr-day .gr-progress{padding:12px;gap:8px}
+#game .gr-day .gr-source{min-height:70px;padding:8px 3px;gap:4px}
+#game .gr-day .gr-source>.icon{height:35px;width:35px}
+#game .gr-day .gr-source strong{font-size:15px}
+#game .gr-day .gr-lesson{padding:10px;font-size:15px}
+#game .gr-differences{display:grid;gap:5px}
+#game .gr-difference{padding:8px 12px;background:var(--rev-peach);border:0;border-image:none;border-radius:20px}
+#game .gr-difference h3{font-size:16px}
+#game .gr-comparison{display:flex;justify-content:center;gap:20px;margin-top:4px;font-size:15px}
+#game .gr-comparison b{font-size:18px}
+#game .gr-day .gr-progress-count{font-size:20px}
+#game .gr-day .gr-progress>p{display:none}
+#game .gr-day .gr-differences{background:var(--rev-peach);border-radius:22px;padding:5px 12px;gap:0}
+#game .gr-day .gr-difference{padding:7px 0;border-radius:0;background:none}
+#game .gr-day .gr-difference+.gr-difference{border-top:1px solid #efc9b5}
+#game .gr-day .gr-comparison{margin-top:2px}
+#game .revision-money .money-meaning{font-size:23px;line-height:1.25}
+#game .money-uses{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}
+#game .money-uses>span{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 4px;background:var(--rev-mint);border-radius:24px;font-size:15px}
+#game .money-uses>span:nth-child(2){background:var(--rev-peach)}#game .money-uses>span:nth-child(3){background:var(--rev-lilac)}
+#game .money-uses .icon{width:62px;height:62px;object-fit:contain}
+#game .revision-gift-art{background:var(--rev-peach);border-radius:38% 42% 34% 40%;padding:24px;margin:15px auto;width:100%;max-width:290px;box-sizing:border-box}
+#game .revision-gift-art .km-art{width:100%;height:190px;max-width:none;margin:0;object-fit:contain}
+#game .revision-price-tag{background:#fbefda;border-radius:17px;display:table;padding:12px 28px;margin:16px auto;font-size:24px;font-weight:bold;transform:rotate(-3deg)}
+#game .revision-summary{display:grid;gap:10px;margin:15px 0}
+#game .revision-summary>div{display:grid;grid-template-columns:53px 1fr auto;gap:10px;align-items:center;text-align:left;background:var(--rev-mint);padding:16px 12px;border-radius:25px}
+#game .revision-summary>div:nth-child(2){background:var(--rev-peach)}#game .revision-summary>div:nth-child(3){background:var(--rev-lilac)}
+#game .revision-summary>div>.icon{width:50px;height:50px;object-fit:contain}
+#game .revision-summary .coin{font-size:25px}
+#game .revision-saved .gr-lesson p{font-size:17px;line-height:1.25;margin:8px 0 0}
+#game .revision-saved .gr-plan-reward{margin:0;background:var(--rev-mint);border-radius:26px}
+@media(max-height:700px){
+ #game .revision-saved .revision-summary{gap:7px;margin:10px 0}
+ #game .revision-saved .revision-summary>div{grid-template-columns:38px 1fr auto;padding:8px 10px;gap:8px;min-height:52px;box-sizing:border-box}
+ #game .revision-saved .revision-summary>div>.icon{width:36px;height:36px}
+ #game .revision-saved .revision-summary .coin{font-size:22px}
+ #game .revision-saved .gr-plan-reward{padding:8px 12px}
+ #game .revision-saved .gr-lesson{padding:12px}
+ #game .revision-saved .gr-lesson p{font-size:16px;margin-top:6px;line-height:1.2}
+ #game .panel:has(.gr-day){padding:14px;max-height:calc(100% - 16px)}
+ #game .gr-day{gap:6px}#game .gr-day .gr-pet-frame{height:99px}#game .gr-day .gr-pet-frame .pet{width:88px;height:74px}
+ #game .gr-day .gr-progress{padding:9px;gap:6px}#game .gr-day .gr-source{min-height:60px;padding:5px 3px}
+ #game .gr-day .gr-source>.icon{height:29px;width:29px}#game .gr-day .gr-care-art{transform:scale(.75);height:30px}
+ #game .gr-day .gr-dots{grid-template-columns:repeat(5,20px);gap:5px}#game .gr-day .gr-dots i{width:20px;height:20px}
+ #game .gr-day .gr-result-title{font-size:26px}#game .gr-day .gr-lesson{font-size:14px}
+ #game .gr-day .gr-difference{padding:5px 10px}#game .gr-day .gr-difference h3{font-size:14px}
+ #game .gr-day .gr-pet-frame .pet.grown{width:58px;height:80px}
+ #game .gr-day .gr-pet-frame .pet.grown .pet-body{bottom:32px}
+ #game .gr-day .gr-pet-frame .pet.grown .pet-legs{width:29px;height:39px}
+ #game .gr-day .gr-comparison{font-size:14px;line-height:1.1}
+ #game .gr-day .gr-differences{padding:2px 8px}
+ #game .gr-day .gr-difference h3{line-height:1.1}
+ #game .panel:has(.gr-day) .panel-footer{padding-top:8px}
+ #game .gr-day .gr-lesson{padding:7px 10px}
+ #game .gr-day .gr-pet-frame{height:93px}
+}

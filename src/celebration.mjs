@@ -2,6 +2,7 @@
 const seen = new WeakMap();
 export function celebrationKey(profile, modal, successfulPlan = false) {
  if (!profile) return null;
+ if (modal === 'bank' && profile.deposit && profile.completedCycles>=profile.deposit.due) return `bank:${profile.deposit.due}:${profile.deposit.principal}:${profile.deposit.bonus}`;
  if (modal === 'grown-event') return `growth:${profile.stage}`;
  if (modal === 'purchase-event' && profile.pendingPurchase?.dream) return `dream:${profile.pendingPurchase.id}`;
  if (modal === 'review' && successfulPlan) return `plan:${profile.cycle}`;
@@ -20,7 +21,7 @@ export function celebrate(root, profile, modal) {
  const {width, height} = root.getBoundingClientRect();
  for (let i = 0; i < 28; i++) {
   const side = i % 2, lane = Math.floor(i / 2), piece = document.createElement('img');
-  piece.src = `assets/celebration/confetti-${i % 6}.png`;
+  piece.src = key.startsWith('bank:')?'assets/ui-v8/coin.png':`assets/celebration/confetti-${i % 6}.png`;
   piece.alt = ''; piece.draggable = false;
   piece.style.left = (side ? width - 12 : 12) + 'px';
   piece.style.top = height * .73 + 'px';

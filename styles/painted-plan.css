@@ -1,0 +1,52 @@
+/* Screen 20: authored geometry; live amounts and controls over raster plates. */
+#game .revision-plan{gap:9px}
+#game .revision-plan .play-plan-wallet{height:61px;min-height:61px}
+#game .revision-plan .play-plan-wallet .play-plan-coins{font-size:36px}
+#game .revision-plan .play-plan-care{height:140px;min-height:140px;padding:15px 0 8px;gap:11px}
+#game .revision-plan .plan-care-label strong{font-size:24px}
+#game .revision-plan .plan-care-label>span{font-size:16px}
+#game .revision-plan .plan-care-apple,#game .revision-plan .plan-care-cloud{width:85px;height:100px;bottom:3px;background:center/contain no-repeat}
+#game .revision-plan .plan-care-apple{left:7px}
+#game .revision-plan .plan-care-cloud{right:7px}
+#game .revision-plan .plan-care-apple{background-image:url('../assets/revision/plan-care-apple.png');filter:saturate(.58)}
+#game .revision-plan .plan-care-cloud{background-image:url('../assets/revision/plan-care-cloud.png');filter:saturate(.58)}
+#game .revision-plan .plan-care-apple>.icon,#game .revision-plan .plan-care-cloud>.icon{visibility:hidden}
+#game .revision-plan .plan-care-apple::before,#game .revision-plan .plan-care-cloud::before{content:none}
+#game .revision-plan .play-plan-care>.plan-saving-stepper{width:204px;padding:4px 8px;grid-template-columns:48px minmax(0,1fr) 48px;border-radius:14px;background:var(--rev-cream);z-index:2}
+#game .revision-plan .plan-saving-stepper button{width:48px;height:48px;background-size:42px 42px}
+#game .revision-plan .play-plan-care .play-plan-coins{font-size:32px;gap:4px}
+#game .revision-plan .play-plan-care .play-plan-coins .icon{width:29px;height:29px}
+#game .revision-plan .play-plan-choices{gap:10px}
+#game .revision-plan .play-plan-choice{height:305px;padding:11px 8px 9px;gap:0;background-image:url('../assets/revision/plan20-want.png');background-size:100% 100%;border-radius:26px;overflow:hidden}
+#game .revision-plan .play-plan-choice.play-plan-save{background-image:url('../assets/revision/plan20-dream.png')}
+#game .revision-plan .play-plan-choice h3{height:34px;min-height:34px;font-size:25px}
+#game .revision-plan .play-plan-choice h3::before,#game .revision-plan .play-plan-choice h3::after{top:25px;width:22px;height:33px;background-image:url('../assets/revision/plan20-rays-coral.png')}
+#game .revision-plan .play-plan-save h3::before,#game .revision-plan .play-plan-save h3::after{background-image:url('../assets/revision/plan20-rays-lilac.png')}
+#game .revision-plan .play-plan-choice .plan-picture-picker{height:110px;min-height:110px;width:100%}
+#game .revision-plan .play-plan-choice .plan-picture-picker .play-plan-art{width:148px;height:110px;max-width:100%;object-fit:contain}
+#game .revision-plan .play-plan-choice .plan-browse{top:34px;right:0;width:38px;height:38px;min-height:38px;padding:0;display:grid;place-items:center;z-index:3;background:var(--rev-cream);border-radius:12px;box-shadow:none}
+#game .revision-plan .play-plan-choice .plan-browse.previous{left:0}
+#game .revision-plan .play-plan-choice .plan-browse .icon{width:17px!important;height:19px!important}
+#game .revision-plan .plan-choice-name{height:27px;min-height:27px;font-size:19px;line-height:1.1}
+#game .revision-plan .plan-item-cost{height:42px;min-height:42px;font-size:17px}
+#game .revision-plan .plan-item-cost .play-plan-coins{font-size:27px}
+#game .revision-plan .plan-item-cost .icon{width:27px;height:27px}
+#game .revision-plan .play-plan-want .plan-item-cost{position:relative;min-width:108px;height:46px;min-height:46px;background:url('../assets/plan-v16/price-tag.png') center/contain no-repeat;padding:0 12px 0 20px;rotate:-3deg}
+#game .revision-plan .play-plan-want .plan-item-cost::after{content:'';position:absolute;right:-23px;top:4px;width:23px;height:34px;background:url('../assets/revision/plan20-rays-gold.png') center/contain no-repeat}
+#game .revision-plan .fixed-goal::before,#game .revision-plan .fixed-goal::after{content:'';position:absolute;width:17px;height:24px;bottom:5px;left:3px;background:url('../assets/pet-v8/sparkle.png') center/contain no-repeat}
+#game .revision-plan .fixed-goal::after{left:auto;right:3px;bottom:9px;width:13px;height:18px}
+#game .revision-plan .plan-envelope{position:absolute;left:7px;right:7px;bottom:8px;height:63px;min-height:63px;background:var(--rev-cream);border-radius:14px;padding:5px;display:grid;align-items:center}
+#game .revision-plan .plan-envelope .plan-saving-stepper{width:100%;grid-template-columns:48px minmax(0,1fr) 48px;gap:0}
+#game .revision-plan .plan-envelope .play-plan-coins{font-size:33px}
+#game .revision-plan .plan-free{height:44px;min-height:44px;font-size:19px;padding:0 12px}
+#game .revision-plan .plan-free::after{content:'';width:20px;height:30px;background:url('../assets/revision/plan20-rays-gold.png') center/contain no-repeat}
+#game .panel:has(.revision-plan) .panel-footer{padding-top:10px}
+#game .panel:has(.revision-plan) .panel-heading{padding:0;text-align:center}
+#game .panel:has(.revision-plan) .panel-heading h2{width:100%;margin-inline:0;text-align:center}
+#game .revision-plan .play-plan-wallet::after,#game .revision-plan .play-plan-wallet>span:first-child::before{width:30px;height:49px;background-image:url('../assets/revision/food-sparkles-left.png');background-size:contain;background-position:center}
+#game .revision-plan .play-plan-wallet::after{left:calc(50% - 111px)}
+#game .revision-plan .play-plan-wallet>span:first-child::before{left:auto;right:calc(50% - 111px)}
+#game .revision-plan .play-plan-save .plan-item-cost{gap:4px;font-size:16px;white-space:nowrap}
+#game .revision-plan .play-plan-save .plan-item-cost .play-plan-coins{font-size:25px;gap:3px}
+#game .revision-plan .play-plan-save .plan-item-cost .icon{width:24px;height:24px}
+#game .plan-day-note{font-size:14px;line-height:1.15;text-align:center;margin:0 4px 7px;color:#665777}

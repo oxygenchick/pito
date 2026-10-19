@@ -1,0 +1,65 @@
+/* Raster-backed growth composition, scoped away from the day review. */
+#game .gr-painted{gap:12px}
+#game .gr-painted .gr-painted-intro{font-size:20px;line-height:1.2;font-weight:700;padding:0 8px 3px}
+#game .gr-painted .gr-growth-board{padding:8px;background:url('../assets/finance-polish/mint.png') center/100% 100% no-repeat}
+#game .gr-painted .gr-stages{gap:5px}
+#game .gr-painted .gr-stage{background:none;border:0;border-image:none;border-radius:0;padding:4px 0 8px}
+#game .gr-painted .gr-stage.current{background:url('../assets/finance-polish/mint.png') center/100% 100% no-repeat}
+#game .gr-painted .gr-stages .gr-pet-frame{width:100%;height:104px}
+#game .gr-painted .gr-stage strong{font-size:15px;line-height:1.1}
+#game .gr-painted .gr-stage:not(:last-child)::after{content:none}
+#game .gr-painted .gr-progress{border:0;border-image:none;border-radius:0;background:url('../assets/finance-polish/hero.png') center/100% 100% no-repeat;padding:13px 7px 12px;gap:10px}
+#game .gr-painted .gr-progress h3{font-size:21px}
+#game .gr-painted .gr-progress h3::before,#game .gr-painted .gr-progress h3::after{width:12px;margin:0 4px;height:19px}
+#game .gr-painted .gr-progress-count{font-size:23px}
+#game .gr-painted .gr-dots{grid-template-columns:repeat(5,24px);gap:7px 11px}
+#game .gr-painted .gr-plan-boost{display:block;background:url('../assets/finance-polish/hero.png') center/100% 100% no-repeat;padding:6px 4px 12px;margin-top:-7px;font-size:19px}
+#game .gr-painted .gr-sources{gap:7px}
+#game .gr-painted .gr-source{position:relative;min-height:127px;padding:14px 2px 12px;gap:12px;border:0;border-image:none;border-radius:0;background:url('../assets/finance-polish/mint.png') center/100% 100% no-repeat}
+#game .gr-painted .gr-source-1{background-image:url('../assets/finance-polish/peach.png')}
+#game .gr-painted .gr-source-2{background-image:url('../assets/finance-polish/hero.png')}
+#game .gr-painted .gr-source>.icon{width:62px;height:65px}
+#game .gr-painted .gr-source strong{font-size:17px;letter-spacing:-.35px}
+#game .gr-painted .gr-care-art{width:76px;height:65px}
+#game .gr-painted .gr-care-art>.icon{width:57px;height:57px}
+#game .gr-painted .gr-care-art>.icon+.icon{width:45px;height:40px;left:32px;top:26px}
+#game .gr-painted .gr-source.has-completion{padding-top:27px}
+#game .gr-painted .gr-source .completion-sticker{top:2px;font-size:11px}
+#game .gr-painted .gr-painted-lesson{position:relative;border:0;border-image:none;border-radius:0;background:url('../assets/finance-polish/peach.png') center/100% 100% no-repeat;padding:17px 24px;font-size:20px;line-height:1.2;font-weight:700}
+#game .gr-painted .gr-painted-lesson::before,#game .gr-painted .gr-painted-lesson::after{content:'';position:absolute;top:21px;left:8px;width:19px;height:28px;background:url('../assets/finance-polish/rays.png') center/contain no-repeat}
+#game .gr-painted .gr-painted-lesson::after{left:auto;right:8px;transform:scaleX(-1)}
+#game .gr-painted .gr-plan-count{background:none;border:0;border-image:none;padding:0;min-height:24px;font-size:16px;gap:5px}
+#game .gr-painted .gr-plan-count>.icon{width:20px;height:20px}
+#game .gr-painted .gr-growth-caption{font-size:13px;line-height:1.15;color:#776790;padding:0 8px}
+#game .panel:has(.gr-painted) .panel-heading h2{font-size:27px}
+#game .panel:has(.gr-painted) .panel-heading{padding-bottom:10px}
+#game .gr-painted .gr-growth-board{background:none;border:0 solid transparent;border-image:url('../assets/finance-polish/mint.png') 35 fill / 24px stretch}
+#game .gr-plan-help.gr-painted .gr-progress{padding:9px 7px;gap:7px}
+#game .gr-plan-help.gr-painted .gr-progress h3{display:none}
+@media(max-height:700px){
+ #game .panel:has(.gr-painted){padding:16px 13px 14px}
+ #game .panel:has(.gr-painted) .panel-heading h2{font-size:24px}
+ #game .panel:has(.gr-painted) .panel-heading{min-height:34px;padding:0 24px 8px}
+ #game .panel:has(.gr-painted) .panel-footer{padding-top:9px}
+ #game .gr-painted{gap:8px}
+ #game .gr-painted .gr-painted-intro{font-size:18px}
+ #game .gr-painted .gr-stages .gr-pet-frame{height:80px}
+ #game .gr-painted .gr-stages .gr-pet-frame .pet{width:72px;height:67px}
+ #game .gr-painted .gr-stages .gr-pet-frame .pet.grown{width:56px;height:83px}
+ #game .gr-painted .gr-source{min-height:94px;padding:8px 2px;gap:5px}
+ #game .gr-painted .gr-source>.icon{width:48px;height:48px}
+ #game .gr-painted .gr-care-art{transform:scale(.8);height:48px}
+ #game .gr-painted .gr-source strong{font-size:16px}
+ #game .gr-painted .gr-progress{gap:7px;padding:10px 6px}
+ #game .gr-painted .gr-progress h3{font-size:19px}
+ #game .gr-painted .gr-dots{grid-template-columns:repeat(5,20px);gap:5px 9px}
+ #game .gr-painted .gr-dots i{width:20px;height:20px}
+ #game .gr-painted .gr-progress-count{font-size:20px}
+ #game .gr-painted .gr-painted-lesson{padding:12px 22px;font-size:18px}
+ #game .gr-painted .gr-plan-boost{font-size:17px;padding-bottom:7px}
+ #game .gr-plan-help.gr-painted .gr-progress-count{font-size:17px}
+ #game .gr-plan-help.gr-painted .gr-stage strong{display:none}
+ #game .gr-plan-help.gr-painted .gr-growth-caption{font-size:12px}
+ #game .gr-plan-help.gr-painted{gap:5px}
+ #game .gr-plan-help.gr-painted .gr-painted-lesson{padding-top:10px;padding-bottom:10px}
+}

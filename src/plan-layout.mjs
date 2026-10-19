@@ -1,6 +1,6 @@
 // Scale the entire authored popup uniformly, never its individual panels.
 export function planScale(width,height) {
- return Math.max(.1,Math.min(1,(width-12)/400,(height-12)/720));
+ return Math.max(.1,Math.min(1,(width-12)/400,(height-12)/744));
 }
 export function installPlanLayout(root) {
  const update=()=>{

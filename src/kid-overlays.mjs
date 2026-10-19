@@ -1,5 +1,7 @@
 import * as E from './engine.mjs';
 import {art, icon} from './visuals.mjs';
+import {missionLearning,childLearning} from './learning-copy.mjs';
+import {parentSkills} from './parent-progress.mjs';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number = value => new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(Number.isFinite(Number(value))?Number(value):0);
@@ -9,7 +11,7 @@ const back = () => button('К Пито','close',{secondary:true});
 const ready = s => s.tutorial==='done' && Boolean(s.plan) && !s.review && !s.pendingGrowth && !s.adultNotice && !s.pendingPurchase && !s.pendingIncome && !s.pendingReward;
 const error = ui => ui.error?`<p class="ko-message error" role="alert">${esc(ui.error)}</p>`:'';
 const wrap = content => `<div class="ko-content">${content}</div>`;
-const goalArrow = (dir,disabled=false) => `<button class="btn ko-goal-arrow ${dir<0?'previous':''}" data-act="goal-step" data-id="${dir}" aria-label="${dir<0?'Предыдущая мечта':'Следующая мечта'}" ${disabled?'disabled':''}>${icon('arrow')}</button>`;
+const goalArrow = (dir,id,disabled=false) => `<button class="btn rv-goal-arrow ${dir<0?'previous':''}" data-act="goal-choice" data-id="${esc(id)}" aria-label="${dir<0?'Предыдущая мечта':'Следующая мечта'}" ${disabled?'disabled':''}>${icon('arrow')}</button>`;
 
 function goalView(s,ui) {
   const g = E.GOALS.find(g=>g.id===s.goal)||E.GOALS[0];
@@ -19,21 +21,20 @@ function goalView(s,ui) {
   const amount = limit?Math.min(limit,Math.max(1,requested)):0, validAmount = amount>0;
   const planned = s.plan?.[2]??0, savedToday = E.cycleSummary(s).actual.savings;
   const careLeft=Math.max(0,(s.plan?.[0]??4)-Math.max(0,E.cycleSummary(s).actual.care));
-  const choices=E.GOALS.filter(goal=>!s.goalsWon.includes(goal.id));
-  const cannotBrowse=!ready(s)||choices.length===0||(choices.length===1&&choices[0].id===g.id);
-  const hero = `<section class="sv-hero"><div class="ko-goal-carousel">${goalArrow(-1,cannotBrowse)}<div class="ko-goal-art">${art(g.id,'art')}</div>${goalArrow(1,cannotBrowse)}</div><h3 class="sv-goal-name">${esc(g.name)}</h3><p class="ko-goal-price" aria-label="Цена ${number(g.price)} штучек">${coin(g.price)}</p></section>`;
+  const hero = `<section class="rv-dream-hero"><div class="rv-dream-picture">${art(g.id,'art')}</div><h3>${esc(g.name)}</h3></section>`;
   const progress = `<div class="ko-progress" role="progressbar" aria-label="Накоплено на мечту" aria-valuemin="0" aria-valuemax="${g.price}" aria-valuenow="${Math.min(s.savings,g.price)}" aria-valuetext="${number(s.savings)} из ${g.price}"><i style="width:${Math.min(100,s.savings/g.price*100)}%"></i></div>`;
-  if(E.pacedIntro(s)&&s.missions?.goal)return {title:'Моя мечта',body:`<div class="savings-screen ss-dream">${hero}<div class="sv-progress"><p>Накоплено ${number(s.savings)} из ${number(g.price)}</p>${progress}</div><p class="lead">Это твоя мечта! Скоро составим план и начнём на неё откладывать.</p></div>`,footer:back(),closable:true};
-  let body = hero+`<div class="sv-progress"><p>Накоплено ${number(s.savings)} из ${number(g.price)}</p>${progress}${won?'<p>Уже на лужайке</p>':enough?'<p>Накопили!</p>':''}</div><section class="sv-plan">${icon('task','sv-plan-icon')}<div class="sv-plan-copy"><div><span>Сегодня по плану</span>${coin(planned)}</div><div><span>Уже отложено</span>${coin(savedToday)}</div></div></section>`;
+  const saved = `<section class="rv-plate rv-lavender rv-saved">${icon('jar','rv-jar')}<div><h3>В копилке</h3><p>${coin(s.savings)} из ${number(g.price)}</p>${progress}${won?'<small>Уже на лужайке</small>':enough?'<small>Накопили!</small>':''}</div></section>`;
+  if(E.pacedIntro(s)&&s.missions?.goal)return {title:'Моя мечта',body:`<div class="revision-overlay rv-savings">${hero}${saved}<p>Это твоя мечта! Скоро составим план и начнём на неё откладывать.</p></div>`,footer:back(),closable:true};
+  let body = hero+saved+`<section class="rv-plate rv-peach rv-savings-plan"><img class="rv-plan-icon" src="assets/revision/dream-plan-v2.png" alt=""><div><p><span>По плану</span>${coin(planned)}</p><p><span>Отложено</span>${coin(savedToday)}</p></div></section>`;
   if(ui.transferNotice) body+=`<p class="ko-transfer-notice" role="status">${icon('check')}${esc(ui.transferNotice)}</p>`;
   if (!won&&!enough) {
-    body+=`<section class="sv-amount"><p class="sv-stepper-label">Сколько отложим?</p><div class="sv-stepper ko-transfer-stepper" role="group" aria-label="Сколько отложить"><button class="btn" data-act="transfer-step" data-delta="-1" aria-label="Отложить на одну штучку меньше" ${!ready(s)||amount<=1?'disabled':''}><img src="./assets/ui-v11/minus.png" class="icon" alt=""></button><output aria-live="polite">${coin(amount)}</output><button class="btn" data-act="transfer-step" data-delta="1" aria-label="Отложить на одну штучку больше" ${!ready(s)||amount>=limit?'disabled':''}><img src="./assets/ui-v11/plus.png" class="icon" alt=""></button></div><p class="sv-wallet">В кошельке ${coin(s.wallet)}</p></section>`;
+    body+=`<section class="rv-plate rv-cream rv-amount"><h3>Сколько отложим в копилку?</h3><div class="rv-stepper ko-transfer-stepper" role="group" aria-label="Сколько отложить в копилку"><button class="btn" data-act="transfer-step" data-delta="-1" aria-label="Отложить на одну штучку меньше" ${!ready(s)||amount<=1?'disabled':''}>${icon('minus')}</button><output aria-live="polite">${coin(amount)}</output><button class="btn" data-act="transfer-step" data-delta="1" aria-label="Отложить на одну штучку больше" ${!ready(s)||amount>=limit?'disabled':''}>${icon('plus')}</button></div></section>`;
     if(validAmount&&s.wallet-amount<careLeft)body+='<p class="ko-message">Если отложить ещё, останется мало на еду и воду.</p>';
     if(s.wallet<1)body+='<p class="ko-message">Завтра будут новые штучки.</p>';
   }
   body+=error(ui);
   const footer = won?back():enough?button(`Купить ${coin(g.price)}`,'claim-goal',{disabled:!ready(s),extra:`data-category="wants" data-price="${g.price}" data-effect="collection"`}) : button(`Отложить ${coin(amount)}`,'transfer',{disabled:!ready(s)||!validAmount,extra:'data-category="savings" data-effect="goal-progress"'});
-  return {title:'Моя мечта',body:`<div class="savings-screen ss-dream">${body}</div>`,footer,closable:true};
+  return {title:'Моя мечта',body:`<div class="revision-overlay rv-savings">${body}</div>`,footer,closable:true};
 }
 
 function bankView(s,ui) {
@@ -45,38 +46,50 @@ function bankView(s,ui) {
   const principal = deposit?.principal??Math.max(0,amount);
   const returned = deposit?Math.ceil(deposit.principal+deposit.bonus):principal+E.depositBonus(principal);
   const left = deposit?Math.max(0,deposit.due-s.completedCycles):E.DEPOSIT_DAYS;
-  const eligible = ready(s)&&s.cycle>=3&&Boolean(s.missions?.save&&s.missions?.goal);
+  const eligible = ready(s)&&E.bankAvailable(s);
   const canOpen = eligible && !deposit && Number.isSafeInteger(amount)&&amount>=E.DEPOSIT_MIN&&amount<=available;
   const canCollect = s.tutorial==='done'&&!s.review&&!s.pendingGrowth&&!s.adultNotice&&!s.pendingIncome&&!s.pendingReward&&!s.pendingPurchase&&Boolean(deposit)&&left===0&&validDeposit;
   let message = left>0?'Штучки остаются твоими. Забрать можно в любой момент, но раньше срока — без дохода.':'Можно забрать штучки и доход!';
   if (!deposit&&!eligible) message = 'Сначала попробуй копилку. Вклад появится на третий день.';
-  else if (!deposit&&available<E.DEPOSIT_MIN) message = 'Для вклада нужно хотя бы 10 штучек в кошельке.';
+  else if (!deposit&&available<E.DEPOSIT_MIN) message = 'Для вклада нужно хотя бы 3 штучки в кошельке.';
   if (!validDeposit) message='Этот вклад не удалось прочитать.';
   const term = left===0?'Срок закончился':left===1?'Через 1 игровой день':`Через ${number(left)} игровых дня`;
-  const controls = deposit?'':`<section class="sv-amount"><p class="sv-stepper-label">Сколько положим? От 10 штучек</p><div class="sv-stepper ko-transfer-stepper ko-bank-stepper"><button class="btn" data-act="bank-step" data-delta="-1" aria-label="Вложить на одну штучку меньше" ${!eligible||amount<=E.DEPOSIT_MIN?'disabled':''}><img src="./assets/ui-v11/minus.png" class="icon" alt=""></button><output aria-live="polite">${coin(principal)}</output><button class="btn" data-act="bank-step" data-delta="1" aria-label="Вложить на одну штучку больше" ${!eligible||amount>=available?'disabled':''}><img src="./assets/ui-v11/plus.png" class="icon" alt=""></button></div><p class="sv-wallet">В кошельке ${coin(s.wallet)}</p></section>`;
-  const warning=!deposit&&funding==='wallet'&&available-amount<E.careReserve(s)?'<p class="ko-message ko-bank-warning">На еду и воду останется меньше, чем ты запланировал.</p>':'';
-  const body = `${!deposit?'<p class="sv-intro">Банк использует деньги в своей работе и платит тебе за это заранее обещанный доход.</p>':''}<section class="sv-hero"><div class="sv-bank-picture">${icon('jar','sv-bank-art')}<img class="sv-rays left" src="assets/finance-polish/rays.png" alt=""><img class="sv-rays right" src="assets/finance-polish/rays.png" alt=""></div><div class="sv-return ko-bank-offer"><div><span>${deposit?'Положили':'Положишь'}</span>${coin(principal)}</div>${icon('arrow')}<div><span>В конце срока</span>${coin(returned)}</div></div><p class="sv-bonus">Доход +${number(returned-principal)}</p></section><section class="sv-lock ${deposit?'sv-lock-open':''}">${icon(left===0?'check':'sun','sv-lock-icon')}<div class="sv-term ko-bank-term"><strong>${term}</strong><p class="ko-main-copy">${message}</p></div></section>${controls}${warning}<p class="sv-wallet">Условные игровые условия, не реальные ставки банка. Доход округляется вниз до целой штучки.</p>${error(ui)}`;
+  const controls = deposit?'':`<section class="rv-plate rv-mint rv-amount"><img class="rv-amount-bush left" src="assets/revision/bank-amount-bush.png" alt=""><img class="rv-amount-bush right" src="assets/revision/bank-amount-bush.png" alt=""><h3>Сколько положим?</h3><div class="rv-stepper ko-transfer-stepper ko-bank-stepper"><button class="btn" data-act="bank-step" data-delta="-1" aria-label="Вложить на одну штучку меньше" ${!eligible||amount<=E.DEPOSIT_MIN?'disabled':''}>${icon('minus')}</button><output aria-live="polite">${coin(principal)}</output><button class="btn" data-act="bank-step" data-delta="1" aria-label="Вложить на одну штучку больше" ${!eligible||amount>=available?'disabled':''}>${icon('plus')}</button></div><p class="rv-caption">От ${E.DEPOSIT_MIN} штучек · В кошельке ${number(s.wallet)}</p></section>`;
+  const warning='';
+  const picture=`<div class="rv-bank-picture ${deposit&&left===0?'rv-bank-celebrate':''}" aria-hidden="true"><img class="rv-bank-scene" src="assets/revision/bank-intro-safe-v2.png" alt="">${deposit&&left===0?Array.from({length:6},(_,i)=>`<span class="rv-celebration-coin rv-celebration-coin-${i}">${icon('coin')}</span>`).join(''):''}</div>`;
+  const offer=`<section class="rv-plate rv-lavender rv-offer"><div class="ko-bank-offer"><div><span>${deposit?'Положено':'Положишь'}</span>${coin(principal)}</div>${icon('arrow')}<div><span>Получишь</span>${coin(returned)}</div></div>${!deposit?`<p class="rv-bonus">Доход +${number(returned-principal)}</p><p class="rv-caption">Через ${E.DEPOSIT_DAYS} игровых дня</p>`:''}</section>`;
+  const elapsed=deposit?Math.max(0,Math.min(E.DEPOSIT_DAYS,E.DEPOSIT_DAYS-left)):0;
+  const timeline=deposit&&left>0?`<section class="rv-plate rv-mint rv-term"><div class="rv-calendar"><img src="assets/revision/bank-calendar.png" alt=""></div><div><h3>${left===1?'Остался 1 игровой день':`Осталось ${number(left)} игровых дня`}</h3><div class="rv-day-dots" aria-label="Прошло ${elapsed} из ${E.DEPOSIT_DAYS} игровых дней">${Array.from({length:E.DEPOSIT_DAYS},(_,i)=>`<span class="${i<elapsed?'done':''}">${i<elapsed?icon('check'):''}</span>`).join('')}</div></div></section>`:'';
+  const body=picture+(deposit&&left===0&&validDeposit?`<section class="rv-plate rv-lavender rv-mature"><p>Можно забрать</p><strong>${coin(returned)}</strong><h3>Вложил ${number(principal)}, а получил ${number(returned)}</h3></section>`:offer+timeline+controls+ (deposit?`<section class="rv-plate rv-peach rv-bank-note">${!deposit?icon('coin'):''}<p>${deposit?'Дождись конца срока,<br>чтобы получить доход.':'Можно забрать раньше,<br>но без дохода.'}</p></section>`:'') )+(!validDeposit?`<p class="ko-message" role="status">${message}</p>`:'')+warning+error(ui);
   const canWithdraw=validDeposit&&left>0&&s.tutorial==='done'&&!s.review&&!s.pendingGrowth&&!s.adultNotice&&!s.pendingIncome&&!s.pendingReward&&!s.pendingPurchase;
   const footer = deposit ? canCollect?button(`Забрать ${coin(returned)}`,'bank-collect',{extra:'data-category="savings" data-effect="income"'}):button(`Забрать ${coin(principal)} без дохода`,'bank-withdraw',{disabled:!canWithdraw,secondary:true}) : button(`Положить ${coin(principal)}`,'bank-open',{disabled:!canOpen,extra:`data-category="savings" data-effect="deposit-lock" data-funding-source="${funding}" data-deposit-amount="${principal}"`})+(!canOpen?back():'');
-  return {title:deposit?(left===0&&validDeposit?'Можно забрать!':'Вклад открыт'):'Вклад',body:`<div class="savings-screen ss-bank ${deposit?'ss-bank-opened':''}">${body}</div>`,footer,closable:true};
+  return {title:deposit?(left===0&&validDeposit?'Вклад принёс доход!':'Твой вклад'):'Открой вклад',body:`<div class="revision-overlay rv-bank ${deposit?'rv-bank-opened':'rv-bank-opening'} ${deposit&&left===0?'rv-bank-mature':''}">${body}</div>`,footer,closable:true};
+}
+
+function bankIntroView(){
+ const body=`<div class="revision-overlay rv-bank rv-bank-intro"><div class="rv-bank-picture"><img class="rv-bank-scene" src="assets/revision/bank-intro-safe-v2.png" alt="Улыбающийся сейф со штучками"></div><section class="rv-bank-explanation"><h3>Что такое вклад?</h3><p>Ты отдаёшь свои деньги в банк. Банк использует их для вложений и делится с тобой прибылью.</p><p>Например, вложишь ${E.DEPOSIT_MIN} штучки, а через ${E.DEPOSIT_DAYS} игровых дня получишь ${E.DEPOSIT_MIN+E.depositBonus(E.DEPOSIT_MIN)}. Вклад от 3 до 7 штучек даёт +1, от 8 до 12 даёт +2, от 13 даёт +3.</p><p>Свои ${E.DEPOSIT_MIN} штучки можно забрать в любой момент. Но если заберёшь раньше срока, не получишь доход.</p></section></div>`;
+ return {title:'Как работает вклад',body,footer:button('Попробовать','bank-intro-continue'),closable:true};
 }
 
 function journalView(s,ui) {
   const done = ui.journalTab==='done';
   const missions = done?E.MISSIONS.filter(m=>E.missionStatus(s,m)==='done'):[E.currentMission(s)].filter(Boolean);
-  const current = E.currentMission(s);
+  if(done){
+    for(const skill of parentSkills(s).filter(skill=>skill.done&&['care','play','follow','day-save','day-wants','big-deposit'].includes(skill.id))){
+      if(skill.id==='big-deposit'&&missions.some(m=>m.id==='deposit-big'))continue;
+      missions.push({id:`skill:${skill.id}`,title:skill.id==='care'?'Погладь Пито':skill.title,learning:childLearning(skill.id)});
+    }
+  }
   const tabs = `<div class="ko-tabs" role="tablist" aria-label="Список заданий">${[['active','Сейчас'],['done','Выполнено']].map(([id,label])=>`<button role="tab" aria-selected="${done===(id==='done')}" data-act="journal-tab" data-id="${id}">${label}</button>`).join('')}</div>`;
   const items = missions.map(m=>{
     const deferred = s.missions?.[m.id]?.resolution==='deferred';
     if (done) {
-      let lesson=deferred?m.deferredLesson||m.lesson:m.lesson;
-      if (!s.onboardingPaid&&m.id==='feed')lesson='Первое яблоко было бесплатным. Следующую еду покупают за штучки.';
-      if (!s.onboardingPaid&&m.id==='wash')lesson='Первое мытьё было бесплатным. Теперь вода стоит штучки.';
-      return `<details class="ko-completed"><summary><span class="ko-check" aria-hidden="true">${icon('check','icon status-icon')}</span><span>${esc(deferred&&m.id==='buy'?'Покупку отложили':m.title)}</span></summary><p>${esc(lesson)}</p></details>`;
+      const lesson=deferred?'Ты научился откладывать покупку, если сейчас она не нужна.':m.learning||missionLearning(m.id);
+      return `<li class="parent-skill done"><span class="parent-skill-mark" aria-label="Выполнено">${icon('check','icon status-icon')}</span><div><h3>${esc(deferred&&m.id==='buy'?'Покупку отложили':m.title)}</h3>${lesson?`<p>${esc(lesson)}</p>`:''}</div></li>`;
     }
-    return `<button class="ko-mission ${current?.id===m.id?'current':''}" data-act="guide" data-id="${esc(m.id)}">${art(m.icon,'icon')}<strong>${esc(m.title)}</strong>${icon('arrow')}</button>`;
+    return `<div class="task-card task-ticket journal-current"><span class="task-marker">${art(m.id==='goal'?'dream':m.icon,'icon')}</span><span class="task-copy"><strong>${esc(m.title)}</strong><p>${esc(m.description)}</p></span></div>`;
   }).join('');
-  return {title:'Мои задания',body:wrap(tabs+(items||`<p class="ko-main-copy">${done?'Здесь появятся твои успехи.':'Можно поиграть с Пито.'}</p>`)),footer:'',closable:true};
+  return {title:'Мои задания',body:wrap(tabs+(items?(done?`<ul class="parent-skills journal-completed">${items}</ul>`:items):`<p class="ko-main-copy">${done?'Здесь появятся твои успехи.':'Можно поиграть с Пито.'}</p>`)),footer:'',closable:true};
 }
 
 /** Pure optional view layer; returns null for routes owned by views.mjs. */
@@ -85,14 +98,23 @@ export function kidOverlay(s,ui) {
   switch(ui.modal) {
     case 'goal': return goalView(s,ui);
     case 'choose-goal': {
-      const choosing=ready(s)||(E.introGoal(s)&&s.tutorial==='done'&&!s.pendingIncome&&!s.pendingReward&&!s.pendingPurchase);
-      const selected=E.availableGoalChoice(s,ui.goalChoice);
+      const choosing=ready(s)||((E.introGoal(s)||E.needsNextDream(s))&&s.tutorial==='done'&&!s.review&&!s.pendingGrowth&&!s.adultNotice&&!s.pendingIncome&&!s.pendingReward&&!s.pendingPurchase);
+      const selected=E.availableGoalChoice(s,ui.goalChoice)||E.GOALS.find(g=>!s.goalsWon.includes(g.id))?.id;
       const choice=E.GOALS.find(g=>g.id===selected&&!s.goalsWon.includes(g.id));
-      const body=wrap(`<div class="ko-goal-options">${E.GOALS.map(g=>`<button class="ko-goal-choice ${selected===g.id?'selected':''}" data-act="goal-choice" data-id="${esc(g.id)}" aria-pressed="${selected===g.id}" ${!choosing||s.goalsWon.includes(g.id)?'disabled':''}>${art(g.id,'art')}<strong>${esc(g.name)}</strong>${s.goalsWon.includes(g.id)?`<span class="ko-owned">${icon('check','icon status-icon')} Уже есть</span>`:coin(g.price)}</button>`).join('')}</div>`);
-      return {title:'Выбери мечту',body,footer:button('Выбрать мечту','goal-confirm',{disabled:!choosing||!choice}),closable:true};
+      const choices=E.GOALS.filter(g=>!s.goalsWon.includes(g.id)),index=choices.findIndex(g=>g.id===selected);
+      if(!choice)return {title:'Все мечты сбылись!',body:wrap('<p>Твоя коллекция уже на лужайке.</p>'),footer:back(),closable:true};
+      const previous=choices[(index-1+choices.length)%choices.length],next=choices[(index+1)%choices.length];
+      const body=`<div class="revision-overlay rv-choose-dream"><section class="rv-dream-hero"><div class="rv-dream-carousel">${goalArrow(-1,previous.id,!choosing||choices.length<2)}<div class="rv-dream-picture">${art(choice.id,'art')}</div>${goalArrow(1,next.id,!choosing||choices.length<2)}</div><h3>${esc(choice.name)}</h3><p class="rv-price">${coin(choice.price)}</p></section><p class="rv-story">${esc(choice.description)}</p><div class="rv-dream-thumbnails" role="group" aria-label="Выбор мечты">${E.GOALS.map(g=>`<button class="rv-dream-thumbnail ${selected===g.id?'selected':''}" data-act="goal-choice" data-id="${esc(g.id)}" aria-label="${esc(g.name)}${s.goalsWon.includes(g.id)?', уже есть':''}" aria-pressed="${selected===g.id}" ${!choosing||s.goalsWon.includes(g.id)?'disabled':''}>${art(g.id,'art')}${s.goalsWon.includes(g.id)?icon('check','rv-owned'):''}</button>`).join('')}</div></div>`;
+      return {title:'О чём ты мечтаешь?',body,footer:button('Выбрать мечту','goal-confirm',{disabled:!choosing||!choice})+back(),closable:false};
     }
     case 'withdraw': return {title:'Взять из копилки?',body:wrap(`${art('jar','ko-jar art')}<div class="ko-main-copy">Останется ${coin(Math.max(0,s.savings-1))}</div><p class="ko-message">До мечты дальше на 1 штучку.</p>${error(ui)}`),footer:button(`Взять ${coin(1)}`,'withdraw-confirm',{disabled:!ready(s)||s.savings<1,extra:'data-category="savings" data-effect="withdraw-one"'}),closable:true};
     case 'bank': return bankView(s,ui);
+    case 'bank-intro': return bankIntroView();
+    case 'shop': {
+      const gift=E.giftItem(s);
+      const body=`<div class="revision-overlay rv-shop"><p>Хотелки это разные клевые вещи. Они появятся на лужайке. Собери всю коллекцию!</p><div class="rv-shop-grid">${E.ITEMS.map(item=>`<button class="rv-shop-item" data-act="select-item" data-id="${item.id}" ${s.owned.includes(item.id)?'disabled':''}><strong>${esc(item.name)}</strong><span class="rv-shop-picture">${art(item.id,'art')}</span><span class="rv-shop-price">${s.owned.includes(item.id)?`${icon('check')} Уже есть`:coin(gift?0:item.price)}</span></button>`).join('')}</div></div>`;
+      return {title:'Хотелки',body,footer:!E.pacedIntro(s)&&E.missionStatus(s,E.MISSIONS.find(m=>m.id==='buy'))==='active'?button('Пока не покупать','defer-buy',{secondary:true}):'',closable:true};
+    }
     case 'journal': return journalView(s,ui);
     default:return null;
   }

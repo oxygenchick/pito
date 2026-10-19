@@ -1,0 +1,170 @@
+/* Approved painted-series: shared live text over reusable flat artwork. */
+#game .modal-backdrop .panel:has(.revision-overlay){width:410px;max-width:calc(100% - 24px);max-height:calc(100% - 24px);padding:20px 16px 16px;background:var(--rev-cream)!important;border:0!important;border-image:none!important;border-radius:32px 28px 34px 29px;box-shadow:none;isolation:isolate;color:#30334f}
+#game .panel:has(.revision-overlay)::before{display:none}
+#game .panel:has(.revision-overlay) .panel-heading{padding:0 32px 12px;min-height:44px;flex-shrink:0}
+#game .panel:has(.revision-overlay) .panel-heading h2{font-size:28px;line-height:1.12;margin:0;text-align:center}
+#game .panel:has(.revision-overlay) .close{width:44px;height:44px;right:-8px;top:-8px;border:0;box-shadow:none;background:none}
+#game .panel:has(.revision-overlay) .panel-body{min-height:0;padding:0;overflow-y:auto;scrollbar-width:thin}
+#game .panel:has(.revision-overlay) .panel-footer{padding:12px 0 0;margin:0;flex-shrink:0}
+#game .panel:has(.revision-overlay) .panel-footer>.btn{width:100%;min-height:56px;font-size:23px}
+#game .revision-overlay{display:flex;flex-direction:column;gap:10px;text-align:center;font-size:18px;line-height:1.25}
+#game .revision-overlay p,#game .revision-overlay h3{margin:0;line-height:1.25}
+#game .revision-overlay h3{font-size:21px}
+#game .revision-overlay .coin{display:inline-flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap}
+#game .revision-overlay .coin>.icon{width:25px;height:27px;object-fit:contain}
+#game .revision-overlay .rv-caption{font-size:15px;color:#61627a}
+#game .rv-plate{position:relative;isolation:isolate;padding:14px 12px;border:0;background:none;border-radius:24px}
+#game .rv-plate::before{content:'';position:absolute;inset:0;z-index:-1;background:var(--rv-fill,#f9edda);mask:url('../assets/revision/plate.svg') center/100% 100% no-repeat;pointer-events:none}
+#game .rv-mint{--rv-fill:var(--rev-mint)}
+#game .rv-peach{--rv-fill:var(--rev-peach)}
+#game .rv-lavender{--rv-fill:var(--rev-lilac)}
+#game .rv-cream{--rv-fill:var(--rev-cream)}
+#game .rv-dream-hero{display:flex;flex-direction:column;align-items:center;gap:8px}
+#game .rv-dream-hero>h3{font-size:26px}
+#game .rv-dream-picture{width:100%;height:180px;display:grid;place-items:center;background:url('../assets/revision/dream-hero.svg') center/100% 100% no-repeat}
+#game .rv-dream-picture>.art{width:72%;height:68%;object-fit:contain;margin-top:15px}
+#game .rv-savings .rv-dream-picture{height:184px;background-image:url('../assets/revision/dream-backdrop-v2.png');background-size:contain}
+#game .rv-savings .rv-dream-picture>.art{width:79.2%}
+#game .rv-dream-carousel{width:100%;position:relative}
+#game .rv-dream-carousel>.rv-dream-picture{height:210px}
+#game .rv-goal-arrow.btn{position:absolute;top:48%;transform:translateY(-50%);right:0;width:44px;min-height:48px;padding:12px;background:#fff3dc;border:0;border-radius:50%;z-index:1}
+#game .rv-goal-arrow.previous{left:0;right:auto}
+#game .rv-goal-arrow>.icon{width:20px;height:24px;object-fit:contain}
+#game .rv-goal-arrow.previous>.icon{transform:scaleX(-1)}
+#game .rv-price{display:inline-flex;padding:7px 18px;background:url('../assets/plan-v16/price-tag.png') center/100% 100% no-repeat;min-width:94px;justify-content:center;font-size:28px;font-weight:700;transform:rotate(-3deg)}
+#game .rv-price .coin>.icon{width:29px;height:31px}
+#game .rv-story{font-size:17px;padding:0 8px;min-height:42px}
+#game .rv-dream-thumbnails{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:5px 3px}
+#game .rv-dream-thumbnail{position:relative;display:grid;place-items:center;padding:6px 3px;min-height:74px;background:#f5e7d0;border:0;border-radius:18px 16px 19px 15px;box-shadow:none}
+#game .rv-dream-thumbnail.selected{background:#dbc1ec;outline:3px solid #a773bf;outline-offset:0}
+#game .rv-dream-thumbnail>.art{width:100%;height:62px;object-fit:contain}
+#game .rv-dream-thumbnail:disabled{opacity:.45}
+#game .rv-dream-thumbnail>.rv-owned{position:absolute;bottom:3px;right:3px;width:16px;height:16px}
+#game .rv-saved{display:grid;grid-template-columns:64px minmax(0,1fr);align-items:center;gap:16px;text-align:left;padding:16px 24px;background:var(--rev-lilac);border-radius:24px}
+#game .rv-saved::before{display:none}
+#game .rv-saved>.rv-jar{width:64px;height:85px;object-fit:contain}
+#game .rv-saved>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+#game .rv-saved p{font-size:22px;font-weight:700}
+#game .rv-saved .ko-progress{width:100%;height:14px;background:#d6c2e8;margin:6px 0 0}
+#game .rv-saved .ko-progress>i{background:#9862b4}
+#game .rv-savings-plan{display:grid;grid-template-columns:45px minmax(0,1fr);gap:10px;align-items:center;text-align:left}
+#game .rv-savings-plan>.rv-plan-icon{width:45px;height:58px;object-fit:contain}
+#game .rv-savings-plan>div{display:flex;flex-direction:column;gap:7px}
+#game .rv-savings-plan p{display:flex;align-items:center;justify-content:space-between;gap:5px;font-size:16px}
+#game .rv-savings-plan p>.coin{padding:4px 7px;background:#fff5e5;border-radius:10px;font-size:20px;font-weight:700}
+#game .rv-savings-plan p+ p{padding-top:7px;border-top:2px solid #f6cfb3}
+#game .revision-overlay .rv-stepper{display:flex;align-items:center;justify-content:center;gap:14px;margin:10px auto 0;padding:5px 8px;border-radius:20px;background:var(--rev-cream);width:max-content;max-width:100%}
+#game .revision-overlay .rv-stepper>.btn{width:48px;min-height:48px;padding:12px;background:#d9c4eb;border:0;border-radius:15px 17px 14px 16px;box-shadow:none}
+#game .revision-overlay .rv-stepper>.btn>.icon{width:24px;height:24px;object-fit:contain}
+#game .revision-overlay .rv-stepper>output{min-width:70px;font-size:30px;font-weight:700;background:#fdf0d1;border-radius:14px;padding:6px}
+#game .revision-overlay .rv-stepper>.btn:disabled{opacity:.4}
+#game .rv-amount>.rv-caption{margin-top:8px}
+#game .rv-bank-picture{position:relative;display:grid;place-items:center;min-height:128px;background:url('../assets/revision/dream-hero.svg') center/72% 100% no-repeat}
+#game .rv-bank-picture>.rv-bank-art{width:135px;height:128px;object-fit:contain}
+#game .rv-bank-picture>.rv-rays{position:absolute;width:32px;height:38px;object-fit:contain;top:45px}
+#game .rv-bank-picture>.rv-left{left:18%;transform:rotate(-90deg)}
+#game .rv-bank-picture>.rv-right{right:18%;transform:rotate(90deg)}
+#game .rv-offer .ko-bank-offer{display:grid;grid-template-columns:minmax(0,1fr) 24px minmax(0,1fr);gap:8px;margin:0;align-items:center}
+#game .rv-offer .ko-bank-offer>div{gap:4px;padding:8px 4px;background:var(--rev-cream);border-radius:18px;font-size:17px}
+#game .rv-offer .ko-bank-offer>div>.coin{font-size:34px}
+#game .rv-offer .ko-bank-offer>div>.coin>.icon{width:29px;height:32px}
+#game .rv-offer .ko-bank-offer>.icon{width:24px;height:25px;object-fit:contain}
+#game .rv-offer .rv-bonus{display:table;margin:9px auto 0;padding:5px 18px;border-radius:18px;background:var(--rev-mint);font-size:22px;font-weight:700}
+#game .rv-offer .rv-caption{margin-top:7px}
+#game .rv-bank-note{display:flex;align-items:center;justify-content:center;gap:14px;font-size:16px}
+#game .rv-bank-note>.icon{width:36px;height:38px;object-fit:contain;flex:none}
+#game .rv-day-dots{display:flex;justify-content:center;gap:12px;margin-top:10px}
+#game .rv-day-dots>span{width:40px;height:40px;display:grid;place-items:center;background:#d9c4eb;border-radius:50%}
+#game .rv-day-dots>span.done{background:#69b99e}
+#game .rv-day-dots .icon{width:24px;height:24px;object-fit:contain}
+#game .rv-mature{display:flex;flex-direction:column;gap:9px;align-items:center}
+#game .rv-mature>strong>.coin{font-size:52px}
+#game .rv-mature>strong>.coin>.icon{width:40px;height:44px}
+#game .rv-bank-timeline{display:grid;grid-template-columns:minmax(0,1fr) 14px minmax(0,1fr) 14px minmax(0,1fr);align-items:center;gap:3px;padding:16px 8px}
+#game .rv-bank-timeline>div{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:14px}
+#game .rv-bank-timeline>div>.coin{font-size:26px;font-weight:700}
+#game .rv-bank-timeline>div>.icon{width:36px;height:36px;object-fit:contain}
+#game .rv-bank-timeline>.icon{width:14px;height:20px;object-fit:contain}
+#game .rv-bank-intro>.rv-mint p{margin-top:9px}
+#game .rv-shop-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#game .rv-shop-item{min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px;background:var(--rev-peach);border:0;border-radius:24px 20px 23px 21px;padding:10px 5px;color:#30334f;font:inherit;line-height:1.2}
+#game .rv-shop-item:nth-child(3n+2){background:var(--rev-lilac)}
+#game .rv-shop-item:nth-child(3n){background:var(--rev-mint)}
+#game .rv-shop-item>.art{width:100%;height:100px;object-fit:contain}
+#game .rv-shop-item>strong{font-size:17px;min-height:20px}
+#game .rv-shop-price{display:flex;align-items:center;justify-content:center;min-height:28px;padding:3px 10px;border-radius:12px;background:#fff6e5;font-size:16px}
+#game .rv-shop-price>.icon{width:20px;height:20px}
+#game .rv-shop-item:disabled{opacity:.6}
+@media(max-height:720px){
+ #game .modal-backdrop .panel:has(.revision-overlay){padding:16px 12px 12px}
+ #game .panel:has(.revision-overlay) .panel-heading{padding-bottom:8px}
+ #game .panel:has(.revision-overlay) .panel-heading h2{font-size:25px}
+ #game .revision-overlay{gap:6px;font-size:16px}
+ #game .revision-overlay h3{font-size:19px}
+ #game .rv-dream-picture{height:96px}
+ #game .rv-savings .rv-dream-picture{height:106px}
+ #game .rv-dream-carousel>.rv-dream-picture{height:150px}
+ #game .rv-dream-hero{gap:5px}
+ #game .rv-dream-hero>h3{font-size:23px}
+ #game .rv-story{font-size:16px}
+ #game .rv-dream-thumbnail{min-height:60px}
+ #game .rv-dream-thumbnail>.art{height:48px}
+ #game .rv-plate{padding:8px 10px}
+ #game .rv-bank-picture{min-height:76px}
+ #game .rv-bank-picture>.rv-bank-art{height:76px;width:84px}
+ #game .rv-offer .rv-bonus{margin-top:5px;padding:3px 18px}
+ #game .rv-offer .rv-caption{margin-top:4px}
+ #game .rv-offer .ko-bank-offer>div>.coin{font-size:28px}
+ #game .rv-shop-item{padding:6px 4px;gap:4px}
+ #game .rv-shop-item>.art{height:65px}
+ #game .rv-shop-price{min-height:24px;padding:2px 7px}
+ #game .rv-shop>p{font-size:15px}
+ #game .rv-shop-item>strong{font-size:16px}
+ #game .rv-shop-grid{gap:6px}
+ #game .rv-saved>.rv-jar{height:65px}
+ #game .rv-saved{padding-top:12px;padding-bottom:12px}
+ #game .rv-saved p{font-size:20px}
+ #game .revision-overlay .rv-stepper{margin-top:7px;gap:10px}
+ #game .rv-bank-note{font-size:15px}
+}
+@media(max-height:700px){
+ #game .panel:has(.revision-overlay) .panel-footer>.btn{min-height:52px;font-size:22px}
+}
+
+/* Dream funding: compact vertical rhythm, full-size readable controls. */
+#game .panel:has(.rv-savings){gap:4px;padding-top:16px}
+#game .panel:has(.rv-savings) .panel-heading{padding-bottom:3px;min-height:36px}
+#game .panel:has(.rv-savings) .panel-footer{padding-top:6px}
+#game .rv-savings{gap:7px}
+#game .rv-savings .rv-dream-hero{gap:0}
+#game .rv-savings .rv-dream-hero>h3{margin-top:-3px}
+#game .rv-savings .rv-dream-picture>.art{margin-top:0;height:75%}
+#game .rv-savings .rv-saved{grid-template-columns:80px minmax(0,1fr);gap:13px;padding:10px 20px}
+#game .rv-savings .rv-saved>.rv-jar{width:80px;height:90px}
+#game .rv-savings .rv-savings-plan{grid-template-columns:80px minmax(0,1fr);gap:13px;padding:10px 20px;background:var(--rev-peach);border-radius:22px;min-height:96px}
+#game .rv-savings .rv-savings-plan:before{display:none}
+#game .rv-savings .rv-savings-plan>.rv-plan-icon{position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:118px;height:110px;object-fit:contain}
+#game .rv-savings .rv-savings-plan>div{grid-column:2}
+#game .rv-savings .rv-savings-plan>div{gap:4px}
+#game .rv-savings .rv-savings-plan p{font-size:18px;font-weight:700;line-height:1.1;gap:4px}
+#game .rv-savings .rv-savings-plan p+p{padding-top:5px}
+#game .rv-savings .rv-savings-plan .coin{min-width:55px;padding:5px 7px;font-size:22px;border-radius:12px}
+#game .rv-savings .rv-amount{padding:4px 0 0}
+#game .rv-savings .rv-stepper{position:relative;margin-top:5px;padding:4px 0;gap:12px}
+#game .rv-savings .rv-stepper>output{min-width:104px;height:54px;padding:6px 12px;display:grid;place-items:center;border-radius:19px;font-size:31px}
+#game .rv-savings .rv-stepper>output .coin{gap:7px}
+#game .rv-savings .rv-stepper>output .icon{width:31px;height:33px}
+#game .rv-savings .rv-stepper:before,#game .rv-savings .rv-stepper:after{content:'';position:absolute;top:0;width:50px;height:100%;background:url('../assets/revision/saved-rays.png') center/contain no-repeat;pointer-events:none}
+#game .rv-savings .rv-stepper:before{right:calc(100% - 18px)}
+#game .rv-savings .rv-stepper:after{left:calc(100% - 18px);transform:scaleX(-1)}
+@media(max-height:700px){
+ #game .rv-savings{gap:4px}
+ #game .rv-savings .rv-dream-picture{height:118px}
+ #game .rv-savings .rv-saved{padding:7px 16px;grid-template-columns:72px minmax(0,1fr);gap:12px}
+ #game .rv-savings .rv-saved>.rv-jar{width:72px;height:76px}
+ #game .rv-savings .rv-savings-plan{padding:7px 16px;grid-template-columns:72px minmax(0,1fr);gap:12px;min-height:86px}
+ #game .rv-savings .rv-savings-plan>.rv-plan-icon{width:108px;height:100px;left:-10px}
+ #game .rv-savings .rv-savings-plan p{font-size:17px}
+ #game .rv-savings .rv-savings-plan .coin{min-width:48px;font-size:20px;padding:4px 5px}
+ #game .rv-savings .rv-stepper>output{min-width:96px;height:50px}
+}

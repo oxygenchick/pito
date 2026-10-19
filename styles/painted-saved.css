@@ -1,0 +1,60 @@
+/* Layered composition from approved screen 21. Values and portrait stay live. */
+#game .panel:has(.painted-saved){padding:18px 12px 16px;gap:8px}
+#game .panel:has(.painted-saved) .panel-heading{padding:0;min-height:36px}
+#game .panel:has(.painted-saved) .panel-heading h2{font-size:32px}
+#game .panel:has(.painted-saved) .panel-body{padding:0}
+#game .painted-saved{display:grid;gap:8px}
+#game .painted-reward{display:grid;justify-items:center;gap:3px;position:relative;font-size:18px}
+#game .painted-reward>div{position:relative;background:url('../assets/revision/saved-plate.png') center/100% 130% no-repeat;width:130px;height:65px;display:grid;place-items:center;padding:0}
+#game .painted-reward>div:before,#game .painted-reward>div:after{content:'';position:absolute;width:60px;height:70px;background:url('../assets/revision/saved-rays.png') center/contain no-repeat;left:-60px;top:-3px}
+#game .painted-reward>div:after{left:auto;right:-60px;transform:scaleX(-1)}
+#game .painted-reward .coin{font-size:38px;gap:5px;line-height:1}
+#game .painted-reward .coin .icon{height:43px;width:43px}
+#game .painted-summary{display:grid;gap:8px}
+#game .painted-summary>section{position:relative;isolation:isolate;height:112px;box-sizing:border-box;padding:13px 20px;display:flex;flex-direction:column;align-items:center;gap:7px;background:url('../assets/plan-approved/care.png') center/100% 100% no-repeat}
+#game .painted-summary>section h3{font-size:25px;line-height:1.1;margin:0;position:relative;z-index:2}
+#game .painted-summary>section>.coin{background:none;width:110px;height:55px;min-height:55px;padding:0;box-sizing:border-box;justify-content:center;font-size:32px;gap:5px;position:relative;z-index:2;isolation:isolate}
+#game .painted-summary>section>.coin:before{content:'';position:absolute;inset:0;background:#fffaf0;mask:url('../assets/revision/saved-plate.png') center/100% 130% no-repeat;z-index:-1}
+#game .painted-summary>section>.coin>.icon{width:34px;height:34px}
+#game .painted-summary .painted-wants{background-image:url('../assets/finance-polish/peach.png')}
+#game .painted-summary .painted-savings{background-image:url('../assets/finance-polish/hero.png')}
+#game .painted-art{position:absolute;width:103px;height:106px;bottom:0;z-index:1;display:grid;place-items:center;pointer-events:none}
+#game .painted-art.left{left:0}#game .painted-art.right{right:0}
+#game .painted-art>.icon,#game .painted-art>img{position:absolute;inset:0;width:100%;height:100%;min-width:0;min-height:0;object-fit:contain;max-width:none;margin:0}
+#game .painted-care .painted-art{width:108px;height:115px;bottom:-3px}
+#game .painted-wants .painted-art.left{width:125px;height:115px;left:-8px;bottom:0}
+#game .painted-care .painted-art>img{filter:saturate(.58)}
+#game .painted-wants .original-shirt>img{inset:20% 14%;width:74%;height:75%}
+#game .original-shirt:before{content:'';position:absolute;left:-6px;top:12px;width:47px;height:75px;background:url('../assets/revision/saved-rays.png') center/contain no-repeat}
+#game .original-jar>.icon{inset:23% auto auto 5%;width:66%;height:73%;transform:rotate(12deg)}
+#game .original-jar:after{content:'';position:absolute;right:0;top:0;width:52%;height:65%;background:#ad8acd;mask:url('../assets/revision/saved-rays.png') center/contain no-repeat;transform:scaleX(-1)}
+#game .selected-dream>img{inset:15% 3% 5%;width:94%;height:80%}
+#game .painted-follow{display:grid;grid-template-columns:92px 1fr;align-items:center;gap:8px;padding:12px 10px;background:url('../assets/finance-polish/peach.png') center/100% 100% no-repeat;text-align:left;min-height:106px;box-sizing:border-box}
+#game .painted-follow strong{font-size:23px;line-height:1.05;display:block}
+#game .painted-follow p{font-size:16px;line-height:1.2;margin:7px 0 0}
+#game .painted-pet{position:relative;width:92px;height:98px;display:grid;place-items:center;pointer-events:none}
+#game .painted-pet .pet{width:83px;height:77px;transform:none;position:relative;inset:auto;margin:0;opacity:1;filter:none}
+#game .painted-pet .pet.grown{width:65px;height:104px}
+#game .painted-pet .pet.grown .pet-body{bottom:39px}
+@media(max-height:700px){
+ #game .panel:has(.painted-saved){padding:12px 10px;gap:5px;max-height:calc(100% - 14px)}
+ #game .panel:has(.painted-saved) .panel-heading h2{font-size:29px}
+ #game .painted-saved,#game .painted-summary{gap:6px}
+ #game .painted-reward{font-size:16px}
+ #game .painted-reward>div{width:104px;height:52px}
+ #game .painted-reward>div:before,#game .painted-reward>div:after{height:60px;top:-4px}
+ #game .painted-reward .coin{font-size:30px}#game .painted-reward .coin .icon{width:32px;height:32px}
+ #game .painted-summary>section{height:81px;padding-top:5px;gap:2px}
+ #game .painted-summary>section h3{font-size:23px}
+ #game .painted-summary>section>.coin{font-size:28px;padding:0;width:92px;height:46px;min-height:46px}
+ #game .painted-summary>section>.coin>.icon{height:29px;width:29px}
+ #game .painted-art{width:83px;height:82px}#game .painted-care .painted-art{width:87px;height:91px}
+ #game .painted-wants .painted-art.left{width:105px;height:90px;left:-7px}
+ #game .painted-follow{min-height:99px;padding:9px;grid-template-columns:76px 1fr}
+ #game .painted-follow strong{font-size:19px}#game .painted-follow p{font-size:14px;margin-top:5px;line-height:1.1}
+ #game .painted-pet{width:76px;height:82px}#game .painted-pet .pet{width:70px;height:67px}
+ #game .painted-pet .pet.grown{width:54px;height:82px}
+ #game .painted-pet .pet.grown .pet-body{bottom:31px}
+ #game .painted-pet .pet.grown .pet-legs{width:28px;height:38px}
+ #game .panel:has(.painted-saved) .panel-footer{padding-top:5px}
+}

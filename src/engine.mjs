@@ -3,15 +3,19 @@ import {pacedIntro,calmIntro,freeCare,giftItem,introPhase,introPaidCare,introSho
 export {pacedIntro,calmIntro,freeCare,giftItem,beforeMoney,introPhase,introPaidCare,introShop,introGoal,tickIntro} from './onboarding.mjs';
 export {ITEMS,GOALS} from './item-catalog.mjs';
 import {applyMissionEvent as emitAction,migrateMissions} from './missions.mjs';
+import {assignDailyChallenge,finishDailyChallenge,challengeFitsPlan} from './daily-challenges.mjs';
+import {bankAvailable} from './bank-access.mjs';
+export {bankAvailable} from './bank-access.mjs';
+export {currentDailyChallenge} from './daily-challenges.mjs';
 export {MISSIONS,missionStatus,currentMission,completeMission,deferMission,applyMissionEvent} from './missions.mjs';
 export const VERSION = 1;
 export const CYCLE_SECONDS = 240;
 export const GROWTH_AWARDS = Object.freeze({care:1,plan:3,savings:1});
 export const DEPOSIT_BONUS = 2;
-export const DEPOSIT_MIN = 10;
+export const DEPOSIT_MIN = 3;
 export const DEPOSIT_DAYS = 2;
 // Simplified game offer: whole-coin interest, quoted before confirmation.
-export const depositBonus = amount => Number.isSafeInteger(amount)&&amount>=DEPOSIT_MIN?Math.floor(amount/5):0;
+export const depositBonus = amount => Number.isSafeInteger(amount)&&amount>=DEPOSIT_MIN?(amount>12?3:amount>7?2:1):0;
 export const POOP_DIRT = 8;
 export const pieceWord = n => n%100>=11&&n%100<=14?'штучек':n%10===1?'штучку':n%10>=2&&n%10<=4?'штучки':'штучек';
 export const FOOD = [
@@ -35,6 +39,8 @@ export function restore(raw,now=Date.now()) {
  try {const s=JSON.parse(raw);if(s?.version!==VERSION||!s.needs||!Array.isArray(s.ledger)||!Array.isArray(s.tasks)||!Number.isFinite(s.wallet)||s.wallet<0||!['money','meet','food','fed','wash','washed','plan','done'].includes(s.tutorial))return null;
  for(const k of ['food','affection','clean'])if(!Number.isFinite(s.needs[k]))return null;
  const base=createProfile();const p={...base,...s,needs:{...s.needs},onboardingPaid:s.onboardingPaid===true};
+ p.bankIntroSeen=s.bankIntroSeen===true||Boolean(s.deposit)||s.ledger.some(e=>e.kind==='bank-in');
+ p.dailyChallenge=s.dailyChallenge&&['save','wants','deposit'].includes(s.dailyChallenge.kind)&&s.dailyChallenge.cycle===s.cycle&&['active','done','missed','skipped'].includes(s.dailyChallenge.status)?{kind:s.dailyChallenge.kind,cycle:s.cycle,status:s.dailyChallenge.status}:null;
  p.onboarding=s.onboarding?.version===2?{version:2,revision:s.onboarding.revision===3?3:2,phase:['care','pet','item-play','money-wait','money','food-wait','paid-food','shop-wait','shop','goal-wait','goal','plan-wait','plan','complete'].includes(s.onboarding.phase)?s.onboarding.phase:'care',remaining:clamp(Number(s.onboarding.remaining)||0,0,15),petDistance:clamp(Number(s.onboarding.petDistance)||0,0,180)}:null;
  if(p.onboardingPaid&&p.tutorial==='plan'&&!p.giftUsed&&!p.plan)p.tutorial='meet';
  p.initialMoneyGranted=p.onboardingPaid||p.onboarding?(s.initialMoneyGranted===true||s.ledger.some(e=>e.source==='initial')):true;
@@ -70,6 +76,7 @@ export function restore(raw,now=Date.now()) {
  }
  // Existing deposits retain the amount, promised interest and maturity date.
  migrateMissions(p);
+ if(p.plan&&p.dailyChallenge?.kind!=='deposit'&&!challengeFitsPlan(p,p.plan))p.dailyChallenge.status='skipped';
  // Offline time is deliberately gentle: at most the remainder of ONE active day,
  // never a day still being planned, tutorial, review, or developer pause.
  const away=Math.max(0,Math.min(CYCLE_SECONDS-p.elapsed,(now-p.lastSeen)/1000));
@@ -82,6 +89,11 @@ export function grantInitialMoney(s){
  const paced=pacedIntro(s);s.wallet+=20;s.ledger.push(initialIncome());s.initialMoneyGranted=true;s.tutorial=paced?'done':'meet';s.pendingIncome={amount:20,source:'initial',cycle:s.cycle};if(paced){s.rainHintSeen=false;if(calmIntro(s)){s.onboarding.phase='plan';s.pendingIncome=null;}else waitForIntro(s,'food');}return true;
 }
 export function acknowledgeIncome(s){if(!s.pendingIncome)return false;s.pendingIncome=null;return true;}
+// The explanation is a presentation milestone, never a money transaction.
+export function acknowledgeBankIntro(s){if(!s||s.bankIntroSeen===true)return false;s.bankIntroSeen=true;return true;}
+// Keep old saved result states resumable without requiring their removed modal.
+// The caller presents the returned feedback as a non-blocking bubble.
+export function acknowledgeCareFeedback(s){const kind=s?.tutorial==='fed'?'fed':s?.tutorial==='washed'?'washed':null;return kind&&acknowledgeCare(s)?kind:null;}
 export function grantPlanMoney(s){
  if(calmIntro(s)||!pacedIntro(s)||introPhase(s)!=='plan'||s.pendingIncome||s.pendingReward||s.ledger.some(e=>e.source==='first-plan-funds'))return false;
  s.wallet+=20;s.ledger.push({cycle:s.cycle,kind:'income',amount:20,label:'Штучки для первого плана',category:'',source:'first-plan-funds'});
@@ -125,10 +137,12 @@ export function rain(s,dt,x,session){if(!(dt>0)||!Number.isFinite(dt)||!session|
  if(used>0)s.cycleCare++;finishFirstWash(s);return true;
 }
 export function setPlan(s,parts){if(s.pendingIncome||s.pendingReward||s.review||s.pendingGrowth||s.adultNotice||s.plan||!['plan','done'].includes(s.tutorial))return false;
+ if(needsNextDream(s))return false;
  if(pacedIntro(s)&&introPhase(s)!=='plan')return false;
  if(!Array.isArray(parts)||parts.length!==3||parts.some(v=>!Number.isInteger(v)||v<0)||parts.reduce((a,b)=>a+b,0)>s.wallet)return false;
  const first=s.plans.length===0;
  const paced=pacedIntro(s);
+ if(!challengeFitsPlan(s,parts))s.dailyChallenge.status='skipped';
  s.plan=[...parts];s.plans.push({cycle:s.cycle,parts:[...parts],wallet:s.wallet,careBeforePlan:totals(s).food+totals(s).rain,wantsBeforePlan:totals(s).wants});s.tutorial=s.onboardingPaid&&first&&!s.giftUsed?'meet':'done';
  if(paced){s.onboarding.phase='complete';s.onboarding.remaining=0;}
  emitAction(s,'plan-confirmed',{first,amount:parts.reduce((sum,n)=>sum+n,0),care:parts[0],wants:parts[1],savings:parts[2]});
@@ -136,13 +150,14 @@ export function setPlan(s,parts){if(s.pendingIncome||s.pendingReward||s.review||
 export function buy(s,id){const item=ITEMS.find(x=>x.id===id);if(!item||s.tutorial!=='done'||s.owned.includes(id)||pacedIntro(s)&&!introShop(s))return false;const gift=giftItem(s);if(gift){if(s.pendingPurchase||s.pendingIncome||s.pendingReward)return false;}else if(!spend(s,item.price,item.name,'wants'))return false;const first=s.owned.length+s.goalsWon.length===0,hadMission=!!s.missions?.buy;s.owned.push(id);emitAction(s,'want-decided',{target:id,amount:item.price,resolution:'purchased'});s.pendingPurchase={id,first,...(gift?{gift:true}:{}),reward:hadMission?0:s.missions?.buy?.rewardPaid||0};if(introPhase(s)==='shop'){if(calmIntro(s))s.onboarding.phase='item-play';else waitForIntro(s,'goal');}return true;}
 export function transfer(s,amount){if(!Number.isInteger(amount)||amount===0||s.tutorial!=='done'||!s.plan||s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward)return false;
  if(amount>0){if(s.wallet<amount)return false;s.wallet-=amount;s.savings+=amount;}else{if(s.savings< -amount)return false;s.savings+=amount;s.wallet-=amount;}
- record(s,'transfer',amount,'Копилка');emitAction(s,'transferred',{amount,target:'savings',abovePlan:s.plan?totals(s).saved-s.plan[2]:0});return true;}
-export function chooseGoal(s,id){const goal=GOALS.find(x=>x.id===id);if(!goal||s.tutorial!=='done'||(!s.plan&&!introGoal(s))||s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward||s.pendingPurchase)return false;s.goal=id;emitAction(s,'goal-selected',{target:id,amount:goal.price});if(introPhase(s)==='goal'){if(calmIntro(s))s.onboarding.phase='plan';else waitForIntro(s,'plan');}return true;}
+ record(s,'transfer',amount,'Копилка');emitAction(s,'transferred',{amount,target:'savings',savedToday:totals(s).saved,plannedSavings:s.plan?.[2]||0,abovePlan:s.plan?totals(s).saved-s.plan[2]:0});return true;}
+export const needsNextDream=s=>s.onboarding?.version===2&&(s.goalsWon||[]).includes(s.goal)&&GOALS.some(g=>!s.goalsWon.includes(g.id));
+export function chooseGoal(s,id){const goal=GOALS.find(x=>x.id===id);if(!goal||s.goalsWon.includes(id)||s.tutorial!=='done'||(!s.plan&&!introGoal(s)&&!needsNextDream(s))||s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward||s.pendingPurchase)return false;s.goal=id;emitAction(s,'goal-selected',{target:id,amount:goal.price});if(introPhase(s)==='goal'){if(calmIntro(s))s.onboarding.phase='plan';else waitForIntro(s,'plan');}return true;}
 export function claimGoal(s){const g=GOALS.find(x=>x.id===s.goal);if(!g||s.savings<g.price||s.goalsWon.includes(g.id)||!s.plan||s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward||s.tutorial!=='done')return false;const first=s.owned.length+s.goalsWon.length===0,firstDream=s.goalsWon.length===0;s.savings-=g.price;s.goalsWon.push(g.id);record(s,'expense',g.price,g.name,'wants');s.ledger.at(-1).source='savings';s.pendingPurchase={id:g.id,first,firstDream,reward:0,dream:true};return true;}
 // New deposits are wallet-only; existing deposit payouts remain unchanged.
 // Actual affordability is checked again in openDeposit; UI shows a care warning.
 export function careReserve(s){return Math.max(0,(s.plan?.[0]??4)-(s.plan?cycleSummary(s).actual.care:0));}
-export function depositFunding(s,amount=10){if(!Number.isSafeInteger(amount)||amount<DEPOSIT_MIN)return null;return s.wallet>=amount?'wallet':null;}
+export function depositFunding(s,amount=DEPOSIT_MIN){if(!Number.isSafeInteger(amount)||amount<DEPOSIT_MIN)return null;return s.wallet>=amount?'wallet':null;}
 // Quote only what is still planned for the goal. Already-paid care or wants no
 // longer reserve wallet coins; moving money between savings and a bank is neutral.
 export function goalRemaining(s,id=s.goal){const g=GOALS.find(g=>g.id===id);return !g||s.goalsWon.includes(id)?0:Math.max(0,g.price-s.savings);}
@@ -158,8 +173,9 @@ export function plannedSavingsAmount(s){
  const remaining=Math.max(0,whole(s.plan[2])-netSaved);
  return Math.min(Math.max(0,wallet-reserve),remaining,goalRemaining(s));
 }
-export function openDeposit(s,source='wallet',amount=10){
- if(s.cycle<3||s.deposit||!s.plan||s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward||s.tutorial!=='done'||!s.missions?.save||!s.missions?.goal)return false;
+export function openDeposit(s,source='wallet',amount=DEPOSIT_MIN){
+ if(!bankAvailable(s))return false;
+ if(s.cycle<3||s.deposit||!s.plan||s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward||s.tutorial!=='done'||!(s.missions?.save||s.ledger.some(e=>e.kind==='transfer'&&e.amount>0))||!s.missions?.goal)return false;
  if(!Number.isSafeInteger(amount)||amount<DEPOSIT_MIN||!Number.isSafeInteger(amount+depositBonus(amount)))return false;
  if(source!=='wallet'||s.wallet<amount)return false;
  s.wallet-=amount;
@@ -177,7 +193,7 @@ export function collectDeposit(s){
  // Preserve the real old principal in accounting; only the actual final payout
  // is rounded up, so a legacy fractional bonus cannot break tomorrow's plan.
  const payout=Math.ceil(d.principal+d.bonus),income=payout-d.principal;
- s.wallet+=payout;record(s,'bank-out',d.principal,'Возврат вклада');record(s,'income',income,'Награда по вкладу');s.deposit=null;return true;
+ s.wallet+=payout;record(s,'bank-out',d.principal,'Возврат вклада');record(s,'income',income,'Награда по вкладу');s.deposit=null;emitAction(s,'deposit-collected',{amount:income,target:'deposit'});return true;
 }
 export function evaluateTask(id,a){
  switch(id){case 0:return a?.join(',')==='need,need,want,want';
@@ -191,12 +207,12 @@ export function completeTask(s,id,answer){if(s.tutorial!=='done'||!s.plan||s.rev
  if(!s.tasks.includes(id)){s.tasks.push(id);s.taskAnswers[id]=answer;s.wallet+=3;record(s,'income',3,TASKS[id].name);}return true;}
 // Keep the care budget per day stable while giving children time to explore.
 // Poop clock uses balance-seconds, not wall-clock seconds, for old-save safety.
-export function decay(s,seconds){const balanceSeconds=seconds*90/CYCLE_SECONDS;s.needs.food=clamp(s.needs.food-balanceSeconds*.19);s.needs.affection=clamp(s.needs.affection-balanceSeconds*.14);s.needs.clean=clamp(s.needs.clean-balanceSeconds*(.10+s.poops.length*.38));s.poopClock+=balanceSeconds;if(s.poopClock>=60){spawnPoop(s);s.poopClock%=60;}}
+export function decay(s,seconds){const balanceSeconds=seconds*90/CYCLE_SECONDS;s.needs.food=clamp(s.needs.food-balanceSeconds*.44);s.needs.affection=clamp(s.needs.affection-balanceSeconds*.14);s.needs.clean=clamp(s.needs.clean-balanceSeconds*(.10+s.poops.length*.38));s.poopClock+=balanceSeconds;if(s.poopClock>=60){spawnPoop(s);s.poopClock%=60;}}
 export function tick(s,dt){if(s.tutorial!=='done'||!s.plan||s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward||s.pendingPurchase||s.speed===0||!Number.isFinite(dt))return;const seconds=Math.min(CYCLE_SECONDS-s.elapsed,Math.max(0,Math.min(dt,2))*s.speed);s.elapsed+=seconds;decay(s,seconds);}
 export function cycleBlockers(s){const b=[];if(!s.plan)b.push('Составь план');if(s.elapsed<CYCLE_SECONDS)b.push('День ещё идёт');return b;}
 export function endCycle(s,force=false){
  if(s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward||s.tutorial!=='done'||!s.plan||(!force&&cycleBlockers(s).length))return false;
- const summary=cycleSummary(s);s.growthPoints=(s.growthPoints||0)+summary.growthGained;
+ const summary=cycleSummary(s);summary.dailyChallenge=finishDailyChallenge(s);s.growthPoints=(s.growthPoints||0)+summary.growthGained;
  summary.growthTotal=s.growthPoints;(s.periods??=[]).push(summary);
  s.completedCycles++;s.review=true;
  if(s.completedCycles>=2&&s.stage===0&&s.growthPoints>=4){s.stage=1;s.antennae=0;s.pendingGrowth=false;s.adultNotice=true;}
@@ -205,7 +221,7 @@ export function endCycle(s,force=false){
 }
 // Also called on resume: old saves can already be waiting at the end of a day.
 export function finishDueCycle(s){return endCycle(s);}
-export function nextCycle(s){if(!s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward)return false;s.review=false;s.cycle++;s.elapsed=0;s.cycleCare=0;s.plan=null;s.wallet+=8;record(s,'income',8,'Карманные штучки');s.pendingIncome={amount:8,source:'daily',cycle:s.cycle};s.adultNotice=false;return true;}
+export function nextCycle(s){if(!s.review||s.pendingGrowth||s.adultNotice||s.pendingIncome||s.pendingReward)return false;s.review=false;s.cycle++;s.elapsed=0;s.cycleCare=0;s.plan=null;s.wallet+=8;record(s,'income',8,'Карманные штучки');s.pendingIncome={amount:8,source:'daily',cycle:s.cycle};s.adultNotice=false;assignDailyChallenge(s);return true;}
 export function totals(s,cycle=s.cycle){const result={food:0,rain:0,wants:0,saved:0,income:0};for(const e of s.ledger.filter(e=>e.cycle===cycle)){if(e.kind==='expense')result[e.category]+=e.amount;if(e.kind==='transfer')result.saved+=e.amount;if(e.kind==='income')result.income+=e.amount;}return result;}
 
 // Snapshot at the end of a day; subsequent income and purchases cannot rewrite it.

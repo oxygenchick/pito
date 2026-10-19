@@ -77,3 +77,36 @@
 #game .rain-cloud.cloud-leaving { animation:cloud-depart .28s ease-in forwards;pointer-events:none; }
 @keyframes cloud-depart { from{opacity:1;translate:0 0}to{opacity:0;translate:50px -6px} }
 @media(prefers-reduced-motion:reduce){#game .hud .task-ticket,#game .hud .goal-strip {transition:none}#game .rain-cloud.cloud-leaving {animation:none;opacity:0} }
+
+/* The live plan uses the same illustrated cards as the saved-plan receipt. */
+#game .mr-plan-summary .mr-plan-cards { gap:14px;padding:10px 0 2px; }
+#game .mr-plan-summary .mr-plan-card { position:relative;display:flex;flex-direction:column;justify-content:center;gap:5px;min-height:148px;padding:14px 8px 10px;background-image:url('../assets/plan-approved/care.png'); }
+#game .mr-plan-summary .mr-wants { background-image:url('../assets/finance-polish/peach.png'); }
+#game .mr-plan-summary .mr-savings { background-image:url('../assets/finance-polish/hero.png'); }
+#game .mr-plan-summary h3 { position:relative;margin:0;font-size:22px;line-height:1.15;z-index:1; }
+#game .mr-summary-art { position:absolute;bottom:18px;width:84px;height:94px;pointer-events:none; }
+#game .mr-summary-art.left { left:0; }
+#game .mr-summary-art.right { right:0; }
+#game .mr-summary-art>img { width:100%;height:100%;object-fit:contain; }
+#game .mr-care .mr-summary-art>img { filter:saturate(.58); }
+#game .mr-summary-amounts { position:relative;width:170px;padding:8px 12px;background:#fffaf0;border-radius:18px 20px 17px 19px;z-index:1; }
+#game .mr-summary-amounts p { display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0;font-size:16px;line-height:1.2; }
+#game .mr-summary-amounts p+p { margin-top:5px; }
+#game .mr-summary-amounts .mr-coins { font-size:24px; }
+#game .mr-summary-amounts .icon { width:23px;height:25px; }
+#game .mr-plan-summary .mr-bar { width:146px;height:9px;flex-shrink:0; }
+#game .mr-plan-summary .completion-sticker { position:absolute;z-index:3;top:-7px;right:10px;padding:4px 9px;background:#bfe2aa;color:#315b4b;border:0;box-shadow:none;text-shadow:none;border-radius:9px 12px 10px 11px;transform:rotate(4deg);font-size:14px;line-height:1.2; }
+#game .mr-plan-summary .is-over-budget .completion-sticker { background:#efb3b1;color:#843d49; }
+#game .mr-plan-summary .is-over-budget .mr-bar i { background:#cc7d87; }
+#game .mr-plan-summary small { margin:0;font-size:13px;line-height:1.1;color:#843d49; }
+@media(max-height:700px){
+ #game .panel:has(.mr-plan-summary) { padding-top:16px;padding-bottom:14px; }
+ #game .panel:has(.mr-plan-summary) .panel-heading { padding-bottom:8px;min-height:38px; }
+ #game .mr-plan-summary .mr-plan-card { min-height:126px;padding-top:10px;gap:4px; }
+ #game .mr-plan-summary .mr-plan-cards { gap:11px; }
+ #game .mr-plan-summary .is-over-budget { padding-bottom:6px; }
+ #game .mr-plan-summary .mr-summary-art { width:72px;height:82px;bottom:16px; }
+ #game .mr-plan-summary h3 { font-size:21px; }
+ #game .mr-summary-amounts { width:158px;padding:6px 10px; }
+ #game .mr-summary-amounts .mr-coins { font-size:22px; }
+}

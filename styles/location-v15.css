@@ -104,7 +104,8 @@
 /* Title shows a read-only copy of the saved world, at gameplay coordinates. */
 .ss-start-scene { position:absolute;inset:0;z-index:0;pointer-events:none; }
 #game .ss-start{background:none}
-#game:is([data-daylight=twilight],[data-daylight=night]) .ss-start .logo img{filter:brightness(0) invert(1)}
+#game:is([data-daylight=twilight],[data-daylight=night]) .ss-start .logo{background-color:#fff8eb}
+#game:is([data-daylight=twilight],[data-daylight=night]) .need-label{color:#fff8eb;text-shadow:none}
 #game:is([data-daylight=twilight],[data-daylight=night]) .ss-start .ss-tagline{color:#fff8eb}
 #game[data-daylight] .ss-start-scene>.pet,#game[data-daylight] .ss-start-scene>.world-collection{filter:var(--sprite-light);transition:filter 1.2s ease}
 .ss-start-scene>.pet-v8 { bottom:26.5%; }

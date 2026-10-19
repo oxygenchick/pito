@@ -1,6 +1,7 @@
 import {ITEMS, GOALS, goalRemaining} from './engine.mjs';
 import {icon, art} from './visuals.mjs';
 import {savedPlanView} from './money-review.mjs';
+import {currentDailyChallenge,challengeFitsPlan} from './daily-challenges.mjs';
 
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const coins = amount => `<span class="play-plan-coins">${icon('coin')}<b>${amount}</b></span>`;
@@ -36,12 +37,12 @@ export function choosePlayPlan(s, choice, itemId = null, careAmount = 4, savings
 
 function previewGoal(s,ui) {
  const goals = GOALS.filter(g => !(s.goalsWon || []).includes(g.id));
- return goals.find(g => g.id===ui.playPlanGoal) || goals.find(g => g.id===(s.missions?.goal?s.goal:s.plannedGoal)) || goals[0] || null;
+ return goals.find(g => g.id===(s.missions?.goal?s.goal:s.plannedGoal)) || goals[0] || null;
 }
 
 // Independent envelopes: planning never transfers money or buys the preview.
 export function independentPlan(s,ui={}) {
- const o=planOptions(s,ui.playPlanItem,ui.playPlanCare,{},ui.playPlanGoal);
+ const o=planOptions(s,ui.playPlanItem,ui.playPlanCare,{},s.goal);
  const goal=previewGoal(s,ui);
  const bound=(v,max)=>Math.min(max,Math.max(0,Math.floor(Number(v)||0)));
  const wants=bound(ui.playPlanWants,Math.min(o.remaining,o.item?.price||0));
@@ -61,7 +62,8 @@ export function playPlanView(s, ui = {}) {
 function independentPlanView(s,ui) {
  const o=independentPlan(s,ui),[care,wants,saving]=o.parts;
  const step=(key,value,max,label)=>`<div class="plan-saving-stepper" role="group" aria-label="${label}"><button data-act="plan-allocation-step" data-id="${key}" data-delta="-1" aria-label="${label}: меньше" ${value?'':'disabled'}>${controlArt('minus')}</button>${coins(value)}<button data-act="plan-allocation-step" data-id="${key}" data-delta="1" aria-label="${label}: больше" ${value<max?'':'disabled'}>${controlArt('plus')}</button></div>`;
- const card=(title,entry,action,count,key,value,max,label)=>`<section class="play-plan-choice ${key==='saving'?'play-plan-save':'play-plan-want'}"><h3>${title}</h3>${picker((entry?art(entry.id,'play-plan-art'):icon('check','play-plan-art'))+(entry?`<span class="plan-price-tag" aria-label="Стоимость ${entry.price} штучек">${coins(entry.price)}</span>`:''),action,'Предыдущая','Следующая',count)}<strong class="plan-choice-name">${entry?escape(entry.name):'Всё собрано'}</strong><div class="plan-envelope"><span>${label}</span>${step(key,value,max,label)}</div></section>`;
- const body=`<div class="play-plan play-plan-v10 play-plan-v11 play-plan-v12 play-plan-independent"><div class="play-plan-wallet plan-block"><span>У тебя</span>${coins(o.wallet)}</div><section class="play-plan-care plan-block"><div class="plan-care-label"><strong>Поесть и помыться</strong><span>${o.wallet?'Обычно оставляем 4':'Новые штучки завтра'}</span></div>${step('care',care,o.wallet-wants-saving,'На еду и воду')}</section><section class="plan-rest-block plan-block"><p class="play-plan-prompt">Куда потратим остальные?</p><div class="play-plan-choices">${card('На хотелки',o.item,'plan-item-step',o.items.length,'wants',wants,Math.min(o.item?.price||0,o.wallet-care-saving),'На покупку')}${card('Копить на мечту',o.goal,'plan-goal-step',GOALS.filter(g=>!(s.goalsWon||[]).includes(g.id)).length,'saving',saving,Math.min(o.wallet-care-wants,o.goal?goalRemaining(s,o.goal.id):0),'В копилку')}</div></section><div class="plan-free" aria-live="polite">Свободно ${coins(o.free)}</div></div>`;
- return {title:`План на день ${s.cycle}`,body,footer:'<button class="btn primary wide play-plan-confirm" data-act="plan-confirm">План готов</button>',closable:true};
+ const card=(title,entry,key,value,max)=>`<section class="play-plan-choice ${key==='saving'?'play-plan-save':'play-plan-want'}"><h3>${title}</h3>${key==='saving'?`<div class="plan-picture-picker fixed-goal">${entry?art(entry.id,'play-plan-art'):icon('check','play-plan-art')}</div>`:picker(entry?art(entry.id,'play-plan-art'):icon('check','play-plan-art'),'plan-item-step','Предыдущая хотелка','Следующая хотелка',o.items.length)}<strong class="plan-choice-name">${entry?escape(entry.name):'Всё собрано'}</strong><div class="plan-item-cost">${entry?(key==='saving'?`Осталось ${coins(goalRemaining(s,entry.id))}`:coins(entry.price)):''}</div><div class="plan-envelope">${step(key,value,max,key==='saving'?'В копилку':'На хотелки')}</div></section>`;
+ const body=`<div class="play-plan play-plan-v10 play-plan-v11 play-plan-v12 play-plan-independent revision-plan"><div class="play-plan-wallet plan-block"><span>У тебя</span>${coins(o.wallet)}</div><section class="play-plan-care plan-block"><div class="plan-care-label"><strong>Поесть и помыться</strong><span>Лучше оставить не меньше 4</span></div><span class="plan-care-apple">${icon('apple')}</span>${step('care',care,o.wallet-wants-saving,'На еду и воду')}<span class="plan-care-cloud">${icon('cloud')}</span></section><section class="plan-rest-block plan-block"><div class="play-plan-choices">${card('На хотелки',o.item,'wants',wants,Math.min(o.item?.price||0,o.wallet-care-saving))}${card('На мечту',o.goal,'saving',saving,Math.min(o.wallet-care-wants,o.goal?goalRemaining(s,o.goal.id):0))}</div></section><div class="plan-free" aria-live="polite">Останутся свободными ${coins(o.free)}</div></div>`;
+ const daily=currentDailyChallenge(s),notice=daily&&!challengeFitsPlan(s,o.parts)?'<p class="plan-day-note">С этим планом задание дня отложим на другой раз.</p>':'';
+ return {title:`План на день ${s.cycle}`,body,footer:notice+'<button class="btn primary wide play-plan-confirm" data-act="plan-confirm">План готов</button>',closable:true};
 }

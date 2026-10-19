@@ -1,0 +1,179 @@
+/* Painted screens 29–31: retain the actual visual hierarchy, not compact rows. */
+#game .modal-backdrop .panel:has(.rv-bank){width:400px;max-width:none;height:744px;max-height:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(var(--plan-scale,1));padding:18px 15px;gap:0}
+#game .panel:has(.rv-bank) .panel-heading{height:42px;min-height:42px;padding-bottom:8px}
+#game .panel:has(.rv-bank) .panel-heading h2{font-size:28px}
+#game .panel:has(.rv-bank) .panel-body{flex:1;overflow-y:auto}
+#game .panel:has(.rv-bank) .panel-footer{padding-top:10px}
+#game .panel:has(.rv-bank) .panel-footer>.btn{min-height:56px;font-size:23px}
+#game .rv-bank{gap:9px;font-size:18px}
+#game .rv-bank .rv-bank-picture{height:170px;min-height:170px;background:none;overflow:hidden;mix-blend-mode:multiply}
+#game .rv-bank-picture>.rv-bank-scene{width:100%;height:100%!important;max-height:100%;min-height:0;object-fit:contain;position:absolute;inset:0}
+#game .rv-bank .rv-offer{padding:13px 12px 10px}
+#game .rv-bank .ko-bank-offer{gap:10px;grid-template-columns:1fr 25px 1fr}
+#game .rv-bank .ko-bank-offer>div{padding:10px 3px;border-radius:24px;font-size:21px;gap:5px}
+#game .rv-bank .ko-bank-offer>div>.coin{font-size:36px}
+#game .rv-bank .ko-bank-offer>div>.coin>.icon{width:35px;height:38px}
+#game .rv-bank .rv-bonus{margin:0 auto;padding:5px 22px;font-size:25px;position:relative}
+#game .rv-bank .rv-caption{font-size:16px;margin-top:6px}
+#game .rv-bank .rv-amount{padding:12px 13px 10px}
+#game .rv-bank .rv-amount h3{font-size:23px}
+#game .rv-bank .rv-stepper{margin-top:9px;width:275px;justify-content:space-between;padding:6px 10px;background:var(--rev-cream)}
+#game .rv-bank .rv-stepper>.btn{width:52px;height:52px;min-height:52px}
+#game .rv-bank .rv-stepper>output{background:none;font-size:35px}
+#game .rv-bank .rv-stepper>output .icon{width:32px;height:35px}
+#game .rv-bank .rv-bank-note{padding:10px 15px;font-size:18px;min-height:62px}
+#game .rv-bank .rv-bank-note>.icon{width:65px;height:48px}
+#game .rv-income{display:flex;align-items:center;justify-content:center;gap:45px;min-height:74px;padding:8px 18px}
+#game .rv-income>div:first-child{display:flex;flex-direction:column;font-size:21px;line-height:1}
+#game .rv-income strong{font-size:37px}
+#game .rv-income-coins{display:flex;align-items:center}
+#game .rv-income-coins>.icon{width:40px;height:44px;margin-left:-9px}
+#game .rv-income-coins>.icon:nth-child(2){transform:translateY(-9px)}
+#game .rv-bank .rv-term{display:grid;grid-template-columns:75px 1fr;align-items:center;gap:12px;min-height:102px;padding:10px 12px}
+#game .rv-term h3{font-size:19px}
+#game .rv-calendar{height:75px;border-radius:13px;background:var(--rev-cream);border-top:17px solid #b79ae5;display:grid;place-items:center;transform:rotate(-5deg)}
+#game .rv-calendar>.icon{width:48px;height:48px}
+#game .rv-bank .rv-day-dots{margin-top:9px;gap:12px}
+#game .rv-bank .rv-day-dots>span{width:40px;height:40px;outline:4px solid var(--rev-cream)}
+#game .rv-bank-opened .rv-bank-picture{height:185px;min-height:185px}
+#game .rv-bank-opened .rv-bank-note{--rv-fill:var(--rev-lilac);min-height:58px}
+#game .rv-bank-intro .rv-bank-picture{height:190px;min-height:190px}
+#game .modal-backdrop .panel:has(.rv-bank-intro){height:auto;min-height:0}
+#game .panel:has(.rv-bank-intro) .panel-body{flex:0 1 auto;min-height:0}
+#game .rv-bank-intro .rv-bank-picture>.rv-bank-scene{position:static;width:100%;height:100%!important;object-fit:contain;transform:none}
+#game .rv-bank-explanation{background:#fde5db;border-radius:30px 36px 32px 28px;padding:17px 18px;text-align:center}
+#game .rv-bank-explanation h3{font-size:21px;margin:0 0 10px}
+#game .rv-bank-explanation p{font-size:18px;line-height:1.24;margin:0}
+#game .rv-bank-explanation p+p{margin-top:12px}
+@media(max-height:700px){#game .rv-bank-intro .rv-bank-picture{height:150px;min-height:150px}#game .rv-bank-explanation{padding:12px 15px}#game .rv-bank-explanation p{font-size:18px;line-height:1.2}#game .rv-bank-explanation p+p{margin-top:9px}}
+#game .rv-bank .rv-bank-timeline{--rv-fill:#fbedd7;padding:10px 9px;min-height:115px;grid-template-columns:1fr 18px 1fr 18px 1fr;gap:4px}
+#game .rv-bank-timeline>div{background:var(--rev-cream);padding:9px 3px;border-radius:38px;gap:7px;font-size:17px}
+#game .rv-bank-timeline>div>.coin{font-size:31px}
+#game .rv-bank-timeline>div>.icon{width:43px;height:43px}
+#game .rv-bank-yours{padding:10px 12px!important}
+#game .rv-bank-yours h3{font-size:22px}
+#game .rv-bank-yours>div{display:flex;align-items:center;justify-content:space-between;gap:8px;height:84px;margin-top:5px}
+#game .rv-bank-yours>div>img{width:31%;height:80px;object-fit:contain}
+#game .rv-bank-early{display:flex;align-items:center;justify-content:center;gap:25px;padding:10px 12px!important;text-align:left;font-size:18px}
+#game .rv-bank-early>.coin{font-size:31px}
+#game .rv-bank-early>.coin>.icon{width:40px;height:44px}
+#game .rv-bank-intro>.rv-caption{padding:7px 6px;background:#fcf0dc;border-radius:20px;margin:0}
+#game .rv-bank-mature .rv-bank-picture{height:270px;min-height:270px}
+#game .rv-bank-mature .rv-bank-picture>.rv-bank-scene{top:auto;bottom:0;height:205px!important}
+#game .rv-celebration-coin{position:absolute;width:48px;height:52px;z-index:1}
+#game .rv-celebration-coin>.icon{width:100%;height:100%;object-fit:contain}
+#game .rv-celebration-coin-0{left:7%;top:45px;rotate:-25deg}
+#game .rv-celebration-coin-1{left:29%;top:4px;rotate:15deg}
+#game .rv-celebration-coin-2{right:12%;top:30px;rotate:30deg}
+#game .rv-celebration-coin-3{right:4%;top:124px;rotate:20deg}
+#game .rv-celebration-coin-4{left:18%;bottom:3px;rotate:-15deg}
+#game .rv-celebration-coin-5{right:18%;bottom:0;rotate:10deg}
+#game .rv-bank-celebrate::before{content:'';position:absolute;inset:0;background-image:url('../assets/ui-v8/star.png'),url('../assets/ui-v8/star.png'),url('../assets/revision/plan20-rays-gold.png');background-size:24px 24px,18px 18px,22px 30px;background-position:53% 6px,85% 88px,12% 3px;background-repeat:no-repeat;pointer-events:none}
+#game .rv-bank-mature .rv-mature{padding:18px 15px;gap:9px}
+#game .rv-mature>p{font-size:30px;font-weight:700}
+#game .rv-mature>strong{background:var(--rev-cream);padding:5px 30px;border-radius:28px}
+#game .rv-bank-mature .rv-mature>strong>.coin{font-size:58px}
+#game .rv-bank-mature .rv-mature h3{font-size:22px}
+#game .panel:has(.rv-bank-mature) .panel-heading{height:65px;min-height:65px}
+#game .panel:has(.rv-bank-mature) .panel-heading h2{max-width:260px;margin:0 auto;font-size:30px}
+#game .rv-bank-mature>p{font-size:20px;padding:9px}
+/* 10: three rows of illustrated cards; names above pictures, broad price insets. */
+#game .modal-backdrop .panel:has(.rv-shop){width:400px;max-width:none;height:744px;max-height:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(var(--plan-scale,1));padding:18px 14px;gap:0}
+#game .panel:has(.rv-shop) .panel-heading{height:43px;min-height:43px;padding-bottom:8px}
+#game .panel:has(.rv-shop) .panel-body{overflow-y:auto}
+#game .rv-shop{gap:9px}
+#game .rv-shop>p{position:relative;font-size:18px;background:var(--rev-lilac);border-radius:28px;padding:10px 28px;line-height:1.22}
+#game .rv-shop>p::before,#game .rv-shop>p::after{content:'';position:absolute;left:5px;top:50%;translate:0 -50%;width:25px;height:43px;background:url('../assets/revision/shop-droplets-mixed-left.png') center/contain no-repeat}
+#game .rv-shop>p::after{left:auto;right:5px;transform:none;background-image:url('../assets/revision/shop-droplets-mixed-right.png')}
+#game .rv-shop-grid{gap:8px}
+#game .rv-shop-item{position:relative;isolation:isolate;height:180px;gap:4px;padding:9px 9px 14px;background:none!important;border-radius:0}
+#game .rv-shop-item::before{content:'';position:absolute;inset:0;z-index:-1;background:url('../assets/revision/shop-card-peach.svg') center/100% 100% no-repeat}
+#game .rv-shop-item:nth-child(3n+2)::before{background-image:url('../assets/revision/shop-card-mint.svg')}
+#game .rv-shop-item:nth-child(3n)::before{background-image:url('../assets/revision/shop-card-lilac.svg')}
+#game .rv-shop-item>strong{font-size:20px;min-height:26px;line-height:1.1}
+#game .rv-shop-item>.art{height:103px;width:100%;object-fit:contain}
+#game .rv-shop-item::after{display:none}
+#game .rv-shop-picture{position:relative;display:grid;place-items:center;width:100%;height:92px;flex:0 0 92px;isolation:isolate}
+#game .rv-shop-picture>.art{width:calc(100% - 30px);height:100%;object-fit:contain;position:relative;z-index:1;margin:0}
+#game .rv-shop-picture::before,#game .rv-shop-picture::after{content:'';position:absolute;width:21px;height:36px;left:0;top:50%;translate:0 -50%;background:url('../assets/revision/shop-droplets-gold-left.png') center/contain no-repeat;pointer-events:none;z-index:0}
+#game .rv-shop-picture::after{left:auto;right:0;transform:none;background-image:url('../assets/revision/shop-droplets-gold-right.png')}
+#game .rv-shop-item:nth-child(3n+2) .rv-shop-picture::before{background-image:url('../assets/revision/shop-droplets-green-left.png')}
+#game .rv-shop-item:nth-child(3n+2) .rv-shop-picture::after{background-image:url('../assets/revision/shop-droplets-green-right.png')}
+#game .rv-shop-item:nth-child(3n) .rv-shop-picture::before{background-image:url('../assets/revision/shop-droplets-mixed-left.png')}
+#game .rv-shop-item:nth-child(3n) .rv-shop-picture::after{background-image:url('../assets/revision/shop-droplets-mixed-right.png')}
+#game .rv-shop-price{width:100px;height:40px;min-height:40px;flex:0 0 40px;box-sizing:border-box;border-radius:0;background:url('../assets/plan-v16/price-tag.png') center/contain no-repeat;font-size:16px;padding:4px 5px 0 19px;gap:5px;margin:0 auto}
+#game .rv-shop-item:disabled .rv-shop-price{background:none;width:100%;padding-left:5px}
+#game .rv-shop-price>.icon{width:22px;height:22px;flex:0 0 22px;margin:0}
+#game .rv-shop-price .coin{font-size:19px}
+#game .rv-shop-item[data-id='drum']>strong{font-size:17px}
+#game .rv-shop-item{padding-top:7px;padding-bottom:8px;gap:3px}
+#game .rv-shop-picture{height:90px;flex-basis:90px}
+#game .rv-shop-price>.icon{width:19px;height:19px;flex-basis:19px}
+#game .task-guide{display:flex;flex-direction:column;gap:15px;text-align:center}
+#game .task-guide-art{height:140px;display:grid;place-items:center}
+#game .task-guide-art>.art{width:145px;height:135px;object-fit:contain;margin:0}
+#game .task-guide-copy{background:#fde5db;border-radius:30px 36px 32px 28px;padding:20px 22px}
+#game .task-guide-copy p{font-size:21px;line-height:1.24;margin:0}
+#game .panel:has(.task-guide){height:auto;min-height:0}
+#game .panel:has(.task-guide) .panel-body{flex:0 1 auto}
+@media(max-height:700px){#game .task-guide-art{height:105px}#game .task-guide-art>.art{width:110px;height:105px}#game .task-guide-copy{padding:16px 18px}#game .task-guide-copy p{font-size:18px}}
+#game .task-guide-scene{position:relative;isolation:isolate;height:180px}
+#game .task-guide-scene>.task-center{position:absolute;width:100px;height:145px;left:calc(50% - 50px);bottom:0;object-fit:contain;z-index:2}
+#game .task-guide-scene>.task-side{position:absolute;width:105px;height:115px;top:15px;object-fit:contain}
+#game .task-guide-scene>.task-side.left{left:13px;rotate:-12deg}
+#game .task-guide-scene>.task-side.right{right:13px;rotate:12deg}
+#game .task-guide-scene>.task-dream{position:absolute;width:145px;height:150px;left:17px;bottom:5px;object-fit:contain;rotate:-7deg}
+#game .task-guide-scene>.task-jar{position:absolute;width:110px;height:135px;right:22px;bottom:0;object-fit:contain;rotate:8deg}
+#game .task-guide-scene>.task-bank{width:100%;height:180px;object-fit:contain}
+#game .rv-bank-opening{gap:10px}
+#game .rv-bank-opening .rv-bank-picture{height:145px;min-height:145px;mix-blend-mode:normal}
+#game :is(.rv-bank-opening,.rv-bank-opened:not(.rv-bank-mature)) .rv-offer{padding:14px 24px 12px;overflow:visible}
+#game :is(.rv-bank-opening,.rv-bank-opened:not(.rv-bank-mature)) .ko-bank-offer{position:relative;grid-template-columns:1fr 30px 1fr;gap:13px}
+#game :is(.rv-bank-opening,.rv-bank-opened:not(.rv-bank-mature)) .ko-bank-offer>div{border-radius:20px;padding:9px 2px;gap:3px;font-size:20px}
+#game :is(.rv-bank-opening,.rv-bank-opened:not(.rv-bank-mature)) .ko-bank-offer>.icon{width:30px;height:30px;content:url('../assets/revision/bank-offer-arrow.svg')}
+#game :is(.rv-bank-opening,.rv-bank-opened:not(.rv-bank-mature)) .ko-bank-offer::before,#game :is(.rv-bank-opening,.rv-bank-opened:not(.rv-bank-mature)) .ko-bank-offer::after,#game :is(.rv-bank-opening,.rv-bank-opened:not(.rv-bank-mature)) .rv-bonus::before,#game :is(.rv-bank-opening,.rv-bank-opened:not(.rv-bank-mature)) .rv-bonus::after,#game :is(.rv-bank-opening,.rv-bank-opened:not(.rv-bank-mature)) .rv-amount h3::before,#game :is(.rv-bank-opening,.rv-bank-opened:not(.rv-bank-mature)) .rv-amount h3::after{content:'';position:absolute;top:50%;width:23px;height:40px;transform:translateY(-50%);background:#9061b5;mask:url('../assets/revision/plan20-rays-lilac.png') center/contain no-repeat;pointer-events:none}
+#game :is(.rv-bank-opening,.rv-bank-opened:not(.rv-bank-mature)) .ko-bank-offer::before{left:-24px;width:24px;height:48px;mask-image:url('../assets/revision/bank-three-rays.svg')}
+#game :is(.rv-bank-opening,.rv-bank-opened:not(.rv-bank-mature)) .ko-bank-offer::after{right:-24px;width:24px;height:48px;mask-image:url('../assets/revision/bank-three-rays.svg');transform:translateY(-50%) scaleX(-1)}
+#game .rv-bank-opening .rv-bonus{margin:14px auto 0;padding:5px 19px;font-size:25px}
+#game .rv-bank-opening .rv-bonus::before,#game .rv-bank-opening .rv-amount h3::before{left:-32px;background:#60bda4}
+#game .rv-bank-opening .rv-bonus::after,#game .rv-bank-opening .rv-amount h3::after{right:-32px;transform:translateY(-50%) scaleX(-1);background:#60bda4}
+#game .rv-bank-opening .rv-caption{font-size:18px;line-height:1.2;font-weight:700;color:#323453;margin-top:8px}
+#game .rv-bank-opening .rv-amount{position:relative;padding:13px 25px 18px;isolation:isolate;overflow:visible}
+#game .rv-bank-opening .rv-amount h3{position:relative;display:table;margin:0 auto;font-size:23px}
+#game .rv-bank-opening .rv-amount h3::before,#game .rv-bank-opening .rv-amount h3::after{width:22px;height:30px}
+#game .rv-bank-opening .rv-amount-bush{position:absolute;bottom:0;width:49px;height:76px;object-fit:contain;pointer-events:none}
+#game .rv-bank-opening .rv-amount-bush.left{left:7px}
+#game .rv-bank-opening .rv-amount-bush.right{right:7px;transform:scaleX(-1)}
+#game .rv-bank-opening .rv-bonus::before{left:-22px}
+#game .rv-bank-opening .rv-bonus::after{right:-22px}
+#game .rv-bank-opening .rv-stepper{width:100%;margin-top:12px;padding:7px 10px}
+#game .rv-bank-opening .rv-amount>.rv-caption{font-size:17px;white-space:nowrap;margin-top:12px}
+#game .modal-backdrop .panel:has(.rv-bank-opening){height:auto;min-height:0}
+#game .panel:has(.rv-bank-opening) .panel-body{flex:0 1 auto}
+#game .modal-backdrop .panel:has(.rv-bank-mature){height:auto;min-height:0}
+#game .panel:has(.rv-bank-mature) .panel-body{flex:0 1 auto}
+#game .rv-bank-mature .rv-bank-picture{height:250px;min-height:250px;mix-blend-mode:normal;overflow:visible}
+#game .rv-bank-mature .rv-bank-picture>.rv-bank-scene{height:205px!important;bottom:0}
+#game .rv-bank-mature .rv-mature{padding:16px 20px;gap:10px}
+#game .rv-bank-mature .rv-mature>strong{position:relative;min-width:165px;padding:5px 20px;border-radius:24px;display:inline-flex;justify-content:center}
+#game .rv-bank-mature .rv-mature>strong::before,#game .rv-bank-mature .rv-mature>strong::after{content:'';position:absolute;top:50%;width:25px;height:47px;transform:translateY(-50%);background:url('../assets/revision/bank-three-rays.svg') center/contain no-repeat;pointer-events:none}
+#game .rv-bank-mature .rv-mature>strong::before{left:-34px}
+#game .rv-bank-mature .rv-mature>strong::after{right:-34px;transform:translateY(-50%) scaleX(-1)}
+#game .rv-bank-mature .rv-mature h3{font-size:21px}
+#game .modal-backdrop .panel:has(.rv-bank-opened:not(.rv-bank-mature)){height:auto;min-height:0}
+#game .panel:has(.rv-bank-opened:not(.rv-bank-mature)) .panel-body{flex:0 1 auto}
+#game .rv-bank-opened:not(.rv-bank-mature){gap:12px}
+#game .rv-bank-opened:not(.rv-bank-mature) .rv-bank-picture{height:145px;min-height:145px;mix-blend-mode:normal}
+#game .rv-bank-opened .rv-calendar{height:108px;background:none;border:0;border-radius:0;transform:none;display:block}
+#game .rv-bank-opened .rv-calendar>img{width:100%;height:100%;object-fit:contain}
+#game .rv-bank-opened .rv-term{grid-template-columns:110px minmax(0,1fr);gap:8px;padding:8px 12px;min-height:124px}
+#game .rv-bank-opened .rv-term h3{font-size:19px}
+#game .rv-bank-opened .rv-day-dots{position:relative;display:flex;width:max-content;margin:14px auto 0;gap:13px}
+#game .rv-bank-opened .rv-day-dots .icon{filter:brightness(0) invert(1)}
+#game .rv-bank-opened .rv-day-dots::before,#game .rv-bank-opened .rv-day-dots::after,#game .rv-bank-opened .rv-bank-note p::before,#game .rv-bank-opened .rv-bank-note p::after{content:'';position:absolute;width:18px;height:34px;top:50%;transform:translateY(-50%);background:url('../assets/revision/bank-three-rays.svg') center/contain no-repeat}
+#game .rv-bank-opened .rv-day-dots::before{left:-27px}
+#game .rv-bank-opened .rv-day-dots::after{right:-27px;transform:translateY(-50%) scaleX(-1)}
+#game .rv-bank-opened .rv-bank-note{padding:13px 35px;min-height:0}
+#game .rv-bank-opened .rv-bank-note p{position:relative;font-size:17px;line-height:1.2}
+#game .rv-bank-opened .rv-bank-note p::before{left:-28px}
+#game .rv-bank-opened .rv-bank-note p::after{right:-28px;transform:translateY(-50%) scaleX(-1)}
