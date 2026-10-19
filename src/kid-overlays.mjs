@@ -67,7 +67,7 @@ function bankView(s,ui) {
 }
 
 function bankIntroView(){
- const body=`<div class="revision-overlay rv-bank rv-bank-intro"><div class="rv-bank-picture"><img class="rv-bank-scene" src="assets/revision/bank-intro-safe-v2.png" alt="Улыбающийся сейф со штучками"></div><section class="rv-bank-explanation"><h3>Что такое вклад?</h3><p>Ты отдаёшь свои деньги в банк. Банк использует их для вложений и делится с тобой прибылью.</p><p>Например, вложишь ${E.DEPOSIT_MIN} штучки, а через ${E.DEPOSIT_DAYS} игровых дня получишь ${E.DEPOSIT_MIN+E.depositBonus(E.DEPOSIT_MIN)}. Вклад от 3 до 7 штучек даёт +1, от 8 до 12 даёт +2, от 13 даёт +3.</p><p>Свои ${E.DEPOSIT_MIN} штучки можно забрать в любой момент. Но если заберёшь раньше срока, не получишь доход.</p></section></div>`;
+ const body=`<div class="revision-overlay rv-bank rv-bank-intro"><div class="rv-bank-picture"><img class="rv-bank-scene" src="assets/revision/bank-intro-safe-v2.png" alt="Улыбающийся сейф со штучками"></div><section class="rv-bank-explanation"><h3>Что такое вклад?</h3><p>Ты можешь отдать свои штучки этому классному банку-сейфу. Он будет использовать твои штучки, чтобы заработать, а прибылью будет делиться с тобой.</p><p>Но условие одно: если заберёшь штучки раньше срока, то прибылью он уже с тобой не поделится.</p></section></div>`;
  return {title:'Как работает вклад',body,footer:button('Попробовать','bank-intro-continue'),closable:true};
 }
 
