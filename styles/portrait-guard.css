@@ -1,0 +1,7 @@
+.portrait-notice[hidden]{display:none}
+.portrait-notice{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:20px max(20px,env(safe-area-inset-right)) 20px max(20px,env(safe-area-inset-left));background:#eee5fa;color:#34334f;text-align:center;font-family:'Balsamiq Sans',sans-serif}
+.portrait-notice h1{margin:0;font-size:clamp(24px,5vh,34px);line-height:1.12}
+.portrait-notice p{margin:0;font-size:18px;line-height:1.3}
+.portrait-phone{display:grid;place-items:center;width:46px;height:70px;border:4px solid #9772b4;border-radius:12px;color:#9772b4;font-size:32px;background:#fff7e9}
+.portrait-blocked{overflow:hidden}
+.portrait-blocked #game,.portrait-blocked .desktop-note{visibility:hidden}

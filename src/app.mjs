@@ -12,6 +12,7 @@ import {installPlanLayout} from './plan-layout.mjs';
 import {installAudio} from './audio.mjs';
 import {celebrate} from './celebration.mjs';
 import {missionRoute,stepChoice} from './interactions-v10.mjs';
+import {installPortraitGuard} from './portrait-guard.mjs';
 
 const $=q=>document.querySelector(q), root=$('#game');
 installGaze(root);
@@ -490,10 +491,10 @@ function updateHUD(){
  const spent=$('[data-rain-spent]');if(spent)spent.textContent=ui.rainSession?.spent||0;
 }
 function syncPoops(){const target=$('#poops');if(target)target.innerHTML=s.poops.map(poop).join('');}
-let previous=performance.now(),saveClock=0;
+let previous=performance.now(),saveClock=0,portraitBlocked=false;
 setInterval(()=>{
  const now=performance.now(),dt=Math.min(.5,(now-previous)/1000);previous=now;
- if(!s||screen!=='home'||document.hidden||nativePaused||ui.careTransition)return;
+ if(!s||screen!=='home'||document.hidden||nativePaused||portraitBlocked||ui.careTransition)return;
  if(ui.dayTransition){tickNight(dt);return;}
  if(!ui.modal&&rainHeld&&ui.rainSession){
   const before=s.poops.map(p=>({...p})),oldTut=s.tutorial,oldWallet=s.wallet,wasClean=s.needs.clean>=100&&!s.poops.length;
@@ -528,7 +529,7 @@ function suspendGame(){
  save();
 }
 function resumeGame(){
- if(hiddenSince!==null&&s&&screen==='home'&&!ui.modal&&!ui.dayTransition){
+ if(hiddenSince!==null&&!portraitBlocked&&s&&screen==='home'&&!ui.modal&&!ui.dayTransition){
   // Use the same bounded offline simulation on tab resume as on a full reload.
   s=E.restore(JSON.stringify({...s,lastSeen:hiddenSince}))||s;
   if(E.finishDueCycle(s)){ui.rainSession=null;ui.needsOpen=false;ui.modal='review';}
@@ -541,4 +542,9 @@ window.addEventListener('pito-native-pause',()=>{nativePaused=true;suspendGame()
 window.addEventListener('pito-native-resume',()=>{nativePaused=false;if(!document.hidden)resumeGame();});
 window.addEventListener('pagehide',save);
 render();
+installPortraitGuard(root,blocked=>{
+ portraitBlocked=blocked;
+ if(blocked){pointerEnd();stopRain();}
+ previous=performance.now();save();
+});
 audio.tryAutoplay();
