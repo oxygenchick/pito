@@ -9,11 +9,10 @@
 ## Как выглядит игра
 
 <p>
-  <img src="docs/images/pet.png" width="220" alt="Уход за Пито">
-  <img src="docs/images/plan.png" width="220" alt="Планирование бюджета">
-  <img src="docs/images/dream.png" width="220" alt="Копилка на мечту">
-  <img src="docs/images/bank.png" width="220" alt="Доход по банковскому вкладу">
-  <img src="docs/images/plan-complete.png" width="220" alt="План выполнен">
+  <img src="docs/images/pet.png" width="23%" alt="Уход за Пито">
+  <img src="docs/images/plan.png" width="23%" alt="Планирование бюджета">
+  <img src="docs/images/dream.png" width="23%" alt="Копилка на мечту">
+  <img src="docs/images/bank.png" width="23%" alt="Доход по банковскому вкладу">
 </p>
 
 ## Запуск
